@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Arsipkan output aktif ke archive/YYYY-MM-DD/ sebelum overwrite. Hapus arsip >7 hari."""
 import os, shutil, datetime
-BASE = "/root/.fastlis-content"
+BASE = os.environ.get("FASTLIS_BASE", os.path.expanduser("~/workspace/fastlis-content"))
 today = datetime.date.today().isoformat()
 dst = os.path.join(BASE, "archive", today)
 os.makedirs(dst, exist_ok=True)

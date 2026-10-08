@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Satu pintu: archive -> render carousel + single -> QA -> update tracking -> caption."""
 import json, os, shutil, subprocess, datetime, sys
-BASE = "/root/.fastlis-content"
+BASE = os.environ.get("FASTLIS_BASE", os.path.expanduser("~/workspace/fastlis-content"))
 
 def run(cmd, label):
     print(f"\n=== {label} ===")
@@ -36,11 +36,11 @@ for d in os.listdir(os.path.join(BASE, "archive")):
             pass
 
 # 2. render
-ok1 = run([sys.executable, f"{BASE}/rebuild_today.py"], "CAROUSEL")
-ok2 = run([sys.executable, f"{BASE}/build_single.py"], "SINGLE")
+ok1 = run([sys.executable, f"{BASE}/scripts/rebuild_today.py"], "CAROUSEL")
+ok2 = run([sys.executable, f"{BASE}/scripts/build_single.py"], "SINGLE")
 
 # 3. QA
-ok3 = run([sys.executable, f"{BASE}/qa_check.py"], "QA")
+ok3 = run([sys.executable, f"{BASE}/scripts/qa_check.py"], "QA")
 
 # 4. update tracking (foto + topik)
 used_p = f"{BASE}/data/used_images.json"

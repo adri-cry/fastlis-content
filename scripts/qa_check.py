@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """QA otomatis: cek widow (baris terakhir 1 kata), placeholder sisa, ukuran file."""
 import json, os, re, sys
-BASE = "/root/.fastlis-content"
+BASE = os.environ.get("FASTLIS_BASE", os.path.expanduser("~/workspace/fastlis-content"))
 J = json.load(open(f"{BASE}/content/hari-ini.json"))
 issues = []
 warns = []
