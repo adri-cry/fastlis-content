@@ -43,7 +43,7 @@ ok2 = run([sys.executable, f"{BASE}/build_single.py"], "SINGLE")
 ok3 = run([sys.executable, f"{BASE}/qa_check.py"], "QA")
 
 # 4. update tracking (foto + topik)
-used_p = f"{BASE}/used_images.json"
+used_p = f"{BASE}/data/used_images.json"
 used = json.load(open(used_p))
 photos = []
 for s in J.get("carousel", []):
@@ -58,7 +58,7 @@ used["used"] = sorted(set(used.get("used", [])) | set(photos))
 json.dump(used, open(used_p, "w"), indent=2)
 print("\nupdated used_images.json:", len(used["used"]), "foto terpakai")
 
-hist_p = f"{BASE}/last_topics.json"
+hist_p = f"{BASE}/data/last_topics.json"
 hist = json.load(open(hist_p))
 hist.setdefault("history", [])
 hist["history"] = [h for h in hist["history"] if h.get("date") != today]
