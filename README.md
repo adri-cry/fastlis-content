@@ -77,3 +77,13 @@ npm run publish    # publish
 - Backup template ada di `backups/` (v1, v2, neobrutalism).
 - Foto yang sudah terpakai dicatat di `data/used_images.json`.
 - Riwayat topik di `data/last_topics.json` (30 hari terakhir).
+
+## v2 (2026-10-09, restore pasca VM replace)
+
+- PENTING: repo tinggal di `~/workspace/fastlis-content` (hanya `~/` yang survive VM replace; `/root` ikut ke-wipe).
+- `scripts/_common.py`: `BASE` dari env `FASTLIS_BASE` (default `~/workspace/fastlis-content`), deteksi Chrome otomatis.
+- `scripts/cdp_shot.py`: screenshot via Chrome DevTools Protocol (stdlib only, port unik per proses). Pengganti flag `--screenshot` yang pernah gagal diam-diam (false positive).
+- `scripts/generate_content.py`: generate `hari-ini.json` via LLM + guard anti topik kembar (alat bantu manual; jadwal resmi pakai agen langsung).
+- `scripts/daily.py`: orkestrator manual (generate -> render_all -> reels -> git).
+- `reels/`: hyperframes 0.8.31 terinstall lokal; gsap + font Plus Jakarta Sans di-vendor lokal (CDN diblokir di sandbox). Render: `TMPDIR=reels/.tmp npm run render` (/tmp cuma 512MB).
+- Jadwal: cron `fastlis-daily-content` (~06:14 WIB, gambar) + `fastlis-daily-reels` (06:45 WIB, video). Push GitHub off (kirim ke chat dulu).

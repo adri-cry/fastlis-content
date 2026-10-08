@@ -1,5 +1,5 @@
-import json
-p = "/root/.fastlis-content/data/used_images.json"
+import json, os
+p = os.path.join(os.environ.get("FASTLIS_BASE", os.path.expanduser("~/workspace/fastlis-content")), "data/used_images.json")
 d = json.load(open(p))
 # used 21/29 >= 20 -> reset pool run ini
 d["used"] = []
