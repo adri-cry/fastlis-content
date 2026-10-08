@@ -1,5 +1,5 @@
 import json
-p = "/root/.fastlis-content/used_images.json"
+p = "/root/.fastlis-content/data/used_images.json"
 d = json.load(open(p))
 # used 21/29 >= 20 -> reset pool run ini
 d["used"] = []
