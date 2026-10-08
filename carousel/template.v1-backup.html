@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; font-family: 'Plus Jakarta Sans', sans-serif; background: #FBFCFD; color: #0B1019; overflow: hidden; }
+  .c-wrap { width: 1080px; height: 1350px; display: flex; flex-direction: column; background: #FBFCFD; }
+  .c-topline { height: 10px; background: #0469DC; flex-shrink: 0; }
+  .c-top { display: flex; align-items: center; justify-content: space-between; padding: 36px 64px 0 64px; flex-shrink: 0; }
+  .c-brand { display: flex; align-items: center; gap: 14px; }
+  .c-brand img { width: 64px; height: 64px; }
+  .c-brand span { font-size: 32px; font-weight: 800; color: #0469DC; letter-spacing: -0.5px; }
+  .c-num { font-size: 22px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; }
+  .c-main { flex: 1; display: flex; gap: 48px; padding: 48px 64px 0 64px; min-height: 0; }
+  .c-text { flex: 1.35; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .c-kicker { font-size: 20px; font-weight: 700; letter-spacing: 3px; color: #0469DC; text-transform: uppercase; margin-bottom: 20px; }
+  .c-text h1 { font-size: 62px; line-height: 1.05; font-weight: 800; letter-spacing: -1.5px; color: #0B1019; }
+  .c-text h1 .blue { color: #0469DC; }
+  .c-body { font-size: 28px; line-height: 1.6; color: #334155; margin-top: 22px; }
+  .c-meta { font-size: 23px; font-weight: 600; color: #64748B; margin-top: 26px; }
+  .c-photo { flex: 1; border-radius: 28px; overflow: hidden; position: relative; min-width: 0; }
+  .c-photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.8) brightness(0.96); }
+  .c-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,105,220,0.10) 0%, rgba(11,16,25,0.28) 100%); }
+  .c-foot { padding: 40px 64px 48px 64px; flex-shrink: 0; }
+  .c-track { height: 6px; border-radius: 999px; background: #E1FAFE; overflow: hidden; }
+  .c-fill { height: 100%; border-radius: 999px; background: #0469DC; width: __PROGRESS__; }
+</style>
+</head>
+<body>
+<div class="c-wrap">
+  <div class="c-topline"></div>
+  <div class="c-top">
+    <div class="c-brand"><img src="../html/fastlis-logo.png"><span>FASTLIS</span></div>
+    <div class="c-num">__NUM__</div>
+  </div>
+  <div class="c-main">
+    <div class="c-text">
+      <div class="c-kicker">__KICKER__</div>
+      <h1>__TITLE__</h1>
+      <div class="c-body">__BODY__</div>
+      <div class="c-meta">__META__</div>
+    </div>
+    <div class="c-photo"><img src="__PHOTO__"></div>
+  </div>
+  <div class="c-foot"><div class="c-track"><div class="c-fill"></div></div></div>
+</div>
+</body>
+</html>
