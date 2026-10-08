@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0B1019}
+  body{font-family:'Plus Jakarta Sans',sans-serif}
+  #root{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0B1019}
+  .clip{position:absolute;inset:0;width:1080px;height:1920px;overflow:hidden;background:#0B1019}
+  .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .topbar{position:absolute;top:0;left:0;right:0;height:10px;background:#0469DC;z-index:3}
+  .header{position:absolute;top:24px;left:40px;right:40px;display:flex;align-items:center;gap:14px;z-index:3}
+  .header img{width:56px;height:56px;border-radius:14px;background:#fff;padding:6px}
+  .header .wm{font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+  .header .sub{font-size:14px;color:rgba(255,255,255,.78);font-weight:600}
+  .header.dark .wm{color:#0B1019;text-shadow:none}
+  .header.dark .sub{color:#64748B}
+  .hero{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:110px 64px 64px;z-index:2}
+  .hero.bottom{justify-content:flex-end;padding-bottom:64px}
+  .kicker{display:inline-block;font-size:19px;font-weight:700;letter-spacing:3px;color:#0469DC;background:#E1FAFE;padding:10px 20px;border-radius:999px;align-self:flex-start}
+  .kicker.dark{background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(8px)}
+  h1{font-size:82px;line-height:0.96;font-weight:800;letter-spacing:-2.5px;color:#fff;margin-top:20px;text-shadow:0 4px 24px rgba(0,0,0,.45)}
+  h1 .blue{color:#3B9EFF}
+  h1.dark{color:#0B1019;text-shadow:none}
+  h1.dark .blue{color:#0469DC}
+  .subtext{font-size:28px;line-height:1.42;color:rgba(255,255,255,.90);margin-top:18px}
+  .subtext.dark{color:#334155}
+  .num{font-size:138px;font-weight:800;color:rgba(255,255,255,.16);line-height:0.9}
+  .feat-title{font-size:50px;font-weight:800;letter-spacing:-1.2px;color:#fff;margin-top:8px}
+  .feat-sub{font-size:26px;font-weight:600;color:#3B9EFF;margin-top:6px}
+  .desc{font-size:26px;line-height:1.5;color:rgba(255,255,255,.88);margin-top:14px}
+  .card{background:#fff;border-radius:24px;padding:24px;margin-top:18px;box-shadow:0 16px 40px rgba(0,0,0,.12)}
+  .pill-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .pill{font-size:18px;font-weight:700;color:#0469DC;background:#E1FAFE;border-radius:999px;padding:10px 16px}
+  .cta-btn{display:inline-block;margin-top:22px;font-size:24px;font-weight:800;color:#fff;background:#0469DC;padding:18px 36px;border-radius:999px;align-self:flex-start;box-shadow:0 12px 32px rgba(4,105,220,.35)}
+  .dash-wrap{border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.14);margin-top:22px}
+  .dash-wrap img{width:100%;display:block}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="35" data-width="1080" data-height="1920">
+  <div id="s1" class="clip" data-start="0" data-duration="6">
+    <img class="bg" src="assets/lab-06.jpg" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(4,12,30,.80) 58%, rgba(4,12,30,.96) 100%);"></div>
+    <div class="topbar"></div>
+    <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero">
+      <span class="kicker dark" id="s1-k">Validasi Multi-level</span>
+      <h1 id="s1-h1">Hasil kritis muncul.<br><span class="blue">Siapa yang memvalidasi?</span></h1>
+      <div class="subtext" id="s1-sub">Setiap hasil kritis melewati validasi multi-level di FASTLIS.</div>
+    </div>
+  </div>
+  <div id="s2" class="clip" data-start="6" data-duration="6" style="background:#FBFCFD">
+    <div class="topbar"></div>
+    <div class="header dark"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero">
+      <span class="kicker" id="s2-k">Validasi Multi-level</span>
+      <h1 class="dark" id="s2-h1">Analis senior memvalidasi,<br><span class="blue">patologi klinik review.</span></h1>
+      <div class="subtext dark" id="s2-sub">Setiap langkah tercatat di audit trail. Hasil kritis bisa dipertanggungjawabkan.</div>
+      <div class="dash-wrap" id="s2-dash"><img src="assets/lab-10.jpg" /></div>
+    </div>
+  </div>
+  <div id="s3" class="clip" data-start="12" data-duration="6">
+    <img class="bg" src="assets/lab-07.jpg" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <div class="topbar"></div>
+    <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero">
+      <div class="num" id="s3-n">01</div>
+      <div class="feat-title" id="s3-t">Analis Senior</div>
+      <div class="feat-sub" id="s3-sub">Memvalidasi hasil kritis</div>
+      <div class="desc" id="s3-d">Analis senior memvalidasi hasil sebelum dikirim.<br>Setiap perubahan tercatat siapa yang mengubahnya.</div>
+    </div>
+  </div>
+  <div id="s4" class="clip" data-start="18" data-duration="6">
+    <img class="bg" src="assets/lab-08.jpg" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <div class="topbar"></div>
+    <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero">
+      <div class="num" id="s4-n">02</div>
+      <div class="feat-title" id="s4-t">Patologi Klinik</div>
+      <div class="feat-sub" id="s4-sub">Review dan eskalasi</div>
+      <div class="desc" id="s4-d">Patologi klinis review hasil yang mencurigakan.<br>Eskalasi langsung ke dokter yang membutuhkan.</div>
+    </div>
+  </div>
+  <div id="s5" class="clip" data-start="24" data-duration="6">
+    <img class="bg" src="assets/lab-09.jpg" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <div class="topbar"></div>
+    <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero">
+      <div class="num" id="s5-n">03</div>
+      <div class="feat-title" id="s5-t">Audit Trail</div>
+      <div class="feat-sub" id="s5-sub">Siapa, kapan, apa yang diubah</div>
+      <div class="desc" id="s5-d">Setiap langkah validasi tercatat lengkap.<br>Integritas data hasil kritis terjaga.</div>
+    </div>
+  </div>
+  <div id="s6" class="clip" data-start="30" data-duration="5" style="background:#FBFCFD">
+    <div class="topbar"></div>
+    <div class="header dark"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
+    <div class="hero bottom">
+      <h1 class="dark" id="s6-h1">Bagaimana validasi<br><span class="blue">hasil kritis di lab Anda?</span></h1>
+      <div class="subtext dark" id="s6-sub">Ceritakan di komentar.<br>Info validasi multi-level di fastlis.com</div>
+      <span class="cta-btn" id="s6-cta">fastlis.com &nbsp;→</span>
+      <div class="card" id="s6-card"><div class="pill-row"><span class="pill">Validasi Multi-level</span><span class="pill">Hasil Kritis</span><span class="pill">FASTLIS</span></div></div>
+    </div>
+  </div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({paused:true});
+  tl.from("#s1-k",{opacity:0,y:14,duration:0.5},0.2);
+  tl.from("#s1-h1",{opacity:0,y:24,duration:0.6},0.4);
+  tl.from("#s1-sub",{opacity:0,y:14,duration:0.45},0.95);
+  tl.from("#s2-k",{opacity:0,y:14,duration:0.45},6.2);
+  tl.from("#s2-h1",{opacity:0,y:20,duration:0.55},6.4);
+  tl.from("#s2-sub",{opacity:0,y:14,duration:0.4},6.85);
+  tl.from("#s2-dash",{opacity:0,y:24,scale:0.98,duration:0.6},7.1);
+  tl.from("#s3-n",{opacity:0,duration:0.4},12.2);
+  tl.from("#s3-t",{opacity:0,y:16,duration:0.5},12.35);
+  tl.from("#s3-sub",{opacity:0,y:12,duration:0.4},12.6);
+  tl.from("#s3-d",{opacity:0,y:12,duration:0.4},12.85);
+  tl.from("#s4-n",{opacity:0,duration:0.4},18.2);
+  tl.from("#s4-t",{opacity:0,y:16,duration:0.5},18.35);
+  tl.from("#s4-sub",{opacity:0,y:12,duration:0.4},18.6);
+  tl.from("#s4-d",{opacity:0,y:12,duration:0.4},18.85);
+  tl.from("#s5-n",{opacity:0,duration:0.4},24.2);
+  tl.from("#s5-t",{opacity:0,y:16,duration:0.5},24.35);
+  tl.from("#s5-sub",{opacity:0,y:12,duration:0.4},24.6);
+  tl.from("#s5-d",{opacity:0,y:12,duration:0.4},24.85);
+  tl.from("#s6-h1",{opacity:0,y:20,duration:0.55},30.25);
+  tl.from("#s6-sub",{opacity:0,y:14,duration:0.4},30.65);
+  tl.from("#s6-cta",{opacity:0,scale:0.96,duration:0.4},30.9);
+  tl.from("#s6-card",{opacity:0,y:16,duration:0.45},31.2);
+  window.__timelines["main"] = tl;
+</script>
+</body>
+</html>

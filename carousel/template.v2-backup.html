@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; font-family: 'Plus Jakarta Sans', sans-serif; background: #FBFCFD; color: #0B1019; overflow: hidden; }
+  .c-wrap { width: 1080px; height: 1350px; display: flex; flex-direction: column; background: #FBFCFD; position: relative; }
+  /* seamless flow rail — same x on every slide creates follow-the-line effect */
+  .c-wrap::before { content: ''; position: absolute; left: 34px; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, #0469DC 0%, #38BDF8 60%, #0469DC 100%); opacity: .18; }
+  .c-topline { height: 12px; background: linear-gradient(90deg, #0469DC, #38BDF8); flex-shrink: 0; z-index: 1; }
+  .c-top { display: flex; align-items: center; justify-content: space-between; padding: 30px 64px 0 72px; flex-shrink: 0; z-index: 1; }
+  .c-brand { display: flex; align-items: center; gap: 14px; }
+  .c-brand img { width: 60px; height: 60px; }
+  .c-brand span { font-size: 30px; font-weight: 800; color: #0469DC; letter-spacing: -0.5px; }
+  .c-num { font-size: 24px; font-weight: 800; color: #334155; letter-spacing: 2px; background: #EFF4FF; border: 2px solid #D7E4FF; padding: 8px 18px; border-radius: 999px; }
+  .c-main { flex: 1; display: flex; gap: 44px; padding: 36px 64px 0 72px; min-height: 0; z-index: 1; }
+  .c-text { flex: 1.32; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 8px; min-width: 0; }
+  .c-kicker { align-self: flex-start; font-size: 21px; font-weight: 800; letter-spacing: 3px; color: #0469DC; text-transform: uppercase; background: #E1FAFE; border: 2px solid #BDE9FF; padding: 10px 22px; border-radius: 999px; margin-bottom: 22px; }
+  .c-kicker:empty { display: none; }
+  .c-text h1 { font-size: 64px; line-height: 1.04; font-weight: 800; letter-spacing: -1.5px; color: #0B1019; text-wrap: balance; }
+  .c-text h1 .blue { color: #0469DC; }
+  .c-body { font-size: 29px; line-height: 1.55; color: #334155; margin-top: 20px; text-wrap: pretty; }
+  .c-body:empty { display: none; }
+  .c-meta { font-size: 24px; font-weight: 700; color: #0469DC; margin-top: 22px; }
+  .c-meta:empty { display: none; }
+  .c-badge { width: 96px; height: 96px; border-radius: 28px; background: #0469DC; color: #fff; font-size: 52px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 12px 28px rgba(4,105,220,.35); }
+  .c-badge:empty { display: none; }
+  .c-badge.dim { background: #E2E8F0; color: #0B1019; box-shadow: none; border: 2px solid #CBD5E1; }
+  .c-badge.ok { background: #16A34A; box-shadow: 0 12px 28px rgba(22,163,74,.35); }
+  .c-photo { flex: 1; border-radius: 28px; overflow: hidden; position: relative; min-width: 0; align-self: stretch; max-height: 960px; border: 2px solid #E2E8F0; }
+  .c-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .c-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,105,220,0.06) 0%, rgba(11,16,25,0.22) 100%); }
+  .c-chips { display: flex; gap: 14px; margin-top: 26px; }
+  .c-chips:empty { display: none; }
+  .c-chip { flex: 1; border: 2px solid #D7E4FF; background: #fff; border-radius: 18px; padding: 14px 10px; text-align: center; font-size: 24px; font-weight: 800; color: #0B1019; }
+  .c-chip small { display: block; font-size: 17px; font-weight: 700; color: #64748B; margin-top: 4px; }
+  .c-cta { margin-top: 24px; background: #0B1019; color: #fff; border-radius: 20px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .c-cta strong { font-size: 27px; font-weight: 800; }
+  .c-cta span { font-size: 22px; font-weight: 700; color: #7DD3FC; }
+  .c-cta:empty { display: none; }
+  .c-foot { padding: 28px 64px 44px 72px; flex-shrink: 0; z-index: 1; }
+  .c-swipe { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .c-swipe p { font-size: 23px; font-weight: 800; color: #0469DC; letter-spacing: 1px; }
+  .c-swipe p:empty { display: none; }
+  .c-track { height: 12px; border-radius: 999px; background: #E2E8F0; overflow: hidden; }
+  .c-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #0469DC, #38BDF8); width: __PROGRESS__; }
+
+  /* ===== COVER (dark, oversized type) ===== */
+  .v-cover { background: radial-gradient(1200px 700px at 85% -10%, #1557C0 0%, transparent 60%), linear-gradient(180deg, #06182F 0%, #0A3D91 78%, #0469DC 100%); color: #fff; }
+  .v-cover::before { opacity: .25; }
+  .v-cover .c-brand span { color: #fff; }
+  .v-cover .c-num { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.35); color: #fff; }
+  .v-cover .c-main { flex-direction: column; gap: 28px; padding-top: 28px; }
+  .v-cover .c-text { padding-top: 0; }
+  .v-cover .c-kicker { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.35); color: #7DD3FC; }
+  .v-cover .c-text h1 { font-size: 92px; line-height: 1.0; color: #fff; }
+  .v-cover .c-text h1 .blue { color: #7DD3FC; }
+  .v-cover .c-body { color: #DCE8FF; font-size: 31px; }
+  .v-cover .c-photo { max-height: 500px; border-color: rgba(255,255,255,.3); background: #fff; padding: 0; overflow: hidden; }
+  .v-cover .c-photo img { object-fit: cover; object-position: top center; }
+  .v-cover .c-photo::after { display: none; }
+  .v-cover .c-swipe p { color: #7DD3FC; }
+
+  /* ===== ANSWER (success) ===== */
+  .v-answer .c-kicker { background: #DCFCE7; border-color: #86EFAC; color: #15803D; }
+  .v-answer .c-cta { background: #0469DC; }
+  .v-answer .c-cta span { color: #fff; }
+</style>
+</head>
+<body>
+<div class="c-wrap __VARIANT__">
+  <div class="c-topline"></div>
+  <div class="c-top">
+    <div class="c-brand"><img src="../html/fastlis-logo.png"><span>FASTLIS</span></div>
+    <div class="c-num">__NUM__</div>
+  </div>
+  <div class="c-main">
+    <div class="c-text">
+      <div class="c-badge __BADGECLASS__">__BADGE__</div>
+      <div class="c-kicker">__KICKER__</div>
+      <h1>__TITLE__</h1>
+      <div class="c-body">__BODY__</div>
+      <div class="c-meta">__META__</div>
+      <div class="c-chips">__CHIPS__</div>
+      <div class="c-cta">__CTA__</div>
+    </div>
+    <div class="c-photo"><img src="__PHOTO__"></div>
+  </div>
+  <div class="c-foot">
+    <div class="c-swipe"><p>__SWIPE__</p></div>
+    <div class="c-track"><div class="c-fill"></div></div>
+  </div>
+</div>
+</body>
+</html>
