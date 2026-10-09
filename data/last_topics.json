@@ -24,6 +24,11 @@
       "date": "2026-10-09",
       "topik": "Rantai dingin reagen + monitoring suhu penyimpanan",
       "format": "checklist"
+    },
+    {
+      "date": "2026-10-10",
+      "topik": "QC harian analyzer + baca grafik Levey-Jennings + aturan Westgard + pencatatan digital",
+      "format": "mitos-vs-fakta"
     }
   ]
 }
