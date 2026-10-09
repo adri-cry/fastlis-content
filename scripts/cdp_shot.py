@@ -132,98 +132,120 @@ def http_json(url, data=None, method=None, timeout=15):
         return json.load(r)
 
 
-def main():
-    if len(sys.argv) < 3:
-        print("pakai: cdp_shot.py <in.html> <out.png> [width] [height]")
-        return 2
-    html, out = sys.argv[1], sys.argv[2]
-    width = int(sys.argv[3]) if len(sys.argv) > 3 else 1080
-    height = int(sys.argv[4]) if len(sys.argv) > 4 else 1350
+class ShotSession:
+    """Satu Chrome dipakai ulang untuk banyak capture (jauh lebih cepat)."""
 
-    chrome = find_chrome()
-    if not chrome:
-        print("chrome tidak ketemu")
-        return 1
-    if os.path.exists(out):
-        os.remove(out)  # cegah false-positive file lama
-
-    port = free_port()
-    profile = f"/tmp/cdp-shot-{os.getpid()}"
-    proc = subprocess.Popen(
-        [chrome, "--headless=new", "--no-sandbox", "--disable-gpu",
-         "--disable-dev-shm-usage", "--no-first-run",
-         f"--remote-debugging-port={port}", f"--user-data-dir={profile}",
-         f"--window-size={width},{height}", "about:blank"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    ws = None
-    try:
-        # tunggu DevTools siap
+    def __init__(self, width=1080, height=1350):
+        chrome = find_chrome()
+        if not chrome:
+            raise RuntimeError("chrome tidak ketemu")
+        self.width, self.height = width, height
+        self.port = free_port()
+        self.profile = f"/tmp/cdp-shot-{os.getpid()}"
+        self.proc = subprocess.Popen(
+            [chrome, "--headless=new", "--no-sandbox", "--disable-gpu",
+             "--disable-dev-shm-usage", "--no-first-run",
+             f"--remote-debugging-port={self.port}", f"--user-data-dir={self.profile}",
+             f"--window-size={width},{height}", "about:blank"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(60):
             try:
-                http_json(f"http://127.0.0.1:{port}/json/version")
+                http_json(f"http://127.0.0.1:{self.port}/json/version")
                 break
             except Exception:
                 time.sleep(0.5)
         else:
-            print("DevTools tidak siap")
-            return 1
+            self.close()
+            raise RuntimeError("DevTools tidak siap")
+        target = http_json(f"http://127.0.0.1:{self.port}/json/new?about:blank", method="PUT")
+        self.ws = WSClient(target["webSocketDebuggerUrl"])
+        self.mid = 0
+        self._call("Page.enable")
+        self._call("Emulation.setDeviceMetricsOverride",
+                   {"width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
+
+    def _call(self, method, params=None):
+        self.mid += 1
+        i = self.mid
+        self.ws.send_json({"id": i, "method": method, "params": params or {}})
+        while True:
+            msg = json.loads(self.ws.recv_msg())
+            if msg.get("id") == i:
+                if "error" in msg:
+                    raise RuntimeError(f"CDP {method}: {msg['error']}")
+                return msg.get("result", {})
+
+    def capture(self, html, out, min_bytes=50000):
+        if os.path.exists(out):
+            os.remove(out)  # cegah false-positive file lama
         file_url = "file://" + os.path.abspath(html)
-        target = http_json(f"http://127.0.0.1:{port}/json/new?{urllib.request.quote(file_url, safe='')}",
-                           method="PUT")
-        wsurl = target["webSocketDebuggerUrl"]
-        ws = WSClient(wsurl)
-        mid = [0]
-
-        def call(method, params=None):
-            mid[0] += 1
-            i = mid[0]
-            ws.send_json({"id": i, "method": method, "params": params or {}})
-            while True:
-                msg = json.loads(ws.recv_msg())
-                if msg.get("id") == i:
-                    if "error" in msg:
-                        raise RuntimeError(f"CDP {method}: {msg['error']}")
-                    return msg.get("result", {})
-                # abaikan event lain, tapi catat loadEventFired via flag di luar
-
-        call("Page.enable")
-        call("Emulation.setDeviceMetricsOverride",
-             {"width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
-        call("Page.navigate", {"url": file_url})
-        # tunggu load + render font/gambar
+        self._call("Page.navigate", {"url": file_url})
         deadline = time.time() + 25
-        loaded = False
         while time.time() < deadline:
-            ws.send_json({"id": 999, "method": "Runtime.evaluate",
-                          "params": {"expression": "document.readyState"}})
+            self.mid += 1
+            i = self.mid
+            self.ws.send_json({"id": i, "method": "Runtime.evaluate",
+                               "params": {"expression": "document.readyState"}})
+            state = None
             while True:
-                msg = json.loads(ws.recv_msg(timeout=30))
-                if msg.get("id") == 999:
-                    if msg.get("result", {}).get("result", {}).get("value") == "complete":
-                        loaded = True
+                msg = json.loads(self.ws.recv_msg(timeout=30))
+                if msg.get("id") == i:
+                    state = msg.get("result", {}).get("result", {}).get("value")
                     break
-            if loaded:
+            if state == "complete":
                 break
             time.sleep(0.5)
-        time.sleep(2.0)
-        res = call("Page.captureScreenshot", {"format": "png", "fromSurface": True})
+        time.sleep(1.0)  # font lokal, cukup 1 detik
+        res = self._call("Page.captureScreenshot", {"format": "png", "fromSurface": True})
         data = res.get("data")
         if not data:
-            print("captureScreenshot tidak mengembalikan data")
-            return 1
+            return False
         with open(out, "wb") as f:
             f.write(base64.b64decode(data))
-        ok = os.path.exists(out) and os.path.getsize(out) > 50000
-        print(f"screenshot {'OK' if ok else 'FAIL'} {os.path.getsize(out) if os.path.exists(out) else 0}")
-        return 0 if ok else 1
-    finally:
-        if ws:
-            ws.close()
-        proc.terminate()
+        return os.path.exists(out) and os.path.getsize(out) > min_bytes
+
+    def close(self):
         try:
-            proc.wait(timeout=5)
+            self.ws.close()
         except Exception:
-            proc.kill()
+            pass
+        self.proc.terminate()
+        try:
+            self.proc.wait(timeout=5)
+        except Exception:
+            self.proc.kill()
+
+
+def main():
+    args = sys.argv[1:]
+    if args and args[0] == "--batch":
+        # --batch jobs.json : [{"html":..,"out":..,"width":..,"height":..}]
+        jobs = json.load(open(args[1]))
+        sess = ShotSession()
+        try:
+            ok = True
+            for jb in jobs:
+                r = sess.capture(jb["html"], jb["out"])
+                sz = os.path.getsize(jb["out"]) if os.path.exists(jb["out"]) else 0
+                print(f"{os.path.basename(jb['out'])} {'OK' if r else 'FAIL'} {sz}", flush=True)
+                ok = ok and r
+            return 0 if ok else 1
+        finally:
+            sess.close()
+    if len(args) < 2:
+        print("pakai: cdp_shot.py <in.html> <out.png> [width] [height]  atau  --batch jobs.json")
+        return 2
+    html, out = args[0], args[1]
+    width = int(args[2]) if len(args) > 2 else 1080
+    height = int(args[3]) if len(args) > 3 else 1350
+    sess = ShotSession(width, height)
+    try:
+        ok = sess.capture(html, out)
+    finally:
+        sess.close()
+    sz = os.path.getsize(out) if os.path.exists(out) else 0
+    print(f"screenshot {'OK' if ok else 'FAIL'} {sz}")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
