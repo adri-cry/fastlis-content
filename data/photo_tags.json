@@ -1,0 +1,251 @@
+{
+ "dashboard.webp": [
+  "dashboard",
+  "lis",
+  "sistem",
+  "digitalisasi",
+  "manajemen"
+ ],
+ "demo-dashboard.png": [
+  "dashboard",
+  "lis",
+  "menu",
+  "sistem"
+ ],
+ "demo-panic-report.png": [
+  "panic",
+  "nilai kritis",
+  "laporan",
+  "qc",
+  "kritis"
+ ],
+ "demo-qc-chart.png": [
+  "qc",
+  "chart",
+  "levey-jennings",
+  "westgard",
+  "kendali mutu",
+  "grafik"
+ ],
+ "demo-s1.jpg": [
+  "hasil",
+  "hematologi",
+  "validasi",
+  "laporan"
+ ],
+ "demo-s2.jpg": [
+  "hasil",
+  "hematologi",
+  "validasi",
+  "laporan"
+ ],
+ "demo-s3.jpg": [
+  "hasil",
+  "hematologi",
+  "validasi",
+  "laporan"
+ ],
+ "demo-s4.jpg": [
+  "hasil",
+  "validasi",
+  "laporan",
+  "status"
+ ],
+ "demo-s5.jpg": [
+  "hasil",
+  "hematologi",
+  "validasi",
+  "laporan"
+ ],
+ "demo-single.jpg": [
+  "validasi",
+  "hasil",
+  "laporan"
+ ],
+ "demo-ui-flags.png": [
+  "validasi",
+  "flag",
+  "autovalidasi",
+  "hasil"
+ ],
+ "demo-ui-status.png": [
+  "pasien",
+  "status",
+  "registrasi",
+  "bpjs"
+ ],
+ "demo-ui-toast.png": [
+  "notifikasi",
+  "sistem"
+ ],
+ "demo-worklist-filled.png": [
+  "worklist",
+  "daftar kerja",
+  "antrian",
+  "sampel"
+ ],
+ "demo-worklist.png": [
+  "worklist",
+  "daftar kerja",
+  "sampel"
+ ],
+ "demo-workstation.png": [
+  "workstation",
+  "alat",
+  "monitor"
+ ],
+ "lab-01.jpg": [
+  "analis",
+  "mikroskop",
+  "sdm",
+  "petugas"
+ ],
+ "lab-02.jpg": [
+  "ruang lab",
+  "analyzer",
+  "alat",
+  "otomasi"
+ ],
+ "lab-03.jpg": [
+  "pipet",
+  "sampel",
+  "tabung",
+  "pre-analitik",
+  "pengambilan"
+ ],
+ "lab-04.jpg": [
+  "mikroskop",
+  "sel",
+  "mikrobiologi",
+  "patologi"
+ ],
+ "lab-05.jpg": [
+  "analis",
+  "komputer",
+  "digitalisasi",
+  "server",
+  "it",
+  "sdm"
+ ],
+ "lab-06.jpg": [
+  "edukasi",
+  "anatomi",
+  "otak"
+ ],
+ "lab-07.jpg": [
+  "mikroskop",
+  "alat"
+ ],
+ "lab-08.jpg": [
+  "tabung",
+  "sampel darah",
+  "pre-analitik",
+  "pengambilan",
+  "tabung darah"
+ ],
+ "lab-09.jpg": [
+  "jantung",
+  "kardiologi",
+  "edukasi"
+ ],
+ "lab-10.jpg": [
+  "dokumentasi",
+  "pencatatan",
+  "menulis",
+  "qc",
+  "administrasi",
+  "suhu",
+  "catat"
+ ],
+ "lab-11.jpg": [
+  "dashboard",
+  "data",
+  "analitik",
+  "manajemen",
+  "grafik"
+ ],
+ "lab-12.jpg": [
+  "laptop",
+  "dashboard",
+  "digitalisasi",
+  "data",
+  "monitoring"
+ ],
+ "lab-13.jpg": [
+  "sampel",
+  "pipet",
+  "pre-analitik",
+  "pengambilan",
+  "apd"
+ ],
+ "lab-14.jpg": [
+  "analis",
+  "ruang lab",
+  "sdm",
+  "petugas"
+ ],
+ "lab-15.jpg": [
+  "sampel",
+  "tabung",
+  "pre-analitik",
+  "pengambilan"
+ ],
+ "lab-16.jpg": [
+  "gudang",
+  "penyimpanan",
+  "reagen",
+  "logistik",
+  "stok",
+  "ruang"
+ ],
+ "lab-17.jpg": [
+  "ruang lab",
+  "alat",
+  "mikroskop"
+ ],
+ "lab-18.jpg": [
+  "tabung",
+  "sampel",
+  "penyimpanan",
+  "rak",
+  "pre-analitik",
+  "reagen"
+ ],
+ "lab-19.jpg": [
+  "otomasi",
+  "analyzer",
+  "alat",
+  "teknologi",
+  "mesin"
+ ],
+ "lab-20.jpg": [
+  "mikroskop",
+  "alat"
+ ],
+ "lab-21.jpg": [
+  "mikroskop",
+  "alat"
+ ],
+ "lab-22.jpg": [
+  "analis",
+  "pipet",
+  "sampel",
+  "sdm",
+  "petugas"
+ ],
+ "lab-23.jpg": [
+  "dna",
+  "molekuler",
+  "genetik"
+ ],
+ "lab-24.jpg": [
+  "mikroskop",
+  "dramatis"
+ ],
+ "lab-25.jpg": [
+  "tabung",
+  "sampel",
+  "pre-analitik",
+  "rak"
+ ]
+}
