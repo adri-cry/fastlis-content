@@ -96,5 +96,41 @@
   "sub": "Hasil kritis ditahan dulu, dicek analis dan disahkan<br>dokter penanggung jawab (dokter spesialis patologi klinik),<br>baru diteruskan ke dokter pengirim.",
   "title": "Siapa yang memvalidasi <span class=\"hl\">hasil kritismu?</span>"
  },
- "topik": "Validasi multi-level + eskalasi patologi klinik + notifikasi nilai kritis"
+ "topik": "Validasi multi-level + eskalasi patologi klinik + notifikasi nilai kritis",
+ "reels": {
+  "s1": {
+   "kicker": "Kuis Validasi",
+   "h1": "Shift malam, flag merah muncul.<br><span class=\"blue\">Kirim atau tahan dulu?</span>",
+   "sub": "Nilai kritis itu soal keselamatan pasien, bukan soal cepat-cepatan."
+  },
+  "s2": {
+   "kicker": "Validasi Multi-level",
+   "h1": "Analis memeriksa,<br><span class=\"blue\">dokter mengesahkan.</span>",
+   "sub": "Dua lapis pemeriksaan sebelum hasil kritis sampai ke dokter."
+  },
+  "s3": {
+   "title": "Tahan Dulu",
+   "sub": "Jangan langsung kirim",
+   "desc": "Hasil kritis yang muncul langsung ditahan sistem.<br>Tidak bisa lolos tanpa pemeriksaan."
+  },
+  "s4": {
+   "title": "Validasi Berlapis",
+   "sub": "Analis + patologi klinik",
+   "desc": "Analis memeriksa, dokter penanggung jawab<br>mengesahkan sebelum dikirim."
+  },
+  "s5": {
+   "title": "Notifikasi Otomatis",
+   "sub": "Eskalasi nilai kritis",
+   "desc": "Pelanggaran aturan terdeteksi otomatis.<br>Notifikasi langsung ke yang berwenang."
+  },
+  "s6": {
+   "h1": "Berani menahan,<br><span class=\"blue\">berani memvalidasi?</span>",
+   "sub": "Ceritakan di komentar.<br>Info validasi multi-level di fastlis.com",
+   "pills": [
+    "Validasi Multi-level",
+    "Nilai Kritis",
+    "FASTLIS"
+   ]
+  }
+ }
 }
