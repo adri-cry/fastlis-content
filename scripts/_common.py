@@ -33,6 +33,35 @@ def find_chrome():
     return None
 
 
+def screenshot_batch(jobs, width=1080, height=1350):
+    """Banyak capture dalam SATU Chrome (jauh lebih cepat dari 1 Chrome per gambar).
+
+    jobs: list of (html_path, out_path). Return True bila semua OK.
+    """
+    import json as _json
+    import tempfile
+    helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp_shot.py")
+    spec = [{"html": h, "out": o, "width": width, "height": height} for h, o in jobs]
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        _json.dump(spec, f)
+        jf = f.name
+    try:
+        r = subprocess.run(
+            [os.environ.get("FASTLIS_PYTHON", "python3"), helper, "--batch", jf],
+            capture_output=True, text=True, timeout=600)
+        if r.stdout.strip():
+            print(r.stdout.strip()[-600:])
+        return r.returncode == 0
+    except Exception as e:
+        print(f"screenshot_batch gagal: {e}")
+        return False
+    finally:
+        try:
+            os.remove(jf)
+        except OSError:
+            pass
+
+
 def screenshot(html_path, out_path, width=1080, height=1350, min_bytes=50000):
     """Render file HTML lokal jadi PNG via CDP. Return True bila OK."""
     helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp_shot.py")

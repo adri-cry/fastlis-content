@@ -3,10 +3,9 @@
 import json
 import os
 import sys
-import concurrent.futures
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import BASE, screenshot
+from _common import BASE, screenshot_batch
 
 J = json.load(open(f"{BASE}/content/hari-ini.json"))
 TPL = open(f"{BASE}/carousel/template.html").read()
@@ -20,21 +19,14 @@ for i, s in enumerate(slides, start=1):
     open(html, "w").write(h)
 
 
-def _one(i):
-    html = f"{BASE}/carousel/_slide{i}.html"
-    out = f"{BASE}/carousel/slide{i}.png"
-    ok = screenshot(html, out)
-    try:
-        os.remove(html)
-    except OSError:
-        pass
-    sz = os.path.getsize(out) if os.path.exists(out) else 0
-    print(f"slide{i} {'OK' if ok else 'FAIL'} {sz}", flush=True)
-    return ok
-
-
 if __name__ == "__main__":
     n = len(slides)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-        results = list(ex.map(_one, range(1, n + 1)))
-    sys.exit(0 if all(results) else 1)
+    jobs = [(f"{BASE}/carousel/_slide{i}.html", f"{BASE}/carousel/slide{i}.png")
+            for i in range(1, n + 1)]
+    ok = screenshot_batch(jobs)
+    for i in range(1, n + 1):
+        try:
+            os.remove(f"{BASE}/carousel/_slide{i}.html")
+        except OSError:
+            pass
+    sys.exit(0 if ok else 1)
