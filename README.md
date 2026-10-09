@@ -87,3 +87,16 @@ npm run publish    # publish
 - `scripts/daily.py`: orkestrator manual (generate -> render_all -> reels -> git).
 - `reels/`: hyperframes 0.8.31 terinstall lokal; gsap + font Plus Jakarta Sans di-vendor lokal (CDN diblokir di sandbox). Render: `TMPDIR=reels/.tmp npm run render` (/tmp cuma 512MB).
 - Jadwal: cron `fastlis-daily-content` (~06:14 WIB, gambar) + `fastlis-daily-reels` (06:45 WIB, video). Push GitHub off (kirim ke chat dulu).
+
+## Audit fixes (2026-10-09)
+- Waktu: semua penanggalan pakai WIB (Asia/Jakarta), bukan UTC sistem.
+- `PipelineLock`: cegah 2 run jalan bareng (jadwal vs manual).
+- `cdp_shot.py`: profile Chrome di /tmp dibersihkan tiap run.
+- `update_used.py`: DEPRECATED (berbahaya, hardcode 2026-09-15) jadi stub.
+- `archive_today.py`: satu-satunya implementasi arsip, prune 30 hari.
+- `killchrome.py`: hanya bunuh chrome headless nyangkut.
+- `qa_check.py`: + cek foto duplikat antar slide, + batas caption 2200.
+- `build_reels.py`: catat bg video ke today_video.
+- `render_all.py`: prune backup hari-ini.json.bak-* >30 hari.
+- `preview.py`: render 1 slide saja buat cek cepat.
+- Cron: rotasi format dipaksakan (beda dari 3 hari terakhir).
