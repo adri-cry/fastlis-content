@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 import os
+import shutil
 import socket
 import struct
 import subprocess
@@ -214,6 +215,11 @@ class ShotSession:
             self.proc.wait(timeout=5)
         except Exception:
             self.proc.kill()
+        # bersihkan profile Chrome di /tmp (/tmp cuma 512MB!)
+        try:
+            shutil.rmtree(self.profile, ignore_errors=True)
+        except Exception:
+            pass
 
 
 def main():

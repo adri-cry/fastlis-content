@@ -12,7 +12,7 @@ import sys
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import BASE
+from _common import BASE, wib_today
 
 CONTENT = os.path.join(BASE, "content", "hari-ini.json")
 HIST = os.path.join(BASE, "data", "last_topics.json")
@@ -132,7 +132,7 @@ def validate(j, history):
 
 
 def main():
-    today = datetime.date.today().isoformat()
+    today = wib_today().isoformat()
     hist = load_json(HIST, {}).get("history", [])
     used = load_json(USED, {"used": []})
     photos = photo_pool(used)

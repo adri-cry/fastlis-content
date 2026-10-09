@@ -51,6 +51,22 @@ for field in ("title", "sub", "sticker", "caption", "note"):
     if field in ("title", "sub"):
         check_widow(f"single.{field}", v)
 
+# foto duplikat antar slide
+seen = {}
+for i, sl in enumerate(J["carousel"], start=1):
+    ph = os.path.basename(sl.get("photo", ""))
+    if ph:
+        if ph in seen:
+            issues.append(f"slide{i} & slide{seen[ph]}: foto sama ({ph}) - variasikan")
+        else:
+            seen[ph] = i
+
+# caption IG maks 2200 karakter
+for key in ("caption_carousel", "caption_single"):
+    v = J.get(key, "")
+    if len(v) > 2200:
+        issues.append(f"{key}: {len(v)} karakter, melebihi batas IG 2200")
+
 print(f"QA: {len(J['carousel'])} carousel + 1 single")
 for w in warns:
     print("WARN:", w)
