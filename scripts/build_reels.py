@@ -104,6 +104,23 @@ def main():
 
     open(OUT, "w").write(html)
     print("index.html ditulis dari template + copy reels hari ini")
+
+    # catat bg video ke tracking
+    try:
+        used_p = os.path.join(BASE, "data", "used_images.json")
+        used = json.load(open(used_p))
+        bgs = []
+        for key in ("s1", "s2", "s3", "s4", "s5"):
+            bg = r.get(key, {}).get("bg")
+            if bg:
+                bgs.append(os.path.basename(bg))
+        if bgs:
+            used["today_video"] = bgs
+            used["used"] = sorted(set(used.get("used", [])) | set(bgs))
+            json.dump(used, open(used_p, "w"), indent=2)
+            print("updated today_video:", bgs)
+    except Exception as e:
+        print(f"tracking video skip: {e}")
     return 0
 
 

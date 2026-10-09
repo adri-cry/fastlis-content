@@ -6,11 +6,62 @@
 - Screenshot via Chrome DevTools Protocol (scripts/cdp_shot.py), bukan flag
   --screenshot (pernah gagal diam-diam = false positive).
 """
+import datetime
+import fcntl
 import os
 import shutil
 import subprocess
 
 BASE = os.environ.get("FASTLIS_BASE", os.path.expanduser("~/workspace/fastlis-content"))
+
+try:
+    from zoneinfo import ZoneInfo
+    _WIB = ZoneInfo("Asia/Jakarta")
+except Exception:
+    _WIB = None
+
+
+def wib_now():
+    """Waktu sekarang zona WIB. Semua penanggalan pipeline pakai ini,
+    bukan waktu sistem (UTC) — cron jalan 06:14 WIB = 23:14 UTC kemarin."""
+    if _WIB:
+        return datetime.datetime.now(_WIB)
+    return datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+
+
+def wib_today():
+    return wib_now().date()
+
+
+class PipelineLock:
+    """File lock biar tidak ada 2 run jalan bareng (jadwal vs manual)."""
+
+    def __init__(self, name="pipeline"):
+        self.path = os.path.join(BASE, f".lock-{name}")
+        self.fh = None
+
+    def __enter__(self):
+        self.fh = open(self.path, "w")
+        try:
+            fcntl.flock(self.fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            self.fh.close()
+            self.fh = None
+            raise RuntimeError("pipeline sedang jalan (lock aktif), batalkan run ini")
+        self.fh.write(str(os.getpid()))
+        self.fh.flush()
+        return self
+
+    def __exit__(self, *a):
+        try:
+            if self.fh:
+                fcntl.flock(self.fh, fcntl.LOCK_UN)
+                self.fh.close()
+        finally:
+            try:
+                os.remove(self.path)
+            except OSError:
+                pass
 
 
 def find_chrome():
