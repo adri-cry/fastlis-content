@@ -29,14 +29,14 @@
     "lab-25.jpg"
   ],
   "today_carousel": [
-    "demo-s1.jpg",
-    "demo-s2.jpg",
-    "demo-s3.jpg",
-    "demo-s4.jpg",
-    "demo-s5.jpg"
+    "lab-16.jpg",
+    "lab-10.jpg",
+    "lab-12.jpg",
+    "lab-18.jpg",
+    "lab-02.jpg"
   ],
   "today_single": [
-    "demo-single.jpg"
+    "lab-16.jpg"
   ],
   "today_video": [
     "lab-06.jpg",
@@ -62,6 +62,13 @@
     "lab-07.jpg",
     "lab-08.jpg",
     "lab-09.jpg",
-    "lab-10.jpg"
+    "lab-10.jpg",
+    "lab-11.jpg",
+    "lab-12.jpg",
+    "lab-13.jpg",
+    "lab-14.jpg",
+    "lab-15.jpg",
+    "lab-16.jpg",
+    "lab-18.jpg"
   ]
 }

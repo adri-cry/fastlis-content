@@ -10,10 +10,9 @@
     background: linear-gradient(160deg, #F2F8FF 0%, #E2EFFE 45%, #D3E6FB 100%); }
   /* soft blobs */
   .blob { position: absolute; z-index: 0; filter: blur(2px); }
-  .b1 { width: 620px; height: 620px; right: -170px; top: -150px; background: #BFE0FF; border-radius: 46% 54% 55% 45%/48% 44% 56% 52%; opacity: .7; }
-  .b2 { width: 520px; height: 520px; left: -160px; bottom: -140px; background: #B9E9EF; border-radius: 55% 45% 44% 56%/52% 55% 45% 48%; opacity: .65; }
-  .b3 { width: 300px; height: 300px; right: 90px; bottom: 260px; background: #D6CFFB; border-radius: 50%; opacity: .45; }
-  .dots { position: absolute; z-index: 0; font-size: 30px; letter-spacing: 10px; color: #0469DC; opacity: .22; }
+  .b1 { width: 620px; height: 620px; right: -170px; top: -150px; background: #BFE0FF; border-radius: 46% 54% 55% 45%/48% 44% 56% 52%; opacity: .5; }
+  .b2 { width: 520px; height: 520px; left: -160px; bottom: -140px; background: #B9E9EF; border-radius: 55% 45% 44% 56%/52% 55% 45% 48%; opacity: .45; }
+  .dots { position: absolute; z-index: 0; font-size: 30px; letter-spacing: 10px; color: #0469DC; opacity: .18; }
 
   .c-top { display: flex; align-items: center; justify-content: space-between; padding: 44px 56px 0 56px; z-index: 2; }
   .logo-pill { display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 999px; padding: 10px 24px 10px 12px;
@@ -34,6 +33,7 @@
   .c-kicker:empty { display: none; }
   .c-title { font-weight: 800; font-size: 72px; line-height: 1.06; letter-spacing: -1.5px; color: #0B2B4F; max-width: 940px; }
   .c-title .hl { background: #FFE9A8; padding: 4px 22px 10px; border-radius: 20px; display: inline-block;
+    line-height: 1.5; margin: 6px 0;
     border: 3px solid rgba(255,255,255,.9);
     box-shadow: 6px 6px 14px rgba(4,105,220,.18), -4px -4px 10px rgba(255,255,255,.9), inset 2px 2px 4px #fff; }
   .c-title .u { text-decoration: underline wavy #0AC0CD 6px; text-underline-offset: 10px; }
@@ -102,15 +102,35 @@
   .v-answer .b2 { background: #BFE0FF; }
   .v-answer .c-kicker { background: #22C55E; color: #fff; }
   .v-answer .c-title { font-size: 68px; }
+
+  /* ===== endcard: slide penutup branded ===== */
+  .c-end { display: none; }
+  .v-endcard .c-mid { display: none; }
+  .v-endcard .c-main { justify-content: center; align-items: center; text-align: center; }
+  .v-endcard .c-kicker { align-self: center; background: #0469DC; color: #fff; }
+  .v-endcard .c-title { font-size: 76px; text-align: center; max-width: 920px; }
+  .v-endcard .c-body { text-align: center; max-width: 760px; font-size: 32px; }
+  .v-endcard .c-end { display: flex; gap: 22px; margin-top: 44px; z-index: 2; }
+  .v-endcard .e-pill { font-size: 30px; font-weight: 800; color: #0B2B4F; background: #fff; border-radius: 999px; padding: 16px 34px;
+    border: 3px solid rgba(255,255,255,.95);
+    box-shadow: 8px 8px 20px rgba(4,105,220,.20), -5px -5px 12px rgba(255,255,255,.9), inset 2px 2px 5px #fff; }
+  .v-endcard .e-pill:empty { display: none; }
+  .v-endcard .e-follow { background: linear-gradient(145deg, #1E7CE8, #0469DC); color: #fff; }
+  .v-endcard .c-swipe { text-align: center; }
+  .c-brand { display: none; }
+  .v-endcard .c-brand { display: flex; align-items: center; gap: 16px; margin-top: 40px; z-index: 2;
+    background: #fff; border-radius: 999px; padding: 12px 36px 12px 14px;
+    border: 3px solid rgba(255,255,255,.95);
+    box-shadow: 10px 10px 24px rgba(4,105,220,.22), -6px -6px 14px rgba(255,255,255,.95); }
+  .v-endcard .c-brand img { width: 64px; height: 64px; border-radius: 50%; }
+  .v-endcard .c-brand span { font-size: 38px; font-weight: 800; color: #0469DC; letter-spacing: -0.5px; }
 </style>
 </head>
 <body>
 <div class="c-wrap __VARIANT__">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
-  <div class="blob b3"></div>
   <div class="dots" style="top:210px;right:60px;">•••<br>•••</div>
-  <div class="dots" style="bottom:230px;left:48px;">•••<br>•••</div>
   <div class="c-top">
     <div class="logo-pill"><img src="../html/fastlis-logo.png"><span>FASTLIS</span></div>
     <div class="c-count">__NUM__</div>
@@ -128,6 +148,12 @@
         <div class="c-cta">__CTA__</div>
       </div>
     </div>
+    <div class="c-end">
+      <div class="e-pill">__STICKER__</div>
+      <div class="e-pill">__NOTE__</div>
+      <div class="e-pill e-follow">__CTA__</div>
+    </div>
+    <div class="c-brand"><img src="../html/fastlis-logo.png"><span>FASTLIS</span></div>
   </div>
   <div class="c-foot">
     <div class="c-swipe">__SWIPE__</div>

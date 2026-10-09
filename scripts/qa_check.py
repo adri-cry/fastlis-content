@@ -67,6 +67,37 @@ for key in ("caption_carousel", "caption_single"):
     if len(v) > 2200:
         issues.append(f"{key}: {len(v)} karakter, melebihi batas IG 2200")
 
+# slide terakhir wajib endcard branded
+slides = J["carousel"]
+if slides and slides[-1].get("variant") != "v-endcard":
+    issues.append(f"slide{len(slides)}: variant harus v-endcard (slide penutup branded)")
+
+# relevansi foto vs topik (pakai data/photo_tags.json)
+import re as _re
+try:
+    _tags = json.load(open(os.path.join(BASE, "data", "photo_tags.json")))
+    _topic_words = set(_re.findall(r"[a-z]+", J.get("topik", "").lower()))
+    for i, sl in enumerate(slides, start=1):
+        if sl.get("variant") == "v-endcard":
+            continue  # foto endcard tidak ditampilkan
+        ph = os.path.basename(sl.get("photo", ""))
+        ptags = set(_tags.get(ph, []))
+        # cek sederhana: ada kata topik yang muncul di tag atau sebaliknya
+        ok = False
+        for w in _topic_words:
+            if len(w) < 4:
+                continue
+            for t in ptags:
+                if w in t.replace(" ", "") or t.replace(" ", "") in w or w in t or t in w:
+                    ok = True
+                    break
+            if ok:
+                break
+        if not ok:
+            issues.append(f"slide{i}: foto {ph} tidak relevan dengan topik (tags: {sorted(ptags)[:5]})")
+except Exception as e:
+    issues.append(f"cek photo_tags gagal: {e}")
+
 print(f"QA: {len(J['carousel'])} carousel + 1 single")
 for w in warns:
     print("WARN:", w)
