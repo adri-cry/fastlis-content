@@ -1,0 +1,136 @@
+{
+ "caption_carousel": "QC harian di lab kamu cuma formalitas? Salah baca chart Levey-Jennings bisa bikin hasil pasien melenceng diam-diam.\n\nGeser buat bedah 3 mitos QC + aturan Westgard yang wajib dihafal (1-3s, 2-2s, R-4s). Save postingan ini biar gampang dibuka pas QC pagi, tag temen lab kamu yang jaga analyzer.\n\n#fastlis #labindonesia #analiskesehatan #patologiklinik #qclab #westgard #ProsedurLab",
+ "caption_single": "1 titik QC lewat 2SD bukan berarti langsung tolak batch. Ingat: 1-2s cuma warning, yang reject itu 1-3s, 2-2s, R-4s.\n\nFastlis catat QC otomatis tiap batch dan tampilkan tren grafiknya, jadi nggak perlu ngitung manual. Komen kalau lab kamu masih catat QC di buku.\n\n#fastlis #labindonesia #qclab #westgard #ProsedurLab",
+ "carousel": [
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "Banyak yang anggap QC harian cuma syarat akreditasi. Padahal salah baca chart = hasil pasien meleset diam-diam.",
+   "caption": "mitos yang masih dipercaya...",
+   "cta": "",
+   "kicker": "Mitos vs Fakta",
+   "note": "3 mitos QC populer",
+   "num": "1/5",
+   "photo": "../html/lab-14.jpg",
+   "prog": "20%",
+   "sticker": "QC cuma formalitas?",
+   "swipe": "save biar nggak lupa &rarr;",
+   "title": "QC itu cuma<br><span class=\"hl\">formalitas?</span>",
+   "variant": "v-cover"
+  },
+  {
+   "badge": "1",
+   "badgeclass": "",
+   "body": "FAKTA: QC harian di analyzer menangkap shift dan drift SEBELUM hasil pasien meleset. Jalan tiap batch, 2 level: normal + patologis.",
+   "caption": "mitos pertama...",
+   "cta": "",
+   "kicker": "Mitos vs Fakta",
+   "note": "2 level, tiap batch",
+   "num": "2/5",
+   "photo": "../html/lab-19.jpg",
+   "prog": "40%",
+   "sticker": "QC kamu jalan tiap batch?",
+   "swipe": "mitos 2 &rarr;",
+   "title": "Hasil keluar =<br><span class=\"hl\">QC aman?</span>",
+   "variant": "v-tilt"
+  },
+  {
+   "badge": "2",
+   "badgeclass": "",
+   "body": "FAKTA: pakai aturan Westgard. 1-2s cuma warning. Tolak batch kalau kena 1-3s, 2-2s, R-4s, atau 4-1s.",
+   "caption": "mitos kedua...",
+   "cta": "",
+   "kicker": "Mitos vs Fakta",
+   "note": "1-3s / 2-2s / R-4s = reject",
+   "num": "3/5",
+   "photo": "../html/demo-qc-chart.png",
+   "prog": "60%",
+   "sticker": "hafalin 4 aturan ini",
+   "swipe": "mitos terakhir &rarr;",
+   "title": "Lewat 2SD =<br><span class=\"hl\">langsung tolak?</span>",
+   "variant": "v-flip"
+  },
+  {
+   "badge": "3",
+   "badgeclass": "",
+   "body": "FAKTA: satu titik tidak berarti apa-apa tanpa tren. Baca grafik Levey-Jennings 7 hari terakhir, catat digital biar gampang diaudit.",
+   "caption": "mitos ketiga...",
+   "cta": "",
+   "kicker": "Mitos vs Fakta",
+   "note": "tren 7 hari > 1 titik",
+   "num": "4/5",
+   "photo": "../html/lab-12.jpg",
+   "prog": "80%",
+   "sticker": "bukumu bisa nunjukin tren?",
+   "swipe": "kesimpulannya &rarr;",
+   "title": "QC cukup<br><span class=\"hl\">dicatat di buku?</span>",
+   "variant": "v-tilt"
+  },
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "QC harian bukan beban, tapi tameng hasil lab kamu. Mulai baca chart dengan benar hari ini.",
+   "caption": "",
+   "cta": "Follow @fastlis",
+   "kicker": "QC Harian",
+   "note": "Bagikan ke tim lab",
+   "num": "5/5",
+   "photo": "../html/lab-22.jpg",
+   "prog": "100%",
+   "sticker": "Simpan postingan ini",
+   "swipe": "",
+   "title": "QC rapi,<br><span class=\"hl\">hasil dipercaya.</span>",
+   "variant": "v-endcard"
+  }
+ ],
+ "date": "2026-10-10",
+ "format": "mitos-vs-fakta",
+ "reels": {
+  "s1": {
+   "h1": "QC cuma<br><span class=\"blue\">formalitas?</span>",
+   "kicker": "Mitos vs Fakta",
+   "sub": "3 mitos QC yang masih dipercaya banyak lab."
+  },
+  "s2": {
+   "h1": "Salah baca chart,<br><span class=\"blue\">hasil meleset.</span>",
+   "kicker": "QC Harian",
+   "sub": "QC harian menangkap error sebelum kena pasien."
+  },
+  "s3": {
+   "desc": "QC jalan setiap batch<br>dengan 2 level kontrol.",
+   "sub": "Normal + patologis, tiap batch",
+   "title": "2 Level QC"
+  },
+  "s4": {
+   "desc": "1-2s cuma warning.<br>Reject kalau 1-3s, 2-2s, R-4s.",
+   "sub": "1-3s, 2-2s, R-4s = reject",
+   "title": "Aturan Westgard"
+  },
+  "s5": {
+   "desc": "Levey-Jennings dibaca<br>sebagai tren, bukan titik.",
+   "sub": "Grafik 7 hari, bukan 1 titik",
+   "title": "Baca Tren"
+  },
+  "s6": {
+   "h1": "QC rapi,<br><span class=\"blue\">hasil dipercaya.</span>",
+   "pills": [
+    "QC Lab",
+    "Westgard",
+    "FASTLIS"
+   ],
+   "sub": "Lab kamu masih catat QC di buku?<br>Ceritakan di komentar."
+  }
+ },
+ "single": {
+  "caption": "aturan westgard",
+  "cta": "fastlis.com",
+  "kicker": "Mitos vs Fakta",
+  "meta": "fastlis.com",
+  "note": "cek tren 7 hari",
+  "photo": "../html/demo-qc-chart.png",
+  "sticker": "save rumusnya",
+  "sub": "Belum tentu. 1-2s cuma warning, reject kalau 1-3s / 2-2s / R-4s.",
+  "title": "1 titik lewat 2SD, langsung tolak batch?"
+ },
+ "topik": "QC harian analyzer + baca grafik Levey-Jennings + aturan Westgard + pencatatan digital"
+}
