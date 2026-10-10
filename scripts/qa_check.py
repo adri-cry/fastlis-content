@@ -82,19 +82,38 @@ try:
             continue  # foto endcard tidak ditampilkan
         ph = os.path.basename(sl.get("photo", ""))
         ptags = set(_tags.get(ph, []))
-        # cek sederhana: ada kata topik yang muncul di tag atau sebaliknya
+        # teks spesifik slide ini (bukan cuma topik global): judul+body+kicker+note
+        slide_text = " ".join([sl.get("title", ""), sl.get("body", ""),
+                               sl.get("kicker", ""), sl.get("note", ""),
+                               sl.get("sticker", ""), J.get("topik", "")])
+        words = set(_re.findall(r"[a-z]+", slide_text.lower()))
+        # tolak foto non-lab untuk konten lab
+        lab_words = ("lab", "qc", "analis", "westgard", "levey", "jennings",
+                     "tabung", "sampel", "reagen", "klinik", "pasien", "patologi",
+                     "analyzer", "mikroskop", "hematologi")
+        if any(t == "bukan foto lab" for t in ptags) and any(lw in words for lw in lab_words):
+            issues.append(f"slide{i}: foto {ph} BUKAN foto lab, tidak cocok untuk konten lab")
+            continue
         ok = False
-        for w in _topic_words:
+        for w in words:
             if len(w) < 4:
                 continue
             for t in ptags:
-                if w in t.replace(" ", "") or t.replace(" ", "") in w or w in t or t in w:
+                tnorm = t.replace(" ", "")
+                if len(tnorm) < 4:
+                    continue
+                # prefix-4 matching: "analis" nyambung ke "analyzer"
+                if w[:4] == tnorm[:4] or w in tnorm or tnorm in w:
                     ok = True
                     break
             if ok:
                 break
         if not ok:
-            issues.append(f"slide{i}: foto {ph} tidak relevan dengan topik (tags: {sorted(ptags)[:5]})")
+            issues.append(f"slide{i}: foto {ph} tidak nyambung dengan isi slide (tags: {sorted(ptags)[:4]})")
+        # badge lingkaran cuma muat angka pendek
+        badge = sl.get("badge", "")
+        if badge and len(badge) > 3:
+            issues.append(f"slide{i}: badge '{badge}' kepanjangan, isi angka saja (mis. '1')")
 except Exception as e:
     issues.append(f"cek photo_tags gagal: {e}")
 
