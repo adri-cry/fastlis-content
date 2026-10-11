@@ -1,0 +1,136 @@
+{
+ "caption_carousel": "Sampel ditolak = ambil ulang, TAT molor, pasien nunggu. Padahal 3 penyebabnya gampang dicegah: label nggak cocok, hemolisis, volume kurang.\n\nGeser buat tips kilatnya + angka yang wajib dihafal (9:1, 21G, H>50). Save postingan ini buat jaga-jaga, tag temen lab kamu yang sering ambil sampel.\n\n#fastlis #labindonesia #analiskesehatan #patologiklinik #preanalitik #ProsedurLab",
+ "caption_single": "60-70% error lab berasal dari pre-analitik, bukan dari analyzernya. Sebelum terima sampel, cek 3 hal: label cocok, tidak hemolisis, volume cukup.\n\nFastLIS bantu catat alasan penolakan tiap sampel biar polanya kelihatan dan nggak keulang. Komen kalau kamu pernah ngalamin sampel ditolak.\n\n#fastlis #labindonesia #preanalitik #analiskesehatan #ProsedurLab",
+ "carousel": [
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "60-70% error lab berasal dari fase pre-analitik.<br>Kenali 3 kriteria penolakan sampel paling sering ini.",
+   "caption": "3 penolakan paling sering...",
+   "cta": "",
+   "kicker": "Tips Praktis",
+   "note": "pre-analitik = 60-70% error",
+   "num": "1/5",
+   "photo": "../html/lab-25.jpg",
+   "prog": "20%",
+   "sticker": "sampel kamu aman?",
+   "swipe": "save buat jaga-jaga &rarr;",
+   "title": "Sampel kamu pernah<br><span class=\"hl\">ditolak lab?</span>",
+   "variant": "v-cover"
+  },
+  {
+   "badge": "1",
+   "badgeclass": "",
+   "body": "Nama + tanggal lahir + nomor RM di tabung harus sama persis dengan data registrasi pasien.<br>Beda 1 huruf pun = tolak, tanpa kecuali.",
+   "caption": "penolakan #1...",
+   "cta": "",
+   "kicker": "Tips Praktis",
+   "note": "nama + Tgl lahir + No. RM",
+   "num": "2/5",
+   "photo": "../html/demo-ui-status.png",
+   "prog": "40%",
+   "sticker": "cek 3 data ini",
+   "swipe": "lanjut &rarr;",
+   "title": "Label nggak cocok<br><span class=\"hl\">ya ditolak aja</span>",
+   "variant": "v-tilt"
+  },
+  {
+   "badge": "2",
+   "badgeclass": "",
+   "body": "Serum merah jelas (indeks H > 50) bikin kalium & LDH naik palsu, laporannya menyesatkan.<br>Pakai jarum 21G, alirkan pelan, jangan kocok tabung.",
+   "caption": "penolakan #2...",
+   "cta": "",
+   "kicker": "Tips Praktis",
+   "note": "H > 50 = tolak",
+   "num": "3/5",
+   "photo": "../html/demo-panic-report.png",
+   "prog": "60%",
+   "sticker": "nilai kritis palsu",
+   "swipe": "satu lagi &rarr;",
+   "title": "Hemolisis bikin<br><span class=\"hl\">nilai kritis palsu</span>",
+   "variant": "v-flip"
+  },
+  {
+   "badge": "3",
+   "badgeclass": "",
+   "body": "Rasio darah:sitrat wajib 9:1, isi tabung sampai garis batas.<br>Volume sampel kurang = hasil PT/APTT ngaco.",
+   "caption": "penolakan #3...",
+   "cta": "",
+   "kicker": "Tips Praktis",
+   "note": "isi sampai garis batas",
+   "num": "4/5",
+   "photo": "../html/lab-18.jpg",
+   "prog": "80%",
+   "sticker": "ingat rasio 9:1",
+   "swipe": "kesimpulannya &rarr;",
+   "title": "Tabung sitrat kurang penuh<br><span class=\"hl\">jangan dipakai</span>",
+   "variant": "v-tilt"
+  },
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "Cek label, cegah hemolisis, penuhi volume. Pre-analitik beres, analis tenang.",
+   "caption": "",
+   "cta": "Follow @fastlis",
+   "kicker": "Sampel Ditolak",
+   "note": "Bagikan ke tim lab",
+   "num": "5/5",
+   "photo": "../html/lab-17.jpg",
+   "prog": "100%",
+   "sticker": "Simpan postingan ini",
+   "swipe": "",
+   "title": "Sampel rapi<br><span class=\"hl\">hasil terpercaya</span>",
+   "variant": "v-endcard"
+  }
+ ],
+ "date": "2026-10-11",
+ "format": "tips praktis",
+ "reels": {
+  "s1": {
+   "h1": "Sampel kamu pernah<br><span class=\"blue\">ditolak lab?</span>",
+   "kicker": "Tips Praktis",
+   "sub": "3 kriteria penolakan sampel paling sering."
+  },
+  "s2": {
+   "h1": "60-70% error lab<br><span class=\"blue\">dari sini.</span>",
+   "kicker": "Pre-analitik",
+   "sub": "Fase pre-analitik, sebelum sampel dianalisis."
+  },
+  "s3": {
+   "desc": "Harus sama persis<br>dengan data pasien.",
+   "sub": "Nama + Tgl lahir + No. RM",
+   "title": "Cek Label"
+  },
+  "s4": {
+   "desc": "Jarum 21G, alirkan pelan,<br>jangan kocok tabung.",
+   "sub": "Indeks H > 50 = tolak",
+   "title": "Cegah Hemolisis"
+  },
+  "s5": {
+   "desc": "Isi tabung sampai garis batas,<br>khusus pemeriksaan koagulasi.",
+   "sub": "Rasio darah:sitrat 9:1",
+   "title": "Penuhi Volume"
+  },
+  "s6": {
+   "h1": "Sampel rapi,<br><span class=\"blue\">hasil dipercaya.</span>",
+   "pills": [
+    "Pre-analitik",
+    "Sampel Lab",
+    "FASTLIS"
+   ],
+   "sub": "Pernah sampel kamu ditolak lab?<br>Ceritakan di komentar."
+  }
+ },
+ "single": {
+  "caption": "cek kilat terima sampel",
+  "cta": "fastlis.com",
+  "kicker": "Tips Praktis",
+  "meta": "fastlis.com",
+  "note": "9:1 / 21G / H>50",
+  "photo": "../html/demo-worklist-filled.png",
+  "sticker": "save rumusnya",
+  "sub": "Label cocok, tidak hemolisis, volume cukup. Pre-analitik = 60-70% error lab.",
+  "title": "Sampel ditolak? Cek 3 hal ini dulu."
+ },
+ "topik": "Sampel ditolak lab: 3 kriteria penolakan paling sering + cara mencegahnya"
+}

@@ -1,136 +1,136 @@
 {
- "caption_carousel": "Sampel ditolak = ambil ulang, TAT molor, pasien nunggu. Padahal 3 penyebabnya gampang dicegah: label nggak cocok, hemolisis, volume kurang.\n\nGeser buat tips kilatnya + angka yang wajib dihafal (9:1, 21G, H>50). Save postingan ini buat jaga-jaga, tag temen lab kamu yang sering ambil sampel.\n\n#fastlis #labindonesia #analiskesehatan #patologiklinik #preanalitik #ProsedurLab",
- "caption_single": "60-70% error lab berasal dari pre-analitik, bukan dari analyzernya. Sebelum terima sampel, cek 3 hal: label cocok, tidak hemolisis, volume cukup.\n\nFastLIS bantu catat alasan penolakan tiap sampel biar polanya kelihatan dan nggak keulang. Komen kalau kamu pernah ngalamin sampel ditolak.\n\n#fastlis #labindonesia #preanalitik #analiskesehatan #ProsedurLab",
+ "caption_carousel": "Kuis kilat buat analis: tabung biru, kuning, ungu, mana yang diambil duluan? 🤔\n\nJawabannya di slide 5, plus urutan CLSI lengkap dan angka yang wajib dihafal (9:1, 1,5 mg/mL, 8-10x invert).\n\nSave postingan ini buat contekan di ruang pengambilan, tag temen analis kamu buat ikutan jawab.\n\n#fastlis #labindonesia #analiskesehatan #patologiklinik #preanalitik #ProsedurLab",
+ "caption_single": "Urutan pengambilan tabung darah (order of draw) versi CLSI: biru → kuning/merah → hijau → ungu → abu-abu. Salah urutan = carryover antikoagulan = hasil ngaco.\n\nAngka kuncinya: rasio darah:sitrat 9:1, EDTA 1,5 mg/mL, invert 8-10x pelan.\n\nKomen, jawaban kuis kamu bener atau nggak 👇\n\n#fastlis #labindonesia #preanalitik #analiskesehatan #ProsedurLab",
  "carousel": [
   {
    "badge": "",
    "badgeclass": "",
-   "body": "60-70% error lab berasal dari fase pre-analitik.<br>Kenali 3 kriteria penolakan sampel paling sering ini.",
-   "caption": "3 penolakan paling sering...",
+   "body": "Kuis kilat buat analis: di meja ada tabung tutup biru, kuning, dan ungu.<br>Urutan pengambilan yang benar yang mana? Tebak dulu, jawabannya di slide 5.",
+   "caption": "kuis: urutan tabung...",
    "cta": "",
-   "kicker": "Tips Praktis",
-   "note": "pre-analitik = 60-70% error",
+   "kicker": "Kuis Lab",
+   "note": "biru, kuning, ungu?",
    "num": "1/5",
-   "photo": "../html/lab-25.jpg",
+   "photo": "../html/lab-08.jpg",
    "prog": "20%",
-   "sticker": "sampel kamu aman?",
-   "swipe": "save buat jaga-jaga &rarr;",
-   "title": "Sampel kamu pernah<br><span class=\"hl\">ditolak lab?</span>",
+   "sticker": "tebak dulu gih",
+   "swipe": "jawab di slide 5 &rarr;",
+   "title": "Ada 3 tabung di meja,<br><span class=\"hl\">mana yang duluan?</span>",
    "variant": "v-cover"
   },
   {
-   "badge": "1",
+   "badge": "",
    "badgeclass": "",
-   "body": "Nama + tanggal lahir + nomor RM di tabung harus sama persis dengan data registrasi pasien.<br>Beda 1 huruf pun = tolak, tanpa kecuali.",
-   "caption": "penolakan #1...",
+   "body": "Antikoagulan tabung pertama bisa kebawa ke tabung berikutnya (carryover).<br>Contoh: EDTA dari tabung ungu nyasar ke tabung kuning, kalium naik palsu dan kalsium turun.",
+   "caption": "kenapa urutan penting...",
    "cta": "",
-   "kicker": "Tips Praktis",
-   "note": "nama + Tgl lahir + No. RM",
+   "kicker": "Kuis Lab",
+   "note": "carryover = kontaminasi",
    "num": "2/5",
-   "photo": "../html/demo-ui-status.png",
+   "photo": "../html/lab-03.jpg",
    "prog": "40%",
-   "sticker": "cek 3 data ini",
-   "swipe": "lanjut &rarr;",
-   "title": "Label nggak cocok<br><span class=\"hl\">ya ditolak aja</span>",
-   "variant": "v-tilt"
-  },
-  {
-   "badge": "2",
-   "badgeclass": "",
-   "body": "Serum merah jelas (indeks H > 50) bikin kalium & LDH naik palsu, laporannya menyesatkan.<br>Pakai jarum 21G, alirkan pelan, jangan kocok tabung.",
-   "caption": "penolakan #2...",
-   "cta": "",
-   "kicker": "Tips Praktis",
-   "note": "H > 50 = tolak",
-   "num": "3/5",
-   "photo": "../html/demo-panic-report.png",
-   "prog": "60%",
-   "sticker": "nilai kritis palsu",
-   "swipe": "satu lagi &rarr;",
-   "title": "Hemolisis bikin<br><span class=\"hl\">nilai kritis palsu</span>",
-   "variant": "v-flip"
-  },
-  {
-   "badge": "3",
-   "badgeclass": "",
-   "body": "Rasio darah:sitrat wajib 9:1, isi tabung sampai garis batas.<br>Volume sampel kurang = hasil PT/APTT ngaco.",
-   "caption": "penolakan #3...",
-   "cta": "",
-   "kicker": "Tips Praktis",
-   "note": "isi sampai garis batas",
-   "num": "4/5",
-   "photo": "../html/lab-18.jpg",
-   "prog": "80%",
-   "sticker": "ingat rasio 9:1",
-   "swipe": "kesimpulannya &rarr;",
-   "title": "Tabung sitrat kurang penuh<br><span class=\"hl\">jangan dipakai</span>",
+   "sticker": "hasil ikut ngaco",
+   "swipe": "urutannya &rarr;",
+   "title": "Salah urutan<br><span class=\"hl\">hasil ikut salah</span>",
    "variant": "v-tilt"
   },
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Cek label, cegah hemolisis, penuhi volume. Pre-analitik beres, analis tenang.",
+   "body": "Urutan CLSI, hafalkan:<br>1. Biru — sitrat (koagulasi)<br>2. Kuning/merah — serum<br>3. Hijau — heparin<br>4. Ungu — EDTA<br>5. Abu-abu — NaF (glukosa)",
+   "caption": "urutan CLSI...",
+   "cta": "",
+   "kicker": "Kuis Lab",
+   "note": "biru-kuning-hijau-ungu-abu",
+   "num": "3/5",
+   "photo": "../html/lab-18.jpg",
+   "prog": "60%",
+   "sticker": "screenshot ini",
+   "swipe": "angka pentingnya &rarr;",
+   "title": "Urutan ambil tabung<br><span class=\"hl\">yang benar itu gini</span>",
+   "variant": "v-flip"
+  },
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "Tabung biru: rasio darah:sitrat wajib 9:1, isi sampai garis batas.<br>EDTA: 1,5 mg per mL darah, invert pelan 8-10 kali. Sampel kurang penuh atau dikocok = tolak.",
+   "caption": "rasio & volume...",
+   "cta": "",
+   "kicker": "Kuis Lab",
+   "note": "9:1, 1,5 mg/mL, 8-10x",
+   "num": "4/5",
+   "photo": "../html/lab-25.jpg",
+   "prog": "80%",
+   "sticker": "ingat angkanya",
+   "swipe": "jawabannya &rarr;",
+   "title": "Rasio 9:1 itu<br><span class=\"hl\">nggak bisa ditawar</span>",
+   "variant": "v-tilt"
+  },
+  {
+   "badge": "",
+   "badgeclass": "",
+   "body": "Kuis terjawab: biru dulu, lalu kuning, terakhir ungu.<br>Hafalkan urutannya, pre-analitik aman, hasil bisa dipercaya.",
    "caption": "",
    "cta": "Follow @fastlis",
-   "kicker": "Sampel Ditolak",
+   "kicker": "Kuis Lab",
    "note": "Bagikan ke tim lab",
    "num": "5/5",
-   "photo": "../html/lab-17.jpg",
+   "photo": "../html/lab-22.jpg",
    "prog": "100%",
    "sticker": "Simpan postingan ini",
    "swipe": "",
-   "title": "Sampel rapi<br><span class=\"hl\">hasil terpercaya</span>",
+   "title": "Jawabannya: biru,<br><span class=\"hl\">kuning, ungu</span>",
    "variant": "v-endcard"
   }
  ],
- "date": "2026-10-11",
- "format": "tips praktis",
+ "date": "2026-10-12",
+ "format": "kuis (jawaban di slide 5)",
  "reels": {
   "s1": {
-   "h1": "Sampel kamu pernah<br><span class=\"blue\">ditolak lab?</span>",
-   "kicker": "Tips Praktis",
-   "sub": "3 kriteria penolakan sampel paling sering."
+   "h1": "Ada 3 tabung di meja,<br><span class=\"blue\">mana yang duluan?</span>",
+   "kicker": "Kuis Lab",
+   "sub": "Tebak dulu, jawabannya di akhir video."
   },
   "s2": {
-   "h1": "60-70% error lab<br><span class=\"blue\">dari sini.</span>",
-   "kicker": "Pre-analitik",
-   "sub": "Fase pre-analitik, sebelum sampel dianalisis."
+   "h1": "Salah urutan,<br><span class=\"blue\">hasil ikut salah.</span>",
+   "kicker": "Kenapa Penting",
+   "sub": "Antikoagulan bisa kebawa ke tabung berikutnya."
   },
   "s3": {
-   "desc": "Harus sama persis<br>dengan data pasien.",
-   "sub": "Nama + Tgl lahir + No. RM",
-   "title": "Cek Label"
+   "desc": "Biru (sitrat) → kuning (serum)<br>→ hijau → ungu (EDTA) → abu-abu.",
+   "sub": "Versi CLSI",
+   "title": "Urutan yang Benar"
   },
   "s4": {
-   "desc": "Jarum 21G, alirkan pelan,<br>jangan kocok tabung.",
-   "sub": "Indeks H > 50 = tolak",
-   "title": "Cegah Hemolisis"
+   "desc": "Darah:sitrat harus 9:1.<br>Kurang penuh = tolak.",
+   "sub": "Tabung biru wajib penuh",
+   "title": "Rasio 9:1"
   },
   "s5": {
-   "desc": "Isi tabung sampai garis batas,<br>khusus pemeriksaan koagulasi.",
-   "sub": "Rasio darah:sitrat 9:1",
-   "title": "Penuhi Volume"
+   "desc": "EDTA: 1,5 mg per mL darah.<br>Dikocok = hemolisis.",
+   "sub": "Invert 8-10x, pelan",
+   "title": "Jangan Kocok Tabung"
   },
   "s6": {
-   "h1": "Sampel rapi,<br><span class=\"blue\">hasil dipercaya.</span>",
+   "h1": "Jawaban: biru,<br><span class=\"blue\">kuning, ungu.</span>",
    "pills": [
+    "Order of Draw",
     "Pre-analitik",
-    "Sampel Lab",
     "FASTLIS"
    ],
-   "sub": "Pernah sampel kamu ditolak lab?<br>Ceritakan di komentar."
+   "sub": "Jawabanmu bener?<br>Tulis di komentar."
   }
  },
  "single": {
-  "caption": "cek kilat terima sampel",
+  "caption": "contekan order of draw",
   "cta": "fastlis.com",
-  "kicker": "Tips Praktis",
+  "kicker": "Kuis Lab",
   "meta": "fastlis.com",
-  "note": "9:1 / 21G / H>50",
-  "photo": "../html/demo-worklist-filled.png",
-  "sticker": "save rumusnya",
-  "sub": "Label cocok, tidak hemolisis, volume cukup. Pre-analitik = 60-70% error lab.",
-  "title": "Sampel ditolak? Cek 3 hal ini dulu."
+  "note": "9:1 / 1,5 mg/mL / 8-10x",
+  "photo": "../html/lab-14.jpg",
+  "sticker": "save contekan ini",
+  "sub": "Order of draw CLSI + rasio 9:1 + invert 8-10x pelan. Salah urutan, hasil ikut salah.",
+  "title": "Tabung biru, kuning, ungu: mana duluan?"
  },
- "topik": "Sampel ditolak lab: 3 kriteria penolakan paling sering + cara mencegahnya"
+ "topik": "Urutan pengambilan tabung darah (order of draw) + rasio darah:antikoagulan + volume minimal"
 }
