@@ -19,8 +19,9 @@
   .header .sub{font-size:14px;color:rgba(255,255,255,.78);font-weight:600}
   .header.dark .wm{color:#0B1019;text-shadow:none}
   .header.dark .sub{color:#64748B}
-  .hero{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:110px 64px 64px;z-index:2}
-  .hero.bottom{justify-content:flex-end;padding-bottom:64px}
+  .hero{position:absolute;inset:0;display:flex;flex-direction:column;padding:110px 64px 64px;z-index:2}
+  .hero>*:first-child{margin-top:auto}
+  .hero>*:last-child{margin-bottom:auto}
   .kicker{display:inline-block;font-size:19px;font-weight:700;letter-spacing:3px;color:#0469DC;background:#E1FAFE;padding:10px 20px;border-radius:999px;align-self:flex-start}
   .kicker.dark{background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(8px)}
   h1{font-size:82px;line-height:0.96;font-weight:800;letter-spacing:-2.5px;color:#fff;margin-top:20px;text-shadow:0 4px 24px rgba(0,0,0,.45)}
@@ -38,19 +39,19 @@
   .pill{font-size:18px;font-weight:700;color:#0469DC;background:#E1FAFE;border-radius:999px;padding:10px 16px}
   .cta-btn{display:inline-block;margin-top:22px;font-size:24px;font-weight:800;color:#fff;background:#0469DC;padding:18px 36px;border-radius:999px;align-self:flex-start;box-shadow:0 12px 32px rgba(4,105,220,.35)}
   .dash-wrap{border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.14);margin-top:22px}
-  .dash-wrap img{width:100%;display:block}
+  .dash-wrap img{width:100%;height:560px;object-fit:cover;display:block}
 </style>
 </head>
 <body>
 <div id="root" data-composition-id="main" data-start="0" data-duration="35" data-width="1080" data-height="1920">
   <div id="s1" class="clip" data-start="0" data-duration="6">
-    <img class="bg" src="assets/lab-06.jpg" />
+    <img class="bg" src="assets/lab-08.jpg" />
     <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(4,12,30,.80) 58%, rgba(4,12,30,.96) 100%);"></div>
     <div class="topbar"></div>
     <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
     <div class="hero">
       <span class="kicker dark" id="s1-k">Tips Praktis</span>
-      <h1 id="s1-h1">Sampel ditolak,<br><span class="blue">kerjaan dobel.</span></span></h1>
+      <h1 id="s1-h1">Sampel kamu pernah<br><span class="blue">ditolak lab?</span></h1>
       <div class="subtext" id="s1-sub">3 kriteria penolakan sampel paling sering.</div>
     </div>
   </div>
@@ -59,14 +60,14 @@
     <div class="header dark"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
     <div class="hero">
       <span class="kicker" id="s2-k">Pre-analitik</span>
-      <h1 class="dark" id="s2-h1">60-70% error lab<br><span class="blue">dari sini.</span></span></h1>
+      <h1 class="dark" id="s2-h1">60-70% error lab<br><span class="blue">dari sini.</span></h1>
       <div class="subtext dark" id="s2-sub">Fase pre-analitik, sebelum sampel dianalisis.</div>
       <div class="dash-wrap" id="s2-dash"><img src="assets/lab-10.jpg" /></div>
     </div>
   </div>
   <div id="s3" class="clip" data-start="12" data-duration="6">
     <img class="bg" src="assets/lab-07.jpg" />
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.55) 0%, rgba(7,18,40,.72) 100%);"></div>
     <div class="topbar"></div>
     <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
     <div class="hero">
@@ -78,7 +79,7 @@
   </div>
   <div id="s4" class="clip" data-start="18" data-duration="6">
     <img class="bg" src="assets/lab-08.jpg" />
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.55) 0%, rgba(7,18,40,.72) 100%);"></div>
     <div class="topbar"></div>
     <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
     <div class="hero">
@@ -89,8 +90,8 @@
     </div>
   </div>
   <div id="s5" class="clip" data-start="24" data-duration="6">
-    <img class="bg" src="assets/lab-09.jpg" />
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.88) 0%, rgba(7,18,40,.93) 100%);"></div>
+    <img class="bg" src="assets/lab-18.jpg" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,18,40,.55) 0%, rgba(7,18,40,.72) 100%);"></div>
     <div class="topbar"></div>
     <div class="header"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
     <div class="hero">
@@ -103,11 +104,11 @@
   <div id="s6" class="clip" data-start="30" data-duration="5" style="background:#FBFCFD">
     <div class="topbar"></div>
     <div class="header dark"><img src="assets/fastlis-logo.png"><div><div class="wm">FASTLIS</div><div class="sub">Laboratory Information System</div></div></div>
-    <div class="hero bottom">
-      <h1 class="dark" id="s6-h1">Sampel rapi,<br><span class="blue">hasil dipercaya.</span></span></h1>
+    <div class="hero">
+      <h1 class="dark" id="s6-h1">Sampel rapi,<br><span class="blue">hasil dipercaya.</span></h1>
       <div class="subtext dark" id="s6-sub">Pernah sampel kamu ditolak lab?<br>Ceritakan di komentar.</div>
       <span class="cta-btn" id="s6-cta">fastlis.com &nbsp;→</span>
-      <div class="card" id="s6-card"><div class="pill-row"><span class="pill">Pre-analitik</span><span class="pill">Sampel Lab</span><span class="pill">FASTLIS</span></div></span><span class="pill">Hasil Kritis</span><span class="pill">FASTLIS</span></div></div>
+      <div class="card" id="s6-card"><div class="pill-row"><span class="pill">Pre-analitik</span><span class="pill">Sampel Lab</span><span class="pill">FASTLIS</span></div></div>
     </div>
   </div>
 </div>

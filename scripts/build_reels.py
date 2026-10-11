@@ -26,14 +26,21 @@ OUT = os.path.join(BASE, "reels", "index.html")
 
 
 def set_inner(html, eid, new_inner):
-    """Ganti innerHTML elemen ber-id eid. Return (html_baru, ketemu)."""
-    pat = re.compile(
-        r'(<[^>]*\bid="' + re.escape(eid) + r'"[^>]*>)(.*?)(</[^>]+>)',
-        re.DOTALL)
-    m = pat.search(html)
+    """Ganti innerHTML elemen ber-id eid (tag-aware: hitung nesting tag yang sama)."""
+    m = re.search(r'<(\w+)[^>]*\bid="' + re.escape(eid) + r'"[^>]*>', html)
     if not m:
         return html, False
-    return html[:m.start(2)] + new_inner + html[m.end(2):], True
+    tag = m.group(1)
+    start = m.end()
+    depth, pos, mm = 1, start, None
+    pat = re.compile(r'<(/?)' + tag + r'\b[^>]*>', re.IGNORECASE)
+    while depth > 0:
+        mm = pat.search(html, pos)
+        if not mm:
+            return html, False
+        depth += -1 if mm.group(1) == '/' else 1
+        pos = mm.end()
+    return html[:start] + new_inner + html[mm.start():], True
 
 
 def set_attr(html, eid, attr, val):
