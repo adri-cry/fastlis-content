@@ -64,6 +64,7 @@ def main():
         d = history[-1]["date"]
         rd = os.path.join(RENDERS, d)
         slides = []
+        single = None
         if os.path.isdir(rd):
             for i in range(1, 6):
                 p = os.path.join(rd, f"slide{i}.png")
