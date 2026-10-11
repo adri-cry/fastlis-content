@@ -41,10 +41,8 @@
     border: 3px solid rgba(255,255,255,.95);
     box-shadow: 12px 12px 28px rgba(4,105,220,.22), -8px -8px 20px rgba(255,255,255,.95), inset 3px 3px 8px #fff, inset -5px -5px 12px rgba(4,105,220,.10); }
   .s-photo img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 26px; }
-  .s-cap { position: absolute; left: 30px; bottom: 26px; z-index: 3; font-family: 'Poppins', sans-serif; font-style: italic; font-size: 30px; font-weight: 800; color: #0B2B4F; background: rgba(255,255,255,.95);
-    border-radius: 16px; padding: 2px 18px; border: 2px solid #fff;
-    box-shadow: 5px 5px 12px rgba(4,105,220,.25), inset 1px 1px 3px #fff; }
-  .s-cap:empty { display: none; }
+  .b-wrap.shot .s-photo { flex: none; height: 430px; align-self: center; }
+  .b-wrap.shot .s-photo img { object-fit: contain; background: #fff; }
   .s-side { flex: .9; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
   .s-sticker { align-self: flex-start; font-family: 'Poppins', sans-serif; font-style: italic; font-size: 31px; font-weight: 800; color: #0B2B4F; background: #fff;
     border-radius: 999px; padding: 4px 24px;
@@ -66,7 +64,7 @@
 </style>
 </head>
 <body>
-<div class="b-wrap">
+<div class="b-wrap __SHOTCLASS__">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
   <div class="dots" style="top:210px;right:60px;">•••<br>•••</div>
@@ -81,7 +79,7 @@
     <div class="s-sub">__SUB__</div>
     <div class="s-note">__NOTE__</div>
     <div class="s-mid">
-      <div class="s-photo"><img src="__PHOTO__"><div class="s-cap">__CAPTION__</div></div>
+      <div class="s-photo"><img src="__PHOTO__"></div>
       <div class="s-side">
         <div class="s-sticker">__STICKER__</div>
         <div class="s-cta">__CTA__</div>

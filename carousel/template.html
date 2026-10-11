@@ -47,6 +47,9 @@
     border: 3px solid rgba(255,255,255,.95);
     box-shadow: 12px 12px 28px rgba(4,105,220,.22), -8px -8px 20px rgba(255,255,255,.95), inset 3px 3px 8px #fff, inset -5px -5px 12px rgba(4,105,220,.10); }
   .c-photo img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 26px; }
+  .c-photo img { object-fit: cover; }
+  .c-wrap.shot .c-photo { height: 430px; align-self: center; }
+  .c-wrap.shot .c-photo img { object-fit: contain; background: #fff; }
 
   .c-side { flex: .85; display: flex; flex-direction: column; justify-content: flex-start; gap: 16px; min-width: 0; padding-top: 4px; }
   .c-badge { width: 116px; height: 116px; border-radius: 50%; background: linear-gradient(145deg, #2B8FFF, #0469DC); color: #fff;
@@ -122,7 +125,7 @@
 </style>
 </head>
 <body>
-<div class="c-wrap __VARIANT__">
+<div class="c-wrap __VARIANT__ __SHOTCLASS__">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
   <div class="dots" style="top:210px;right:60px;">•••<br>•••</div>

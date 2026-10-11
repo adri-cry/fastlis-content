@@ -7,6 +7,7 @@
   --screenshot (pernah gagal diam-diam = false positive).
 """
 import datetime
+import json
 import fcntl
 import os
 import shutil
@@ -128,3 +129,17 @@ def screenshot(html_path, out_path, width=1080, height=1350, min_bytes=50000):
     except Exception as e:
         print(f"screenshot gagal: {e}")
         return False
+
+
+_screen_tags = None
+
+def is_screenshot(photo_path):
+    """True bila foto adalah screenshot UI (tag 'screenshot' di photo_tags.json)."""
+    global _screen_tags
+    if _screen_tags is None:
+        try:
+            _screen_tags = json.load(open(os.path.join(BASE, "data", "photo_tags.json")))
+        except Exception:
+            _screen_tags = {}
+    import json as _j  # noqa
+    return "screenshot" in _screen_tags.get(os.path.basename(photo_path or ""), [])
