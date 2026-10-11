@@ -5,7 +5,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import BASE, screenshot
+from _common import BASE, screenshot, is_screenshot
 
 J = json.load(open(f"{BASE}/content/hari-ini.json"))
 TPL = open(f"{BASE}/single/template.html").read()
@@ -24,6 +24,7 @@ mapping = {
 h = TPL
 for k, v in mapping.items():
     h = h.replace(k, str(v))
+h = h.replace("__SHOTCLASS__", "shot" if is_screenshot(c.get("photo", "")) else "")
 html = f"{BASE}/single/_post.html"
 out = f"{BASE}/single/single-post.png"
 open(html, "w").write(h)

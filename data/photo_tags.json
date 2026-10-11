@@ -10,14 +10,16 @@
   "dashboard",
   "lis",
   "menu",
-  "sistem"
+  "sistem",
+  "screenshot"
  ],
  "demo-panic-report.png": [
   "panic",
   "nilai kritis",
   "laporan",
   "qc",
-  "kritis"
+  "kritis",
+  "screenshot"
  ],
  "demo-qc-chart.png": [
   "qc",
@@ -25,7 +27,8 @@
   "levey-jennings",
   "westgard",
   "kendali mutu",
-  "grafik"
+  "grafik",
+  "screenshot"
  ],
  "demo-s1.jpg": [
   "hasil",
@@ -66,33 +69,39 @@
   "validasi",
   "flag",
   "autovalidasi",
-  "hasil"
+  "hasil",
+  "screenshot"
  ],
  "demo-ui-status.png": [
   "pasien",
   "status",
   "registrasi",
-  "bpjs"
+  "bpjs",
+  "screenshot"
  ],
  "demo-ui-toast.png": [
   "notifikasi",
-  "sistem"
+  "sistem",
+  "screenshot"
  ],
  "demo-worklist-filled.png": [
   "worklist",
   "daftar kerja",
   "antrian",
-  "sampel"
+  "sampel",
+  "screenshot"
  ],
  "demo-worklist.png": [
   "worklist",
   "daftar kerja",
-  "sampel"
+  "sampel",
+  "screenshot"
  ],
  "demo-workstation.png": [
   "workstation",
   "alat",
-  "monitor"
+  "monitor",
+  "screenshot"
  ],
  "lab-01.jpg": [
   "analis",

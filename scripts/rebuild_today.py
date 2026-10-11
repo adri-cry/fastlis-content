@@ -5,7 +5,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import BASE, screenshot_batch
+from _common import BASE, screenshot_batch, is_screenshot
 
 J = json.load(open(f"{BASE}/content/hari-ini.json"))
 TPL = open(f"{BASE}/carousel/template.html").read()
@@ -15,6 +15,7 @@ for i, s in enumerate(slides, start=1):
     h = TPL
     for k, v in s.items():
         h = h.replace("__" + k.upper() + "__", str(v))
+    h = h.replace("__SHOTCLASS__", "shot" if is_screenshot(s.get("photo", "")) else "")
     html = f"{BASE}/carousel/_slide{i}.html"
     open(html, "w").write(h)
 

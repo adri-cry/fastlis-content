@@ -10,7 +10,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import BASE, screenshot
+from _common import BASE, screenshot, is_screenshot
 
 
 def main():
@@ -36,6 +36,7 @@ def main():
         h = TPL
         for k, v in mapping.items():
             h = h.replace(k, str(v))
+        h = h.replace("__SHOTCLASS__", "shot" if is_screenshot(c.get("photo", "")) else "")
         html, out = f"{BASE}/single/_preview.html", f"{BASE}/single/single-post.png"
     else:
         try:
@@ -49,6 +50,7 @@ def main():
         h = TPL
         for k, v in s.items():
             h = h.replace("__" + k.upper() + "__", str(v))
+        h = h.replace("__SHOTCLASS__", "shot" if is_screenshot(s.get("photo", "")) else "")
         html, out = f"{BASE}/carousel/_preview.html", f"{BASE}/carousel/slide{i}.png"
     open(html, "w").write(h)
     ok = screenshot(html, out)
