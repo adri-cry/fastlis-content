@@ -15,7 +15,7 @@
    "prog": "20%",
    "sticker": "sampel kamu aman?",
    "swipe": "save buat jaga-jaga &rarr;",
-   "title": "Sampel ditolak <span class=\"hl\">bikin kerjaan dobel</span>",
+   "title": "Sampel ditolak<br><span class=\"hl\">bikin kerjaan dobel</span>",
    "variant": "v-cover"
   },
   {
@@ -31,7 +31,7 @@
    "prog": "40%",
    "sticker": "cek 3 data ini",
    "swipe": "lanjut &rarr;",
-   "title": "Label nggak cocok <span class=\"hl\">ya ditolak aja</span>",
+   "title": "Label nggak cocok<br><span class=\"hl\">ya ditolak aja</span>",
    "variant": "v-tilt"
   },
   {
@@ -47,7 +47,7 @@
    "prog": "60%",
    "sticker": "nilai kritis palsu",
    "swipe": "satu lagi &rarr;",
-   "title": "Hemolisis bikin <span class=\"hl\">nilai kritis palsu</span>",
+   "title": "Hemolisis bikin<br><span class=\"hl\">nilai kritis palsu</span>",
    "variant": "v-flip"
   },
   {
@@ -63,7 +63,7 @@
    "prog": "80%",
    "sticker": "ingat rasio 9:1",
    "swipe": "kesimpulannya &rarr;",
-   "title": "Tabung sitrat kurang penuh <span class=\"hl\">jangan dipakai</span>",
+   "title": "Tabung sitrat kurang penuh<br><span class=\"hl\">jangan dipakai</span>",
    "variant": "v-tilt"
   },
   {
@@ -79,7 +79,7 @@
    "prog": "100%",
    "sticker": "Simpan postingan ini",
    "swipe": "",
-   "title": "Sampel rapi <span class=\"hl\">hasil terpercaya</span>",
+   "title": "Sampel rapi<br><span class=\"hl\">hasil terpercaya</span>",
    "variant": "v-endcard"
   }
  ],
