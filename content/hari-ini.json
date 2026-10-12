@@ -1,136 +1,136 @@
 {
- "caption_carousel": "Kuis kilat buat analis: tabung biru, kuning, ungu, mana yang diambil duluan? 🤔\n\nJawabannya di slide 5, plus urutan CLSI lengkap dan angka yang wajib dihafal (9:1, 1,5 mg/mL, 8-10x invert).\n\nSave postingan ini buat contekan di ruang pengambilan, tag temen analis kamu buat ikutan jawab.\n\n#fastlis #labindonesia #analiskesehatan #patologiklinik #preanalitik #ProsedurLab",
- "caption_single": "Urutan pengambilan tabung darah (order of draw) versi CLSI: biru → kuning/merah → hijau → ungu → abu-abu. Salah urutan = carryover antikoagulan = hasil ngaco.\n\nAngka kuncinya: rasio darah:sitrat 9:1, EDTA 1,5 mg/mL, invert 8-10x pelan.\n\nKomen, jawaban kuis kamu bener atau nggak 👇\n\n#fastlis #labindonesia #preanalitik #analiskesehatan #ProsedurLab",
+ "caption_carousel": "Sebelum ngomongin analyzer canggih, beresin dulu yang paling basic: identifikasi pasien.\n\n2 identifier wajib (nama + tanggal lahir), label ditempel di samping pasien, cek 3 titik sebelum tusuk.\n\nSave postingan ini, kirim ke tim phlebotomy biar nggak ada lagi sampel ketuker.\n\n#fastlis #labindonesia #analiskesehatan #preanalitik #patologiklinik #laboratorium",
+ "caption_single": "Contekan cepat identifikasi pasien: nama lengkap + tanggal lahir, cocokkan di gelang, form, dan label.\n\nLabel ditempel di samping pasien, bukan di meja.\n\nSave biar nggak lupa, tag temen lab kamu yang bagian pengambilan sampel.\n\n#fastlis #labindonesia #analiskesehatan #preanalitik #laboratorium",
  "carousel": [
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Kuis kilat buat analis: di meja ada tabung tutup biru, kuning, dan ungu.<br>Urutan pengambilan yang benar yang mana? Tebak dulu, jawabannya di slide 5.",
-   "caption": "kuis: urutan tabung...",
+   "body": "Sebelum ngomongin analyzer canggih, ada masalah yang jauh lebih basic: sampel pasien yang tertukar. Semua berawal dari identifikasi yang asal-asalan.",
+   "caption": "2 identifier...",
    "cta": "",
-   "kicker": "Kuis Lab",
-   "note": "biru, kuning, ungu?",
+   "kicker": "Pre-analitik",
+   "note": "",
    "num": "1/5",
-   "photo": "../html/lab-08.jpg",
+   "photo": "../html/lab-15.jpg",
    "prog": "20%",
-   "sticker": "tebak dulu gih",
-   "swipe": "jawab di slide 5 &rarr;",
-   "title": "Ada 3 tabung di meja,<br><span class=\"hl\">mana yang duluan?</span>",
+   "sticker": "",
+   "swipe": "lihat bedanya &rarr;",
+   "title": "Sampel pasien kamu<br><span class=\"hl\">pernah ketuker?</span>",
    "variant": "v-cover"
   },
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Antikoagulan tabung pertama bisa kebawa ke tabung berikutnya (carryover).<br>Contoh: EDTA dari tabung ungu nyasar ke tabung kuning, kalium naik palsu dan kalsium turun.",
-   "caption": "kenapa urutan penting...",
+   "body": "BEFORE: analis manggil \"Bapak siapa?\", pasien cuma angguk-angguk, tabung langsung dilabel di meja. Kalau ada dua pasien nama sama di hari yang sama... ya sudah, tinggal berdoa.",
+   "caption": "panggil nama doang...",
    "cta": "",
-   "kicker": "Kuis Lab",
-   "note": "carryover = kontaminasi",
+   "kicker": "Pre-analitik",
+   "note": "",
    "num": "2/5",
-   "photo": "../html/lab-03.jpg",
+   "photo": "../html/lab-01.jpg",
    "prog": "40%",
-   "sticker": "hasil ikut ngaco",
-   "swipe": "urutannya &rarr;",
-   "title": "Salah urutan<br><span class=\"hl\">hasil ikut salah</span>",
+   "sticker": "",
+   "swipe": "terus solusinya apa &rarr;",
+   "title": "Dulu panggil nama,<br><span class=\"hl\">langsung tusuk aja</span>",
    "variant": "v-tilt"
   },
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Urutan CLSI, hafalkan:<br>1. Biru — sitrat (koagulasi)<br>2. Kuning/merah — serum<br>3. Hijau — heparin<br>4. Ungu — EDTA<br>5. Abu-abu — NaF (glukosa)",
-   "caption": "urutan CLSI...",
+   "body": "AFTER: scan gelang pasien, LIS yang mencocokkan dengan order. Nama, tanggal lahir, dan no. RM dicek otomatis sebelum tabung dibuka. Beda satu huruf, sistem nolak lanjut.",
+   "caption": "scan barcode di bedside...",
    "cta": "",
-   "kicker": "Kuis Lab",
-   "note": "biru-kuning-hijau-ungu-abu",
+   "kicker": "Pre-analitik",
+   "note": "",
    "num": "3/5",
-   "photo": "../html/lab-18.jpg",
+   "photo": "../html/lab-05.jpg",
    "prog": "60%",
-   "sticker": "screenshot ini",
-   "swipe": "angka pentingnya &rarr;",
-   "title": "Urutan ambil tabung<br><span class=\"hl\">yang benar itu gini</span>",
+   "sticker": "",
+   "swipe": "catat aturannya &rarr;",
+   "title": "Sekarang scan barcode<br><span class=\"hl\">di samping pasien</span>",
    "variant": "v-flip"
   },
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Tabung biru: rasio darah:sitrat wajib 9:1, isi sampai garis batas.<br>EDTA: 1,5 mg per mL darah, invert pelan 8-10 kali. Sampel kurang penuh atau dikocok = tolak.",
-   "caption": "rasio & volume...",
+   "body": "SAVEABLE: minimal 2 identifier wajib = 1) nama lengkap, 2) tanggal lahir (atau no. RM). Label ditempel di samping pasien, SEBELUM pengambilan. Catat dan cek 3 titik: gelang pasien, form permintaan, label tabung. Ketiganya wajib sama persis.",
+   "caption": "2 identifier + 3 titik cek...",
    "cta": "",
-   "kicker": "Kuis Lab",
-   "note": "9:1, 1,5 mg/mL, 8-10x",
+   "kicker": "Pre-analitik",
+   "note": "",
    "num": "4/5",
-   "photo": "../html/lab-25.jpg",
+   "photo": "../html/lab-10.jpg",
    "prog": "80%",
-   "sticker": "ingat angkanya",
-   "swipe": "jawabannya &rarr;",
-   "title": "Rasio 9:1 itu<br><span class=\"hl\">nggak bisa ditawar</span>",
+   "sticker": "",
+   "swipe": "save buat jaga-jaga &rarr;",
+   "title": "Hafalin 2 identifier ini<br><span class=\"hl\">nama + tanggal lahir</span>",
    "variant": "v-tilt"
   },
   {
    "badge": "",
    "badgeclass": "",
-   "body": "Kuis terjawab: biru dulu, lalu kuning, terakhir ungu.<br>Hafalkan urutannya, pre-analitik aman, hasil bisa dipercaya.",
-   "caption": "",
+   "body": "Kesimpulan: sebagian besar kesalahan lab berasal dari pre-analitik, dan identifikasi pasien adalah gerbang pertamanya. Benerin dari sini, sisanya ngikut. Pernah kejadian di lab kamu? Cerita di komentar.",
+   "caption": "kesimpulan...",
    "cta": "Follow @fastlis",
-   "kicker": "Kuis Lab",
+   "kicker": "Pre-analitik",
    "note": "Bagikan ke tim lab",
    "num": "5/5",
-   "photo": "../html/lab-22.jpg",
+   "photo": "../html/lab-17.jpg",
    "prog": "100%",
    "sticker": "Simpan postingan ini",
-   "swipe": "",
-   "title": "Jawabannya: biru,<br><span class=\"hl\">kuning, ungu</span>",
+   "swipe": "komen kalau pernah kejadian &rarr;",
+   "title": "Sampel bener = hasil<br><span class=\"hl\">bisa dipercaya</span>",
    "variant": "v-endcard"
   }
  ],
- "date": "2026-10-12",
- "format": "kuis (jawaban di slide 5)",
+ "date": "2026-10-13",
+ "format": "before-vs-after",
  "reels": {
   "s1": {
-   "h1": "Ada 3 tabung di meja,<br><span class=\"blue\">mana yang duluan?</span>",
-   "kicker": "Kuis Lab",
-   "sub": "Tebak dulu, jawabannya di akhir video."
+   "h1": "Sampel pasien kamu<br><span class=\"blue\">pernah ketuker?</span>",
+   "kicker": "Pre-analitik",
+   "sub": "Kejadiannya serem, tapi sering."
   },
   "s2": {
-   "h1": "Salah urutan,<br><span class=\"blue\">hasil ikut salah.</span>",
-   "kicker": "Kenapa Penting",
-   "sub": "Antikoagulan bisa kebawa ke tabung berikutnya."
+   "h1": "Panggil nama doang,<br><span class=\"blue\">langsung diambil.</span>",
+   "kicker": "Kenapa Bisa",
+   "sub": "Nama sama? Wassalam, sampel tertukar."
   },
   "s3": {
-   "desc": "Biru (sitrat) → kuning (serum)<br>→ hijau → ungu (EDTA) → abu-abu.",
-   "sub": "Versi CLSI",
-   "title": "Urutan yang Benar"
+   "desc": "Nama lengkap + tanggal lahir.<br>Cocokkan gelang pasien.",
+   "sub": "Sebelum tusuk",
+   "title": "Cek 2 Identifier"
   },
   "s4": {
-   "desc": "Darah:sitrat harus 9:1.<br>Kurang penuh = tolak.",
-   "sub": "Tabung biru wajib penuh",
-   "title": "Rasio 9:1"
+   "desc": "Tempel label sebelum ambil.<br>Jangan pernah label duluan.",
+   "sub": "Bukan di meja",
+   "title": "Label di Bedside"
   },
   "s5": {
-   "desc": "EDTA: 1,5 mg per mL darah.<br>Dikocok = hemolisis.",
-   "sub": "Invert 8-10x, pelan",
-   "title": "Jangan Kocok Tabung"
+   "desc": "Ketiganya harus sama.<br>Beda satu = stop.",
+   "sub": "Gelang, form, label",
+   "title": "3 Titik Cek"
   },
   "s6": {
-   "h1": "Jawaban: biru,<br><span class=\"blue\">kuning, ungu.</span>",
+   "h1": "Sampel bener, hasil<br><span class=\"blue\">bisa dipercaya.</span>",
    "pills": [
-    "Order of Draw",
     "Pre-analitik",
+    "Identifikasi Pasien",
     "FASTLIS"
    ],
-   "sub": "Jawabanmu bener?<br>Tulis di komentar."
+   "sub": "Pernah kejadian di labmu?<br>Cerita di komentar."
   }
  },
  "single": {
-  "caption": "contekan order of draw",
+  "caption": "contekan identifikasi pasien",
   "cta": "fastlis.com",
-  "kicker": "Kuis Lab",
+  "kicker": "Pre-analitik",
   "meta": "fastlis.com",
-  "note": "9:1 / 1,5 mg/mL / 8-10x",
-  "photo": "../html/lab-14.jpg",
+  "note": "nama + tgl lahir",
+  "photo": "../html/lab-12.jpg",
   "sticker": "save contekan ini",
-  "sub": "Order of draw CLSI + rasio 9:1 + invert 8-10x pelan. Salah urutan, hasil ikut salah.",
-  "title": "Tabung biru, kuning, ungu: mana duluan?"
+  "sub": "Nama lengkap + tanggal lahir wajib cocok di 3 titik: gelang, form, label. Label ditempel di samping pasien, bukan di meja.",
+  "title": "Sampel pasien pernah ketuker? Cek 2 identifier ini"
  },
- "topik": "Urutan pengambilan tabung darah (order of draw) + rasio darah:antikoagulan + volume minimal"
+ "topik": "Identifikasi pasien pre-analitik: 2 identifier + label di samping pasien (bedside labeling)"
 }

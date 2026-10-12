@@ -39,6 +39,11 @@
       "date": "2026-10-12",
       "topik": "Urutan pengambilan tabung darah (order of draw) + rasio darah:antikoagulan + volume minimal",
       "format": "kuis (jawaban di slide 5)"
+    },
+    {
+      "date": "2026-10-13",
+      "topik": "Identifikasi pasien pre-analitik: 2 identifier + label di samping pasien (bedside labeling)",
+      "format": "before-vs-after"
     }
   ]
 }
