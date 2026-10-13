@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<link href="../assets/fonts-poppins.css" rel="stylesheet">
+<script src="../assets/gsap.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#071120}
+  body{font-family:'Poppins',sans-serif}
+  #root{width:1080px;height:1920px;position:relative;overflow:hidden;background:#071120}
+  #canvas{position:absolute;inset:-70px;
+    background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);
+    background-size:36px 36px;}
+  #vignette{position:absolute;inset:0;z-index:2;
+    background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}
+  .progress{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}
+  .beat{position:absolute;inset:0;z-index:3;padding:110px 72px 0}
+  .chlabel{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;
+    letter-spacing:5px;color:#3B9EFF;font-weight:700}
+  .bigt{font-size:86px;font-weight:800;color:#fff;line-height:1.04;
+    letter-spacing:-2px;margin-top:24px;text-transform:uppercase}
+  .bigt .hl{color:#3B9EFF}
+  .polaroid{margin-top:40px;background:#fff;border-radius:10px;padding:18px 18px 0;
+    transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}
+  .polaroid img{width:100%;height:560px;object-fit:cover;display:block;border-radius:4px}
+  .polaroid .cap{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:26px;color:#334155;padding:18px 6px;letter-spacing:1px}
+  .polaroid .tape{position:absolute;top:-22px;left:50%;width:180px;height:44px;
+    background:rgba(230,236,245,.85);transform:translateX(-50%) rotate(3deg);
+    border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12)}
+  .card{margin-top:40px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);
+    border-radius:24px;padding:36px 38px}
+  .card .cl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:24px;
+    letter-spacing:4px;color:#3B9EFF;font-weight:700}
+  .card .big{font-size:62px;font-weight:800;color:#fff;margin-top:12px;line-height:1.18}
+  .card .big .hl{color:#3B9EFF}
+  .card.ask .big{font-size:56px}
+  .card .asksub{font-size:34px;color:rgba(255,255,255,.85);margin-top:14px;font-weight:600}
+  #karaoke{position:absolute;left:56px;right:56px;bottom:110px;z-index:4;text-align:center}
+  .phrase{display:inline-block;background:rgba(3,10,22,.68);border-radius:20px;
+    padding:24px 32px;font-size:39px;font-weight:600;color:rgba(255,255,255,.93);
+    line-height:1.5}
+  .kw{transition:color .12s}
+  .kw.on{color:#3B9EFF;font-weight:800}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="full" data-start="0" data-duration="36.69" data-width="1080" data-height="1920">
+  <div id="canvas"></div>
+  <div id="vignette"></div>
+  <div class="progress" id="prog"></div>
+  <div class="beat" id="beat0"><div class="chlabel">BAGIAN 01 &middot; HOOK</div><div class="bigt">SAMPEL PASIEN KAMU<br><span class="hl">PERNAH KETUKER?</span></div><div class="polaroid" id="b0-vis"><div class="tape"></div><img src="../assets/lab-08.jpg"><div class="cap">Tabung sampel pasien</div></div></div><div class="beat" id="beat1" style="opacity:0"><div class="chlabel">BAGIAN 02 &middot; KENAPA BISA</div><div class="bigt">PANGGIL NAMA DOANG,<br><span class="hl">LANGSUNG DIAMBIL.</span></div><div class="card" id="b1-vis"><div class="cl">RISIKO NYATA</div><div class="big">2 nama sama<br><span class="hl">= 1 sampel tertukar</span></div></div></div><div class="beat" id="beat2" style="opacity:0"><div class="chlabel">BAGIAN 03 &middot; SOLUSI</div><div class="bigt">CEK 2 IDENTIFIER<br><span class="hl">DI BEDSIDE.</span></div><div class="polaroid" id="b2-vis"><div class="tape"></div><img src="../assets/lab-18.jpg"><div class="cap">Label ditempel di bedside</div></div></div><div class="beat" id="beat3" style="opacity:0"><div class="chlabel">PENUTUP</div><div class="bigt">GELANG, FORM, LABEL.<br><span class="hl">BEDA SATU = STOP.</span></div><div class="card ask" id="b3-vis"><div class="big">Pernah kejadian di labmu?</div><div class="asksub">Cerita di komentar.</div></div></div>
+  <div id="karaoke"><div class="phrase" id="p0" style="display:none"><span class="kw" id="w0">Coba</span> <span class="kw" id="w1">bayangin.</span> <span class="kw" id="w2">Sampel</span> <span class="kw" id="w3">pasien</span> <span class="kw" id="w4">kamu...</span> <span class="kw" id="w5">pernah</span> <span class="kw" id="w6">ketuker?</span> <span class="kw" id="w7">Kedengerannya</span> <span class="kw" id="w8">serem,</span> <span class="kw" id="w9">tapi</span> <span class="kw" id="w10">sering</span> <span class="kw" id="w11">kejadian.</span></div><div class="phrase" id="p1" style="display:none"><span class="kw" id="w12">Penyebabnya:</span> <span class="kw" id="w13">panggil</span> <span class="kw" id="w14">nama</span> <span class="kw" id="w15">doang,</span> <span class="kw" id="w16">langsung</span> <span class="kw" id="w17">diambil.</span> <span class="kw" id="w18">Kalau</span> <span class="kw" id="w19">ada</span> <span class="kw" id="w20">dua</span> <span class="kw" id="w21">pasien</span> <span class="kw" id="w22">namanya</span> <span class="kw" id="w23">sama?</span> <span class="kw" id="w24">Wassalam.</span> <span class="kw" id="w25">Sampel</span> <span class="kw" id="w26">tertukar,</span> <span class="kw" id="w27">hasil</span> <span class="kw" id="w28">ikut</span> <span class="kw" id="w29">salah.</span></div><div class="phrase" id="p2" style="display:none"><span class="kw" id="w30">Solusinya</span> <span class="kw" id="w31">juga</span> <span class="kw" id="w32">simpel.</span> <span class="kw" id="w33">Cek</span> <span class="kw" id="w34">dua</span> <span class="kw" id="w35">identifier:</span> <span class="kw" id="w36">nama</span> <span class="kw" id="w37">lengkap</span> <span class="kw" id="w38">dan</span> <span class="kw" id="w39">tanggal</span> <span class="kw" id="w40">lahir,</span> <span class="kw" id="w41">cocokkan</span> <span class="kw" id="w42">dengan</span> <span class="kw" id="w43">gelang</span> <span class="kw" id="w44">pasien.</span> <span class="kw" id="w45">Tempel</span> <span class="kw" id="w46">label</span> <span class="kw" id="w47">di</span> <span class="kw" id="w48">bedside,</span> <span class="kw" id="w49">sebelum</span> <span class="kw" id="w50">diambil,</span> <span class="kw" id="w51">bukan</span> <span class="kw" id="w52">di</span> <span class="kw" id="w53">meja.</span></div><div class="phrase" id="p3" style="display:none"><span class="kw" id="w54">Tiga</span> <span class="kw" id="w55">titik:</span> <span class="kw" id="w56">gelang,</span> <span class="kw" id="w57">form,</span> <span class="kw" id="w58">label.</span> <span class="kw" id="w59">Beda</span> <span class="kw" id="w60">satu,</span> <span class="kw" id="w61">stop.</span> <span class="kw" id="w62">Pernah</span> <span class="kw" id="w63">kejadian</span> <span class="kw" id="w64">di</span> <span class="kw" id="w65">labmu?</span> <span class="kw" id="w66">Cerita</span> <span class="kw" id="w67">di</span> <span class="kw" id="w68">komentar.</span></div></div>
+</div>
+<script>
+  var cur = -1, curP = -1;
+  function setWord(i){
+    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
+    document.getElementById('w'+i).classList.add('on');
+    cur = i;
+  }
+  function clearWords(){
+    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
+    cur = -1;
+  }
+  function showPhrase(p){
+    if(curP >= 0) document.getElementById('p'+curP).style.display = 'none';
+    clearWords();
+    document.getElementById('p'+p).style.display = 'inline-block';
+    curP = p;
+  }
+  var tl = gsap.timeline();
+  tl.fromTo('#canvas', {scale:1, x:0, y:0}, {scale:1.10, x:-30, y:-44, duration:36.69, ease:'none'}, 0);
+  tl.fromTo('#prog', {width:0}, {width:1080, duration:36.69, ease:'none'}, 0);
+  tl.from('#beat0 .chlabel', {opacity:0, y:16, duration:.5}, .15);
+  tl.from('#beat0 .bigt', {opacity:0, y:30, duration:.7}, .35);
+  tl.from('#b0-vis', {opacity:0, y:26, rotate:2, duration:.7}, .8);
+  
+  tl.to("#beat0", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 7.08);
+  tl.fromTo("#beat1", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 7.08);
+  tl.from("#beat1 .chlabel", {opacity:0, y:14, duration:.45}, 7.23);
+  tl.from("#beat1 .bigt", {opacity:0, y:26, duration:.6}, 7.38);
+  tl.from("#b1-vis", {opacity:0, y:22, scale:.97, duration:.55}, 7.63);
+  tl.to("#beat1", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 16.81);
+  tl.fromTo("#beat2", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 16.81);
+  tl.from("#beat2 .chlabel", {opacity:0, y:14, duration:.45}, 16.96);
+  tl.from("#beat2 .bigt", {opacity:0, y:26, duration:.6}, 17.11);
+  tl.from("#b2-vis", {opacity:0, y:22, scale:.97, duration:.55}, 17.36);
+  tl.to("#beat2", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 28.24);
+  tl.fromTo("#beat3", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 28.24);
+  tl.from("#beat3 .chlabel", {opacity:0, y:14, duration:.45}, 28.39);
+  tl.from("#beat3 .bigt", {opacity:0, y:26, duration:.6}, 28.54);
+  tl.from("#b3-vis", {opacity:0, y:22, scale:.97, duration:.55}, 28.79);
+  
+  tl.call(setWord, [0], 0.0);
+  tl.call(setWord, [1], 0.284);
+  tl.call(setWord, [2], 1.207);
+  tl.call(setWord, [3], 1.633);
+  tl.call(setWord, [4], 2.059);
+  tl.call(setWord, [5], 3.125);
+  tl.call(setWord, [6], 3.551);
+  tl.call(setWord, [7], 4.403);
+  tl.call(setWord, [8], 5.326);
+  tl.call(setWord, [9], 5.894);
+  tl.call(setWord, [10], 6.178);
+  tl.call(setWord, [11], 6.604);
+  tl.call(setWord, [12], 7.527);
+  tl.call(setWord, [13], 8.664);
+  tl.call(setWord, [14], 9.161);
+  tl.call(setWord, [15], 9.445);
+  tl.call(setWord, [16], 10.013);
+  tl.call(setWord, [17], 10.581);
+  tl.call(setWord, [18], 11.433);
+  tl.call(setWord, [19], 11.788);
+  tl.call(setWord, [20], 12.001);
+  tl.call(setWord, [21], 12.214);
+  tl.call(setWord, [22], 12.64);
+  tl.call(setWord, [23], 13.138);
+  tl.call(setWord, [24], 13.777);
+  tl.call(setWord, [25], 14.7);
+  tl.call(setWord, [26], 15.126);
+  tl.call(setWord, [27], 15.907);
+  tl.call(setWord, [28], 16.262);
+  tl.call(setWord, [29], 16.546);
+  tl.call(setWord, [30], 17.256);
+  tl.call(setWord, [31], 17.895);
+  tl.call(setWord, [32], 18.18);
+  tl.call(setWord, [33], 18.961);
+  tl.call(setWord, [34], 19.174);
+  tl.call(setWord, [35], 19.387);
+  tl.call(setWord, [36], 20.452);
+  tl.call(setWord, [37], 20.736);
+  tl.call(setWord, [38], 21.233);
+  tl.call(setWord, [39], 21.446);
+  tl.call(setWord, [40], 21.943);
+  tl.call(setWord, [41], 22.511);
+  tl.call(setWord, [42], 23.079);
+  tl.call(setWord, [43], 23.506);
+  tl.call(setWord, [44], 23.932);
+  tl.call(setWord, [45], 24.713);
+  tl.call(setWord, [46], 25.139);
+  tl.call(setWord, [47], 25.494);
+  tl.call(setWord, [48], 25.636);
+  tl.call(setWord, [49], 26.346);
+  tl.call(setWord, [50], 26.843);
+  tl.call(setWord, [51], 27.553);
+  tl.call(setWord, [52], 27.908);
+  tl.call(setWord, [53], 28.05);
+  tl.call(setWord, [54], 28.69);
+  tl.call(setWord, [55], 28.974);
+  tl.call(setWord, [56], 29.684);
+  tl.call(setWord, [57], 30.323);
+  tl.call(setWord, [58], 30.82);
+  tl.call(setWord, [59], 31.53);
+  tl.call(setWord, [60], 31.814);
+  tl.call(setWord, [61], 32.311);
+  tl.call(setWord, [62], 32.95);
+  tl.call(setWord, [63], 33.376);
+  tl.call(setWord, [64], 33.945);
+  tl.call(setWord, [65], 34.087);
+  tl.call(setWord, [66], 34.797);
+  tl.call(setWord, [67], 35.223);
+  tl.call(setWord, [68], 35.365);
+  tl.call(showPhrase, [0], 0.0);
+  tl.call(showPhrase, [1], 7.527);
+  tl.call(showPhrase, [2], 17.256);
+  tl.call(showPhrase, [3], 28.69);
+  tl.call(clearWords, [], 36.64);
+  tl.to({}, {duration:36.69});
+</script>
+</body>
+</html>

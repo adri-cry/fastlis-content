@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Export data dashboard FastLIS -> JSON siap push ke artifact via invoke_action.
+"""Export data dashboard FastLIS -> JSON dengan referensi URL media (bukan base64).
+
+Media (slide PNG, single PNG, reels MP4) di-serve langsung oleh nginx dari
+/srv/fastlis-dashboard/media/YYYY-MM-DD/. JSON hanya berisi path relatif.
+
 Pakai: python3 scripts/export_dashboard.py [--out FILE]
+Nama file single distandarisasi: single-post.png (fallback: single.png).
 """
-import base64
-import io
 import json
 import os
 import sys
@@ -12,18 +15,42 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _common import BASE, wib_today
 
 RENDERS = os.path.expanduser("~/workspace/fastlis-renders")
+MEDIA_URL_PREFIX = "media"  # relatif terhadap root dashboard
 
-def thumb_b64(path, width=360):
-    try:
-        from PIL import Image
-        im = Image.open(path).convert("RGB")
-        r = width / im.width
-        im = im.resize((width, int(im.height * r)), Image.LANCZOS)
-        buf = io.BytesIO()
-        im.save(buf, "JPEG", quality=68)
-        return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
-    except Exception:
-        return None
+SINGLE_NAMES = ("single-post.png", "single.png")  # urutan prioritas
+
+
+def find_single(rd):
+    for name in SINGLE_NAMES:
+        p = os.path.join(rd, name)
+        if os.path.exists(p):
+            return name
+    return None
+
+
+def media_for(date):
+    """Kembalikan dict media untuk tanggal tsb, path relatif atau None."""
+    rd = os.path.join(RENDERS, date)
+    slides = []
+    if os.path.isdir(rd):
+        for i in range(1, 6):
+            name = f"slide{i}.png"
+            if os.path.exists(os.path.join(rd, name)):
+                slides.append(f"{MEDIA_URL_PREFIX}/{date}/{name}")
+    single_name = find_single(rd) if os.path.isdir(rd) else None
+    single = f"{MEDIA_URL_PREFIX}/{date}/{single_name}" if single_name else None
+    reels = None
+    if os.path.isdir(rd) and os.path.exists(os.path.join(rd, "fastlis-reels.mp4")):
+        reels = f"{MEDIA_URL_PREFIX}/{date}/fastlis-reels.mp4"
+    return {
+        "slides": slides,
+        "single": single,
+        "reels": reels,
+        "cover": slides[0] if slides else None,
+        "slide_count": len(slides),
+        "has_reels": reels is not None,
+    }
+
 
 def main():
     out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else None
@@ -31,7 +58,6 @@ def main():
     hist = json.load(open(os.path.join(BASE, "data", "last_topics.json")))
     history = hist.get("history", [])
 
-    # statistik format
     formats = {}
     for h in history:
         f = h.get("format", "?")
@@ -40,40 +66,21 @@ def main():
     items = []
     for h in history[-14:]:
         d = h.get("date")
-        rd = os.path.join(RENDERS, d)
-        thumbs = []
-        if os.path.isdir(rd):
-            for i in range(1, 6):
-                p = os.path.join(rd, f"slide{i}.png")
-                if os.path.exists(p):
-                    t = thumb_b64(p)
-                    if t:
-                        thumbs.append(t)
+        m = media_for(d)
         items.append({
             "date": d,
             "topic": h.get("topik", ""),
             "format": h.get("format", ""),
-            "cover": thumbs[0] if thumbs else None,
-            "slide_count": len(thumbs),
-            "has_reels": os.path.exists(os.path.join(rd, "fastlis-reels.mp4")),
+            "cover": m["cover"],
+            "slide_count": m["slide_count"],
+            "has_reels": m["has_reels"],
+            "media": m,
         })
 
-    # detail konten terbaru
     latest = None
     if history:
         d = history[-1]["date"]
-        rd = os.path.join(RENDERS, d)
-        slides = []
-        single = None
-        if os.path.isdir(rd):
-            for i in range(1, 6):
-                p = os.path.join(rd, f"slide{i}.png")
-                if os.path.exists(p):
-                    t = thumb_b64(p, width=540)
-                    if t:
-                        slides.append(t)
-            sp = os.path.join(rd, "single.png")
-            single = thumb_b64(sp, width=540) if os.path.exists(sp) else None
+        m = media_for(d)
         cap_c = cap_s = ""
         jp = os.path.join(BASE, "content", "hari-ini.json")
         if os.path.exists(jp):
@@ -84,13 +91,14 @@ def main():
             "date": d,
             "topic": history[-1].get("topik", ""),
             "format": history[-1].get("format", ""),
-            "slides": slides,
-            "single": single,
+            "slides": m["slides"],
+            "single": m["single"],
+            "reels": m["reels"],
+            "has_reels": m["has_reels"],
             "caption_carousel": cap_c,
             "caption_single": cap_s,
         }
 
-    # 5 topik terakhir (penjaga anti-kembar)
     guard = [{"date": h.get("date"), "topic": h.get("topik", "")} for h in history[-5:]]
 
     payload = {
@@ -115,6 +123,7 @@ def main():
         print(f"dashboard JSON ditulis: {out} ({len(js)//1024} KB)")
     else:
         print(js)
+
 
 if __name__ == "__main__":
     main()
