@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<link href="../assets/fonts-poppins.css" rel="stylesheet">
+<script src="../assets/gsap.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#071120}
+  body{font-family:'Poppins',sans-serif}
+  #root{width:1080px;height:1920px;position:relative;overflow:hidden;background:#071120}
+  #canvas{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}
+  #vignette{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}
+  .progress{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}
+  #brandlogo{position:absolute;top:26px;right:72px;height:52px;z-index:6;opacity:.92}
+  .beat{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:40px 72px 360px}
+  .chlabel{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}
+  .bigt{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}
+  .bigt .hl{color:#3B9EFF}
+  .polaroid{margin-top:34px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}
+  .polaroid img{width:100%;height:600px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}
+  .polaroid .cap{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:25px;color:#334155;padding:18px 6px;letter-spacing:1px}
+  .polaroid .tape{position:absolute;top:-22px;left:50%;width:180px;height:44px;background:rgba(230,236,245,.85);transform:translateX(-50%) rotate(3deg);border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12)}
+  .keystrip{margin-top:26px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:18px;padding:24px 28px;font-size:33px;font-weight:600;color:#fff;line-height:1.4;display:flex;align-items:center;gap:18px}
+  .keystrip .kdot{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#3B9EFF;box-shadow:0 0 14px rgba(59,158,255,.8)}
+  .card{margin-top:40px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:24px;padding:36px 38px}
+  .card .big{font-size:54px;font-weight:800;color:#fff;line-height:1.2}
+  .card .asksub{font-size:34px;color:rgba(255,255,255,.85);margin-top:14px;font-weight:600}
+  .pillrow{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+  .pill{font-size:26px;font-weight:700;color:#3B9EFF;background:rgba(59,158,255,.14);border:1px solid rgba(59,158,255,.35);border-radius:999px;padding:14px 26px}
+  #karaoke{position:absolute;left:56px;right:56px;bottom:110px;z-index:4;text-align:center}
+  .phrase{display:inline-block;background:rgba(3,10,22,.68);border-radius:20px;padding:24px 32px;font-size:38px;font-weight:600;color:rgba(255,255,255,.93);line-height:1.5}
+  .kw{transition:color .12s}
+  .kw.on{color:#3B9EFF;font-weight:800}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="daily" data-start="0" data-duration="109.77" data-width="1080" data-height="1920">
+  <div id="canvas"></div>
+  <div id="vignette"></div>
+  <div class="progress" id="prog"></div>
+  <img id="brandlogo" src="../assets/fastlis-logo.png" alt="FastLIS">
+  <div class="beat" id="beat0"><div class="chlabel">PRE-ANALITIK</div><div class="bigt">SERUM PASIEN KAMU<br><span class="hl">KOK MERAH BANGET?</span></div><div class="polaroid" id="b0-vis"><div class="tape"></div><img src="../assets/lab-08.jpg"><div class="cap">SERUM PASIEN KAMU KOK MERAH BANGET</div></div><div class="keystrip" id="b0-key"><span class="kdot"></span>Kenalin HIL, biang keroknya.</div></div><div class="beat" id="beat1" style="opacity:0"><div class="chlabel">TIGA PENGACAU</div><div class="bigt">HEMOLISIS, LIPEMIA,<br><span class="hl">IKTERUS</span></div><div class="polaroid" id="b1-vis"><div class="tape"></div><img src="../assets/lab-03.jpg"><div class="cap">HEMOLISIS, LIPEMIA, IKTERUS</div></div><div class="keystrip" id="b1-key"><span class="kdot"></span>Tiga pengganggu hasil lab dari pre-analitik.</div></div><div class="beat" id="beat2" style="opacity:0"><div class="chlabel">SEL DARAH PECAH</div><div class="bigt">01 &middot; <span class="hl">HEMOLISIS</span></div><div class="polaroid" id="b2-vis"><div class="tape"></div><img src="../assets/lab-15.jpg"><div class="cap">01 &amp;middot; HEMOLISIS</div></div><div class="keystrip" id="b2-key"><span class="kdot"></span>Tourniquet kelamaan, jarum kekecilan, tabung dikocok.</div></div><div class="beat" id="beat3" style="opacity:0"><div class="chlabel">CEGAH HEMOLISIS</div><div class="bigt">CARA CEGAH<br><span class="hl">HEMOLISIS</span></div><div class="polaroid" id="b3-vis"><div class="tape"></div><img src="../assets/lab-25.jpg"><div class="cap">CARA CEGAH HEMOLISIS</div></div><div class="keystrip" id="b3-key"><span class="kdot"></span>Tourniquet maks 1 menit, jarum 21-22G, balik 8-10x pelan.</div></div><div class="beat" id="beat4" style="opacity:0"><div class="chlabel">LEMAK DARAH TINGGI</div><div class="bigt">03 &middot; <span class="hl">LIPEMIA</span></div><div class="polaroid" id="b4-vis"><div class="tape"></div><img src="../assets/lab-18.jpg"><div class="cap">03 &amp;middot; LIPEMIA</div></div><div class="keystrip" id="b4-key"><span class="kdot"></span>Lemak darah tinggi: pasien nggak puasa / nutrisi parenteral.</div></div><div class="beat" id="beat5" style="opacity:0"><div class="chlabel">ATASI LIPEMIA</div><div class="bigt">CARA ATASI<br><span class="hl">LIPEMIA</span></div><div class="polaroid" id="b5-vis"><div class="tape"></div><img src="../assets/lab-22.jpg"><div class="cap">CARA ATASI LIPEMIA</div></div><div class="keystrip" id="b5-key"><span class="kdot"></span>Puasa 8-12 jam sebelum ambil; catat lipemik.</div></div><div class="beat" id="beat6" style="opacity:0"><div class="chlabel">BILIRUBIN TINGGI</div><div class="bigt">05 &middot; <span class="hl">IKTERUS</span></div><div class="polaroid" id="b6-vis"><div class="tape"></div><img src="../assets/lab-16.jpg"><div class="cap">05 &amp;middot; IKTERUS</div></div><div class="keystrip" id="b6-key"><span class="kdot"></span>Serum kuning pekat: catat ikterik di LIS.</div></div><div class="beat" id="beat7" style="opacity:0"><div class="chlabel">DETEKSI OTOMATIS</div><div class="bigt">DETEKSI<br><span class="hl">HIL INDEX</span></div><div class="polaroid" id="b7-vis"><div class="tape"></div><img src="../assets/lab-19.jpg"><div class="cap">DETEKSI HIL INDEX</div></div><div class="keystrip" id="b7-key"><span class="kdot"></span>HIL index: hemolisis, lipemia, ikterus terukur otomatis.</div></div><div class="beat" id="beat8" style="opacity:0"><div class="chlabel">KEPUTUSAN LAB</div><div class="bigt">KAPAN SAMPEL<br><span class="hl">DITOLAK?</span></div><div class="polaroid" id="b8-vis"><div class="tape"></div><img src="../assets/lab-01.jpg"><div class="cap">KAPAN SAMPEL DITOLAK</div></div><div class="keystrip" id="b8-key"><span class="kdot"></span>Ganggu hasil kritis (mis. kalium)? Tolak, ambil ulang.</div></div><div class="beat" id="beat9" style="opacity:0"><div class="chlabel">PENUTUP</div><div class="bigt">PERNAH KETIPU<br><span class="hl">HASIL LAB?</span></div><div class="card ask" id="b9-vis"><div class="brandpill">FastLIS</div><div class="big">Pernah hasil lab bikin bingung gara-gara HIL?</div><div class="pillrow"><span class="pill">Ceritain di komen</span><span class="pill">Save buat jaga-jaga</span><span class="pill">Tag teman lab</span></div><div class="promo">Follow FastLIS untuk edukasi lab setiap hari.</div></div></div>
+  <div id="karaoke"><div class="phrase" id="p0" style="display:none"><span class="kw" id="w0">Serum</span> <span class="kw" id="w1">pasien</span> <span class="kw" id="w2">kamu</span> <span class="kw" id="w3">kok</span> <span class="kw" id="w4">merah</span> <span class="kw" id="w5">banget?</span> <span class="kw" id="w6">Kenalin</span> <span class="kw" id="w7">HIL,</span> <span class="kw" id="w8">biang</span> <span class="kw" id="w9">keroknya.</span></div><div class="phrase" id="p1" style="display:none"><span class="kw" id="w10">Hemolisis,</span> <span class="kw" id="w11">Lipemia,</span> <span class="kw" id="w12">Ikterus.</span> <span class="kw" id="w13">Tiga</span> <span class="kw" id="w14">pengganggu</span> <span class="kw" id="w15">hasil</span> <span class="kw" id="w16">lab</span> <span class="kw" id="w17">yang</span> <span class="kw" id="w18">asalnya</span> <span class="kw" id="w19">dari</span> <span class="kw" id="w20">pre-analitik.</span></div><div class="phrase" id="p2" style="display:none"><span class="kw" id="w21">Satu.</span> <span class="kw" id="w22">Hemolisis.</span> <span class="kw" id="w23">Sel</span> <span class="kw" id="w24">darah</span> <span class="kw" id="w25">pecah,</span> <span class="kw" id="w26">serum</span> <span class="kw" id="w27">jadi</span> <span class="kw" id="w28">merah.</span> <span class="kw" id="w29">Biang</span> <span class="kw" id="w30">keroknya:</span> <span class="kw" id="w31">tourniquet</span> <span class="kw" id="w32">kelamaan,</span> <span class="kw" id="w33">jarum</span> <span class="kw" id="w34">kekecilan,</span> <span class="kw" id="w35">atau</span> <span class="kw" id="w36">tabung</span> <span class="kw" id="w37">dikocok.</span></div><div class="phrase" id="p3" style="display:none"><span class="kw" id="w38">Dua.</span> <span class="kw" id="w39">Cara</span> <span class="kw" id="w40">cegahnya.</span> <span class="kw" id="w41">Tourniquet</span> <span class="kw" id="w42">maksimal</span> <span class="kw" id="w43">satu</span> <span class="kw" id="w44">menit.</span> <span class="kw" id="w45">Pakai</span> <span class="kw" id="w46">jarum</span> <span class="kw" id="w47">21</span> <span class="kw" id="w48">sampai</span> <span class="kw" id="w49">22G.</span> <span class="kw" id="w50">Balik</span> <span class="kw" id="w51">tabung</span> <span class="kw" id="w52">delapan</span> <span class="kw" id="w53">sampai</span> <span class="kw" id="w54">sepuluh</span> <span class="kw" id="w55">kali,</span> <span class="kw" id="w56">pelan.</span> <span class="kw" id="w57">Jangan</span> <span class="kw" id="w58">dikocok.</span></div><div class="phrase" id="p4" style="display:none"><span class="kw" id="w59">Tiga.</span> <span class="kw" id="w60">Lipemia.</span> <span class="kw" id="w61">Serum</span> <span class="kw" id="w62">keruh</span> <span class="kw" id="w63">kayak</span> <span class="kw" id="w64">susu.</span> <span class="kw" id="w65">Penyebabnya</span> <span class="kw" id="w66">lemak</span> <span class="kw" id="w67">darah</span> <span class="kw" id="w68">tinggi.</span> <span class="kw" id="w69">Pasien</span> <span class="kw" id="w70">nggak</span> <span class="kw" id="w71">puasa,</span> <span class="kw" id="w72">atau</span> <span class="kw" id="w73">lagi</span> <span class="kw" id="w74">dapat</span> <span class="kw" id="w75">nutrisi</span> <span class="kw" id="w76">parenteral.</span></div><div class="phrase" id="p5" style="display:none"><span class="kw" id="w77">Empat.</span> <span class="kw" id="w78">Cara</span> <span class="kw" id="w79">atasinya.</span> <span class="kw" id="w80">Minta</span> <span class="kw" id="w81">pasien</span> <span class="kw" id="w82">puasa</span> <span class="kw" id="w83">delapan</span> <span class="kw" id="w84">sampai</span> <span class="kw" id="w85">dua</span> <span class="kw" id="w86">belas</span> <span class="kw" id="w87">jam</span> <span class="kw" id="w88">sebelum</span> <span class="kw" id="w89">diambil.</span> <span class="kw" id="w90">Kalau</span> <span class="kw" id="w91">masih</span> <span class="kw" id="w92">keruh,</span> <span class="kw" id="w93">catat</span> <span class="kw" id="w94">lipemik</span> <span class="kw" id="w95">dan</span> <span class="kw" id="w96">diskusikan</span> <span class="kw" id="w97">dengan</span> <span class="kw" id="w98">dokter.</span> <span class="kw" id="w99">Ultrasentrifugasi</span> <span class="kw" id="w100">bisa</span> <span class="kw" id="w101">jadi</span> <span class="kw" id="w102">opsi</span> <span class="kw" id="w103">terakhir</span> <span class="kw" id="w104">untuk</span> <span class="kw" id="w105">lipemia</span> <span class="kw" id="w106">berat,</span> <span class="kw" id="w107">sesuai</span> <span class="kw" id="w108">SOP</span> <span class="kw" id="w109">lab.</span></div><div class="phrase" id="p6" style="display:none"><span class="kw" id="w110">Lima.</span> <span class="kw" id="w111">Ikterus.</span> <span class="kw" id="w112">Serum</span> <span class="kw" id="w113">kuning</span> <span class="kw" id="w114">pekat,</span> <span class="kw" id="w115">tandanya</span> <span class="kw" id="w116">bilirubin</span> <span class="kw" id="w117">tinggi.</span> <span class="kw" id="w118">Jangan</span> <span class="kw" id="w119">asal</span> <span class="kw" id="w120">encerkan.</span> <span class="kw" id="w121">Catat</span> <span class="kw" id="w122">ikterik</span> <span class="kw" id="w123">di</span> <span class="kw" id="w124">LIS</span> <span class="kw" id="w125">supaya</span> <span class="kw" id="w126">hasilnya</span> <span class="kw" id="w127">bisa</span> <span class="kw" id="w128">diinterpretasi</span> <span class="kw" id="w129">dengan</span> <span class="kw" id="w130">benar.</span></div><div class="phrase" id="p7" style="display:none"><span class="kw" id="w131">Enam.</span> <span class="kw" id="w132">Deteksi.</span> <span class="kw" id="w133">Analyzer</span> <span class="kw" id="w134">modern</span> <span class="kw" id="w135">punya</span> <span class="kw" id="w136">HIL</span> <span class="kw" id="w137">index.</span> <span class="kw" id="w138">Kadar</span> <span class="kw" id="w139">hemolisis,</span> <span class="kw" id="w140">lipemia,</span> <span class="kw" id="w141">dan</span> <span class="kw" id="w142">ikterus</span> <span class="kw" id="w143">diukur</span> <span class="kw" id="w144">otomatis</span> <span class="kw" id="w145">di</span> <span class="kw" id="w146">setiap</span> <span class="kw" id="w147">sampel.</span> <span class="kw" id="w148">Kalau</span> <span class="kw" id="w149">indeksnya</span> <span class="kw" id="w150">tinggi,</span> <span class="kw" id="w151">analyzer</span> <span class="kw" id="w152">kasih</span> <span class="kw" id="w153">flag.</span> <span class="kw" id="w154">Jangan</span> <span class="kw" id="w155">diabaikan,</span> <span class="kw" id="w156">itu</span> <span class="kw" id="w157">peringatan.</span></div><div class="phrase" id="p8" style="display:none"><span class="kw" id="w158">Tujuh.</span> <span class="kw" id="w159">Keputusan.</span> <span class="kw" id="w160">Kapan</span> <span class="kw" id="w161">sampel</span> <span class="kw" id="w162">harus</span> <span class="kw" id="w163">ditolak?</span> <span class="kw" id="w164">Kalau</span> <span class="kw" id="w165">HIL-nya</span> <span class="kw" id="w166">mengganggu</span> <span class="kw" id="w167">hasil</span> <span class="kw" id="w168">kritis,</span> <span class="kw" id="w169">misalnya</span> <span class="kw" id="w170">kalium.</span> <span class="kw" id="w171">Tolak,</span> <span class="kw" id="w172">minta</span> <span class="kw" id="w173">ambil</span> <span class="kw" id="w174">ulang,</span> <span class="kw" id="w175">dan</span> <span class="kw" id="w176">jelaskan</span> <span class="kw" id="w177">alasannya.</span> <span class="kw" id="w178">Dokumentasikan</span> <span class="kw" id="w179">penolakan</span> <span class="kw" id="w180">di</span> <span class="kw" id="w181">LIS.</span> <span class="kw" id="w182">Komunikasi</span> <span class="kw" id="w183">yang</span> <span class="kw" id="w184">jelas</span> <span class="kw" id="w185">mencegah</span> <span class="kw" id="w186">kejadian</span> <span class="kw" id="w187">terulang.</span></div><div class="phrase" id="p9" style="display:none"><span class="kw" id="w188">Pernah</span> <span class="kw" id="w189">hasil</span> <span class="kw" id="w190">lab</span> <span class="kw" id="w191">bikin</span> <span class="kw" id="w192">bingung</span> <span class="kw" id="w193">gara-gara</span> <span class="kw" id="w194">HIL?</span> <span class="kw" id="w195">Ceritain</span> <span class="kw" id="w196">pengalamanmu</span> <span class="kw" id="w197">di</span> <span class="kw" id="w198">kolom</span> <span class="kw" id="w199">komentar.</span> <span class="kw" id="w200">Follow</span> <span class="kw" id="w201">FastLIS</span> <span class="kw" id="w202">untuk</span> <span class="kw" id="w203">edukasi</span> <span class="kw" id="w204">lab</span> <span class="kw" id="w205">setiap</span> <span class="kw" id="w206">hari.</span></div></div>
+</div>
+<script>
+  var cur = -1, curP = -1;
+  function setWord(i){
+    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
+    document.getElementById('w'+i).classList.add('on');
+    cur = i;
+  }
+  function clearWords(){
+    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
+    cur = -1;
+  }
+  function showPhrase(p){
+    if(curP >= 0) document.getElementById('p'+curP).style.display = 'none';
+    clearWords();
+    document.getElementById('p'+p).style.display = 'inline-block';
+    curP = p;
+  }
+  var tl = gsap.timeline();
+  tl.fromTo('#canvas', {scale:1, x:0, y:0}, {scale:1.10, x:-30, y:-44, duration:109.77, ease:'none'}, 0);
+  tl.fromTo('#prog', {width:0}, {width:1080, duration:109.77, ease:'none'}, 0);
+  tl.from('#beat0 .chlabel', {opacity:0, y:16, duration:.5}, .15);
+  tl.from('#beat0 .bigt', {opacity:0, y:30, duration:.7}, .35);
+  tl.from('#b0-vis', {opacity:0, y:26, rotate:2, duration:.7}, .8);
+  tl.from('#b0-key', {opacity:0, x:-18, duration:.45}, 1.15);
+  
+  tl.to("#beat0", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 4.76);
+  tl.fromTo("#beat1", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 4.94);
+  tl.from("#beat1 .chlabel", {opacity:0, y:14, duration:.45}, 4.91);
+  tl.from("#beat1 .bigt", {opacity:0, y:26, duration:.6}, 5.06);
+  tl.from("#b1-vis", {opacity:0, y:22, scale:.97, duration:.55}, 5.31);
+  tl.from("#b1-key", {opacity:0, x:-18, duration:.45}, 5.56);
+  tl.to("#beat1", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 11.54);
+  tl.fromTo("#beat2", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 11.72);
+  tl.from("#beat2 .chlabel", {opacity:0, y:14, duration:.45}, 11.69);
+  tl.from("#beat2 .bigt", {opacity:0, y:26, duration:.6}, 11.84);
+  tl.from("#b2-vis", {opacity:0, y:22, scale:.97, duration:.55}, 12.09);
+  tl.from("#b2-key", {opacity:0, x:-18, duration:.45}, 12.34);
+  tl.to("#beat2", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 21.84);
+  tl.fromTo("#beat3", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 22.02);
+  tl.from("#beat3 .chlabel", {opacity:0, y:14, duration:.45}, 21.99);
+  tl.from("#beat3 .bigt", {opacity:0, y:26, duration:.6}, 22.14);
+  tl.from("#b3-vis", {opacity:0, y:22, scale:.97, duration:.55}, 22.39);
+  tl.from("#b3-key", {opacity:0, x:-18, duration:.45}, 22.64);
+  tl.to("#beat3", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 34.28);
+  tl.fromTo("#beat4", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 34.46);
+  tl.from("#beat4 .chlabel", {opacity:0, y:14, duration:.45}, 34.43);
+  tl.from("#beat4 .bigt", {opacity:0, y:26, duration:.6}, 34.58);
+  tl.from("#b4-vis", {opacity:0, y:22, scale:.97, duration:.55}, 34.83);
+  tl.from("#b4-key", {opacity:0, x:-18, duration:.45}, 35.08);
+  tl.to("#beat4", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 44.16);
+  tl.fromTo("#beat5", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 44.34);
+  tl.from("#beat5 .chlabel", {opacity:0, y:14, duration:.45}, 44.31);
+  tl.from("#beat5 .bigt", {opacity:0, y:26, duration:.6}, 44.46);
+  tl.from("#b5-vis", {opacity:0, y:22, scale:.97, duration:.55}, 44.71);
+  tl.from("#b5-key", {opacity:0, x:-18, duration:.45}, 44.96);
+  tl.to("#beat5", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 61.44);
+  tl.fromTo("#beat6", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 61.62);
+  tl.from("#beat6 .chlabel", {opacity:0, y:14, duration:.45}, 61.59);
+  tl.from("#beat6 .bigt", {opacity:0, y:26, duration:.6}, 61.74);
+  tl.from("#b6-vis", {opacity:0, y:22, scale:.97, duration:.55}, 61.99);
+  tl.from("#b6-key", {opacity:0, x:-18, duration:.45}, 62.24);
+  tl.to("#beat6", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 73.0);
+  tl.fromTo("#beat7", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 73.18);
+  tl.from("#beat7 .chlabel", {opacity:0, y:14, duration:.45}, 73.15);
+  tl.from("#beat7 .bigt", {opacity:0, y:26, duration:.6}, 73.3);
+  tl.from("#b7-vis", {opacity:0, y:22, scale:.97, duration:.55}, 73.55);
+  tl.from("#b7-key", {opacity:0, x:-18, duration:.45}, 73.8);
+  tl.to("#beat7", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 89.52);
+  tl.fromTo("#beat8", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 89.7);
+  tl.from("#beat8 .chlabel", {opacity:0, y:14, duration:.45}, 89.67);
+  tl.from("#beat8 .bigt", {opacity:0, y:26, duration:.6}, 89.82);
+  tl.from("#b8-vis", {opacity:0, y:22, scale:.97, duration:.55}, 90.07);
+  tl.from("#b8-key", {opacity:0, x:-18, duration:.45}, 90.32);
+  tl.to("#beat8", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 104.11);
+  tl.fromTo("#beat9", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 104.29);
+  tl.from("#beat9 .chlabel", {opacity:0, y:14, duration:.45}, 104.26);
+  tl.from("#beat9 .bigt", {opacity:0, y:26, duration:.6}, 104.41);
+  tl.from("#b9-vis", {opacity:0, y:22, scale:.97, duration:.55}, 104.66);
+  tl.from("#b9-key", {opacity:0, x:-18, duration:.45}, 104.91);
+  
+  tl.call(setWord, [0], 0.11);
+  tl.call(setWord, [1], 0.57);
+  tl.call(setWord, [2], 1.03);
+  tl.call(setWord, [3], 1.33);
+  tl.call(setWord, [4], 1.49);
+  tl.call(setWord, [5], 1.75);
+  tl.call(setWord, [6], 2.73);
+  tl.call(setWord, [7], 3.09);
+  tl.call(setWord, [8], 3.73);
+  tl.call(setWord, [9], 3.97);
+  tl.call(setWord, [10], 5.21);
+  tl.call(setWord, [11], 6.35);
+  tl.call(setWord, [12], 7.25);
+  tl.call(setWord, [13], 8.37);
+  tl.call(setWord, [14], 8.59);
+  tl.call(setWord, [15], 9.11);
+  tl.call(setWord, [16], 9.41);
+  tl.call(setWord, [17], 9.65);
+  tl.call(setWord, [18], 9.79);
+  tl.call(setWord, [19], 10.23);
+  tl.call(setWord, [20], 10.67);
+  tl.call(setWord, [21], 11.99);
+  tl.call(setWord, [22], 12.75);
+  tl.call(setWord, [23], 13.83);
+  tl.call(setWord, [24], 14.03);
+  tl.call(setWord, [25], 14.35);
+  tl.call(setWord, [26], 15.07);
+  tl.call(setWord, [27], 15.33);
+  tl.call(setWord, [28], 15.55);
+  tl.call(setWord, [29], 16.39);
+  tl.call(setWord, [30], 16.81);
+  tl.call(setWord, [31], 17.89);
+  tl.call(setWord, [32], 18.29);
+  tl.call(setWord, [33], 19.41);
+  tl.call(setWord, [34], 19.63);
+  tl.call(setWord, [35], 20.29);
+  tl.call(setWord, [36], 20.81);
+  tl.call(setWord, [37], 21.23);
+  tl.call(setWord, [38], 22.29);
+  tl.call(setWord, [39], 23.15);
+  tl.call(setWord, [40], 23.35);
+  tl.call(setWord, [41], 24.41);
+  tl.call(setWord, [42], 24.95);
+  tl.call(setWord, [43], 25.51);
+  tl.call(setWord, [44], 25.83);
+  tl.call(setWord, [45], 26.63);
+  tl.call(setWord, [46], 26.97);
+  tl.call(setWord, [47], 27.31);
+  tl.call(setWord, [48], 28.03);
+  tl.call(setWord, [49], 28.49);
+  tl.call(setWord, [50], 30.33);
+  tl.call(setWord, [51], 30.65);
+  tl.call(setWord, [52], 31.01);
+  tl.call(setWord, [53], 31.37);
+  tl.call(setWord, [54], 31.81);
+  tl.call(setWord, [55], 32.11);
+  tl.call(setWord, [56], 32.51);
+  tl.call(setWord, [57], 33.27);
+  tl.call(setWord, [58], 33.69);
+  tl.call(setWord, [59], 34.73);
+  tl.call(setWord, [60], 35.55);
+  tl.call(setWord, [61], 36.59);
+  tl.call(setWord, [62], 36.93);
+  tl.call(setWord, [63], 37.2);
+  tl.call(setWord, [64], 37.47);
+  tl.call(setWord, [65], 38.39);
+  tl.call(setWord, [66], 38.95);
+  tl.call(setWord, [67], 39.25);
+  tl.call(setWord, [68], 39.53);
+  tl.call(setWord, [69], 40.51);
+  tl.call(setWord, [70], 40.91);
+  tl.call(setWord, [71], 41.11);
+  tl.call(setWord, [72], 41.55);
+  tl.call(setWord, [73], 42.17);
+  tl.call(setWord, [74], 42.49);
+  tl.call(setWord, [75], 42.71);
+  tl.call(setWord, [76], 43.33);
+  tl.call(setWord, [77], 44.61);
+  tl.call(setWord, [78], 45.53);
+  tl.call(setWord, [79], 45.71);
+  tl.call(setWord, [80], 46.97);
+  tl.call(setWord, [81], 47.23);
+  tl.call(setWord, [82], 47.63);
+  tl.call(setWord, [83], 48.03);
+  tl.call(setWord, [84], 48.51);
+  tl.call(setWord, [85], 48.91);
+  tl.call(setWord, [86], 49.13);
+  tl.call(setWord, [87], 49.35);
+  tl.call(setWord, [88], 49.67);
+  tl.call(setWord, [89], 50.15);
+  tl.call(setWord, [90], 51.13);
+  tl.call(setWord, [91], 51.43);
+  tl.call(setWord, [92], 51.79);
+  tl.call(setWord, [93], 52.51);
+  tl.call(setWord, [94], 52.89);
+  tl.call(setWord, [95], 53.43);
+  tl.call(setWord, [96], 53.65);
+  tl.call(setWord, [97], 54.23);
+  tl.call(setWord, [98], 54.57);
+  tl.call(setWord, [99], 56.21);
+  tl.call(setWord, [100], 57.09);
+  tl.call(setWord, [101], 57.59);
+  tl.call(setWord, [102], 57.89);
+  tl.call(setWord, [103], 58.21);
+  tl.call(setWord, [104], 58.59);
+  tl.call(setWord, [105], 58.83);
+  tl.call(setWord, [106], 59.27);
+  tl.call(setWord, [107], 60.03);
+  tl.call(setWord, [108], 60.53);
+  tl.call(setWord, [109], 60.99);
+  tl.call(setWord, [110], 61.89);
+  tl.call(setWord, [111], 62.69);
+  tl.call(setWord, [112], 63.65);
+  tl.call(setWord, [113], 63.89);
+  tl.call(setWord, [114], 64.19);
+  tl.call(setWord, [115], 64.95);
+  tl.call(setWord, [116], 65.45);
+  tl.call(setWord, [117], 66.05);
+  tl.call(setWord, [118], 66.99);
+  tl.call(setWord, [119], 67.25);
+  tl.call(setWord, [120], 67.61);
+  tl.call(setWord, [121], 68.67);
+  tl.call(setWord, [122], 69.05);
+  tl.call(setWord, [123], 69.51);
+  tl.call(setWord, [124], 69.72);
+  tl.call(setWord, [125], 69.93);
+  tl.call(setWord, [126], 70.59);
+  tl.call(setWord, [127], 71.09);
+  tl.call(setWord, [128], 71.31);
+  tl.call(setWord, [129], 72.21);
+  tl.call(setWord, [130], 72.41);
+  tl.call(setWord, [131], 73.45);
+  tl.call(setWord, [132], 74.37);
+  tl.call(setWord, [133], 75.55);
+  tl.call(setWord, [134], 76.17);
+  tl.call(setWord, [135], 76.41);
+  tl.call(setWord, [136], 76.85);
+  tl.call(setWord, [137], 77.15);
+  tl.call(setWord, [138], 78.03);
+  tl.call(setWord, [139], 78.37);
+  tl.call(setWord, [140], 79.39);
+  tl.call(setWord, [141], 80.23);
+  tl.call(setWord, [142], 80.41);
+  tl.call(setWord, [143], 80.93);
+  tl.call(setWord, [144], 81.35);
+  tl.call(setWord, [145], 82.01);
+  tl.call(setWord, [146], 82.21);
+  tl.call(setWord, [147], 82.57);
+  tl.call(setWord, [148], 83.01);
+  tl.call(setWord, [149], 83.81);
+  tl.call(setWord, [150], 84.41);
+  tl.call(setWord, [151], 85.25);
+  tl.call(setWord, [152], 85.83);
+  tl.call(setWord, [153], 86.09);
+  tl.call(setWord, [154], 86.95);
+  tl.call(setWord, [155], 87.37);
+  tl.call(setWord, [156], 88.33);
+  tl.call(setWord, [157], 88.63);
+  tl.call(setWord, [158], 89.97);
+  tl.call(setWord, [159], 90.87);
+  tl.call(setWord, [160], 92.01);
+  tl.call(setWord, [161], 92.35);
+  tl.call(setWord, [162], 92.77);
+  tl.call(setWord, [163], 92.97);
+  tl.call(setWord, [164], 94.05);
+  tl.call(setWord, [165], 94.41);
+  tl.call(setWord, [166], 94.85);
+  tl.call(setWord, [167], 95.35);
+  tl.call(setWord, [168], 95.67);
+  tl.call(setWord, [169], 96.47);
+  tl.call(setWord, [170], 96.83);
+  tl.call(setWord, [171], 97.89);
+  tl.call(setWord, [172], 98.79);
+  tl.call(setWord, [173], 99.05);
+  tl.call(setWord, [174], 99.35);
+  tl.call(setWord, [175], 99.71);
+  tl.call(setWord, [176], 100.13);
+  tl.call(setWord, [177], 100.71);
+  tl.call(setWord, [178], 101.85);
+  tl.call(setWord, [179], 102.121);
+  tl.call(setWord, [180], 102.393);
+  tl.call(setWord, [181], 102.664);
+  tl.call(setWord, [182], 102.936);
+  tl.call(setWord, [183], 103.207);
+  tl.call(setWord, [184], 103.479);
+  tl.call(setWord, [185], 103.75);
+  tl.call(setWord, [186], 104.021);
+  tl.call(setWord, [187], 104.293);
+  tl.call(setWord, [188], 104.564);
+  tl.call(setWord, [189], 104.836);
+  tl.call(setWord, [190], 105.107);
+  tl.call(setWord, [191], 105.379);
+  tl.call(setWord, [192], 105.65);
+  tl.call(setWord, [193], 106.03);
+  tl.call(setWord, [194], 106.234);
+  tl.call(setWord, [195], 106.439);
+  tl.call(setWord, [196], 106.643);
+  tl.call(setWord, [197], 106.847);
+  tl.call(setWord, [198], 107.051);
+  tl.call(setWord, [199], 107.256);
+  tl.call(setWord, [200], 107.46);
+  tl.call(setWord, [201], 107.664);
+  tl.call(setWord, [202], 107.869);
+  tl.call(setWord, [203], 108.073);
+  tl.call(setWord, [204], 108.277);
+  tl.call(setWord, [205], 108.481);
+  tl.call(setWord, [206], 108.686);
+  tl.call(showPhrase, [0], 0.11);
+  tl.call(showPhrase, [1], 5.21);
+  tl.call(showPhrase, [2], 11.99);
+  tl.call(showPhrase, [3], 22.29);
+  tl.call(showPhrase, [4], 34.73);
+  tl.call(showPhrase, [5], 44.61);
+  tl.call(showPhrase, [6], 61.89);
+  tl.call(showPhrase, [7], 73.45);
+  tl.call(showPhrase, [8], 89.97);
+  tl.call(showPhrase, [9], 104.564);
+  tl.call(clearWords, [], 109.72);
+  tl.to({}, {duration:109.77});
+</script>
+</body>
+</html>
