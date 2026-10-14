@@ -104,9 +104,31 @@ def compute_timings(beats, total):
     return words, bounds
 
 
+LAB_KEYS = {"lab", "tabung", "sampel", "mikroskop", "analyzer", "pipet", "reagen",
+            "darah", "serum", "sentrifug", "qc", "pre-analitik", "analitik", "alat",
+            "tube", "laboratorium"}
+# file yang sudah diverifikasi BUKAN foto lab (cek visual langsung)
+PHOTO_DENY = {"lab-09.jpg", "lab-10.jpg", "lab-11.jpg", "lab-12.jpg"}
+
+
+def _is_lab_photo(fn, tags):
+    if fn in PHOTO_DENY:
+        return False
+    tg = [str(x).lower() for x in tags.get(fn, [])]
+    if "bukan foto lab" in tg:
+        return False
+    return any(k in t for t in tg for k in LAB_KEYS)
+
+
 def pick_photos(n, dayofyear):
     cands = sorted(glob.glob(os.path.join(ASSETS, "lab-*.jpg")))
     cands = [os.path.basename(c) for c in cands]
+    # hanya foto lab asli
+    try:
+        tags = json.load(open(os.path.join(BASE, "data", "photo_tags.json")))
+        cands = [c for c in cands if _is_lab_photo(c, tags)]
+    except Exception:
+        pass
     # hindari yang baru dipakai
     used = set()
     try:
@@ -115,7 +137,17 @@ def pick_photos(n, dayofyear):
     except Exception:
         pass
     pool = [c for c in cands if c not in used] or cands
-    return [pool[(dayofyear + i * 7) % len(pool)] for i in range(n)]
+    # pilih n foto unik (tidak duplikat antar beat); kalau pool < n, pakai semua lalu ulang
+    picks, i, guard = [], 0, 0
+    while len(picks) < n and guard < n * len(pool) + len(pool):
+        c = pool[(dayofyear + i * 7) % len(pool)]
+        if c not in picks:
+            picks.append(c)
+        i += 1
+        guard += 1
+    while len(picks) < n:
+        picks.append(pool[(dayofyear + len(picks) * 13) % len(pool)])
+    return picks
 
 
 def main():
@@ -135,6 +167,7 @@ def main():
         "label": f"BAGIAN 01 &middot; {esc(strip_html(d1.get('kicker', '')).upper())}",
         "title": blue_to_hl(d1.get("h1", "")),
         "narr": join_spoken(strip_html(d1.get('h1', '')), strip_html(d1.get('sub', ''))),
+        "key": strip_html(d1.get('sub', '')),
         "bg": d1.get("bg", ""),
     })
     # s2: konteks
@@ -143,6 +176,7 @@ def main():
         "label": f"BAGIAN 02 &middot; {esc(strip_html(d2.get('kicker', '')).upper())}",
         "title": blue_to_hl(d2.get("h1", "")),
         "narr": join_spoken(strip_html(d2.get('h1', '')), strip_html(d2.get('sub', ''))),
+        "key": strip_html(d2.get('sub', '')),
         "bg": d2.get("bg", ""),
     })
     # s3-s5: poin
@@ -153,6 +187,7 @@ def main():
             "title": blue_to_hl(dd.get("title", "")),
             "narr": join_spoken(strip_html(dd.get('title', '')), strip_html(dd.get('sub', '')),
                          strip_html(dd.get('desc', ''))),
+            "key": strip_html(dd.get('desc', '')),
             "bg": dd.get("bg", ""),
         })
     # s6: penutup
@@ -224,19 +259,23 @@ def main():
         else:
             cap = strip_html(b["title"]).split("?")[0][:48]
             vis = (f'<div class="polaroid" id="b{bi}-vis"><div class="tape"></div>'
-                   f'<img src="{b["photo"]}"><div class="cap">{esc(cap)}</div></div>')
+                   f'<img src="{b["photo"]}"><div class="cap">{esc(cap)}</div></div>'
+                   f'<div class="keystrip" id="b{bi}-key"><span class="kdot"></span>{esc(b.get("key",""))}</div>')
         op = "" if bi == 0 else ' style="opacity:0"'
         beat_divs.append(
             f'<div class="beat" id="beat{bi}"{op}>'
+            f'<div class="beatnum">{bi+1:02d}</div>'
             f'<div class="chlabel">{b["label"]}</div>'
             f'<div class="bigt">{b["title"]}</div>{vis}</div>')
         if bi > 0:
             t_in = round(bounds[bi][0] - 0.45, 2)
-            trans.append(f'tl.to("#beat{bi-1}", {{opacity:0, y:-36, duration:.7, ease:"power2.inOut"}}, {t_in});')
-            trans.append(f'tl.fromTo("#beat{bi}", {{opacity:0, y:36}}, {{opacity:1, y:0, duration:.7, ease:"power2.inOut"}}, {t_in});')
+            trans.append(f'tl.to("#beat{bi-1}", {{opacity:0, y:-70, duration:.35, ease:"power2.in"}}, {t_in});')
+            trans.append(f'tl.fromTo("#beat{bi}", {{opacity:0, y:70}}, {{opacity:1, y:0, duration:.5, ease:"power2.out"}}, {round(t_in + 0.18, 2)});')
             trans.append(f'tl.from("#beat{bi} .chlabel", {{opacity:0, y:14, duration:.45}}, {round(t_in + .15, 2)});')
             trans.append(f'tl.from("#beat{bi} .bigt", {{opacity:0, y:26, duration:.6}}, {round(t_in + .3, 2)});')
+            trans.append(f'tl.from("#beat{bi} .beatnum", {{opacity:0, x:40, duration:.7}}, {round(t_in + .4, 2)});')
             trans.append(f'tl.from("#b{bi}-vis", {{opacity:0, y:22, scale:.97, duration:.55}}, {round(t_in + .55, 2)});')
+            trans.append(f'tl.from("#b{bi}-key", {{opacity:0, x:-18, duration:.45}}, {round(t_in + .8, 2)});')
 
     html = f"""<!doctype html>
 <html lang="id">
@@ -253,14 +292,17 @@ def main():
   #canvas{{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}}
   #vignette{{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}}
   .progress{{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}}
-  .beat{{position:absolute;inset:0;z-index:3;padding:110px 72px 0}}
+  .beat{{position:absolute;inset:0;z-index:3;padding:96px 72px 0}}
+  .beatnum{{position:absolute;right:36px;top:52%;font-size:400px;font-weight:800;color:rgba(255,255,255,.05);line-height:1;letter-spacing:-8px;pointer-events:none}}
   .chlabel{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}}
   .bigt{{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}}
   .bigt .hl{{color:#3B9EFF}}
-  .polaroid{{margin-top:40px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}}
-  .polaroid img{{width:100%;height:520px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}}
+  .polaroid{{margin-top:34px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}}
+  .polaroid img{{width:100%;height:600px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}}
   .polaroid .cap{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:25px;color:#334155;padding:18px 6px;letter-spacing:1px}}
   .polaroid .tape{{position:absolute;top:-22px;left:50%;width:180px;height:44px;background:rgba(230,236,245,.85);transform:translateX(-50%) rotate(3deg);border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12)}}
+  .keystrip{{margin-top:26px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:18px;padding:24px 28px;font-size:33px;font-weight:600;color:#fff;line-height:1.4;display:flex;align-items:center;gap:18px}}
+  .keystrip .kdot{{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#3B9EFF;box-shadow:0 0 14px rgba(59,158,255,.8)}}
   .card{{margin-top:40px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:24px;padding:36px 38px}}
   .card .big{{font-size:54px;font-weight:800;color:#fff;line-height:1.2}}
   .card .asksub{{font-size:34px;color:rgba(255,255,255,.85);margin-top:14px;font-weight:600}}
@@ -303,6 +345,8 @@ def main():
   tl.from('#beat0 .chlabel', {{opacity:0, y:16, duration:.5}}, .15);
   tl.from('#beat0 .bigt', {{opacity:0, y:30, duration:.7}}, .35);
   tl.from('#b0-vis', {{opacity:0, y:26, rotate:2, duration:.7}}, .8);
+  tl.from('#b0-key', {{opacity:0, x:-18, duration:.45}}, 1.15);
+  tl.from('#beat0 .beatnum', {{opacity:0, x:40, duration:.7}}, .5);
   {"".join(chr(10) + "  " + x for x in trans)}
   {"".join(chr(10) + "  " + x for x in calls)}
   tl.to({{}}, {{duration:{total}}});
