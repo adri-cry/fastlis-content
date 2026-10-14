@@ -7,7 +7,7 @@ Alur: baca content/hari-ini.json key "reels" (s1..s6)
 
 Render:  cd reels && TMPDIR=$PWD/.tmp npx hyperframes render -c v2/daily.html -o <out>
 Mux:     ffmpeg -i <render> -i v2/vo_daily.mp3 -i assets/jingle-<varian>.wav
-         -filter_complex "[1:a]volume=1.0[vo];[2:a]volume=0.22,afade...[bg];
+         -filter_complex "[1:a]volume=1.0[vo];[2:a]volume=0.12,afade...[bg];
                           [vo][bg]amix=inputs=2:duration=longest[a]"
          -map 0:v -map "[a]" -c:v copy -c:a aac -movflags +faststart <final>
 
@@ -120,34 +120,48 @@ def _is_lab_photo(fn, tags):
     return any(k in t for t in tg for k in LAB_KEYS)
 
 
-def pick_photos(n, dayofyear):
+def pick_photos(beats_kw, dayofyear):
+    """Pilih foto per beat berdasarkan relevansi tag; unik antar beat; hindari yang baru dipakai."""
     cands = sorted(glob.glob(os.path.join(ASSETS, "lab-*.jpg")))
     cands = [os.path.basename(c) for c in cands]
-    # hanya foto lab asli
     try:
         tags = json.load(open(os.path.join(BASE, "data", "photo_tags.json")))
         cands = [c for c in cands if _is_lab_photo(c, tags)]
     except Exception:
-        pass
-    # hindari yang baru dipakai
+        tags = {}
     used = set()
     try:
         uj = json.load(open(os.path.join(BASE, "data", "used_images.json")))
         used.update(uj.get("today_video", []))
     except Exception:
         pass
-    pool = [c for c in cands if c not in used] or cands
-    # pilih n foto unik (tidak duplikat antar beat); kalau pool < n, pakai semua lalu ulang
-    picks, i, guard = [], 0, 0
-    while len(picks) < n and guard < n * len(pool) + len(pool):
-        c = pool[(dayofyear + i * 7) % len(pool)]
-        if c not in picks:
-            picks.append(c)
-        i += 1
-        guard += 1
-    while len(picks) < n:
-        picks.append(pool[(dayofyear + len(picks) * 13) % len(pool)])
+
+    def score(fn, kws):
+        tg = " ".join(str(x).lower() for x in tags.get(fn, []))
+        return sum(1 for k in kws if k in tg)
+
+    def stable(fn):
+        return (sum(ord(ch) for ch in fn) + dayofyear) % 997
+
+    picks = []
+    for kws in beats_kw:
+        ranked = sorted((c for c in cands if c not in used and c not in picks),
+                        key=lambda c: (-score(c, kws), stable(c)))
+        if not ranked:
+            ranked = sorted((c for c in cands if c not in picks),
+                            key=lambda c: (-score(c, kws), stable(c)))
+        picks.append(ranked[0] if ranked else cands[0])
     return picks
+
+
+# keyword relevansi foto per beat: s1 hook, s2 konteks, s3 hemolisis, s4 lipemia, s5 ikterus
+BEAT_KW = [
+    ["serum", "tabung", "sampel", "darah"],
+    ["pre-analitik", "tabung", "pengambilan", "sampel"],
+    ["pengambilan", "pipet", "tabung darah", "pre-analitik"],
+    ["serum", "tabung", "sampel", "rak"],
+    ["serum", "tabung", "sampel", "reagen"],
+]
 
 
 def main():
@@ -203,7 +217,7 @@ def main():
     })
 
     # ---- foto per beat (kecuali penutup) ----
-    auto = pick_photos(5, doy)
+    auto = pick_photos(BEAT_KW, doy)
     ai = 0
     for b in beats[:-1]:
         bg = b.get("bg", "")
@@ -264,7 +278,6 @@ def main():
         op = "" if bi == 0 else ' style="opacity:0"'
         beat_divs.append(
             f'<div class="beat" id="beat{bi}"{op}>'
-            f'<div class="beatnum">{bi+1:02d}</div>'
             f'<div class="chlabel">{b["label"]}</div>'
             f'<div class="bigt">{b["title"]}</div>{vis}</div>')
         if bi > 0:
@@ -273,7 +286,6 @@ def main():
             trans.append(f'tl.fromTo("#beat{bi}", {{opacity:0, y:70}}, {{opacity:1, y:0, duration:.5, ease:"power2.out"}}, {round(t_in + 0.18, 2)});')
             trans.append(f'tl.from("#beat{bi} .chlabel", {{opacity:0, y:14, duration:.45}}, {round(t_in + .15, 2)});')
             trans.append(f'tl.from("#beat{bi} .bigt", {{opacity:0, y:26, duration:.6}}, {round(t_in + .3, 2)});')
-            trans.append(f'tl.from("#beat{bi} .beatnum", {{opacity:0, x:40, duration:.7}}, {round(t_in + .4, 2)});')
             trans.append(f'tl.from("#b{bi}-vis", {{opacity:0, y:22, scale:.97, duration:.55}}, {round(t_in + .55, 2)});')
             trans.append(f'tl.from("#b{bi}-key", {{opacity:0, x:-18, duration:.45}}, {round(t_in + .8, 2)});')
 
@@ -292,8 +304,7 @@ def main():
   #canvas{{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}}
   #vignette{{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}}
   .progress{{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}}
-  .beat{{position:absolute;inset:0;z-index:3;padding:96px 72px 0}}
-  .beatnum{{position:absolute;right:36px;top:52%;font-size:400px;font-weight:800;color:rgba(255,255,255,.05);line-height:1;letter-spacing:-8px;pointer-events:none}}
+  .beat{{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:40px 72px 360px}}
   .chlabel{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}}
   .bigt{{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}}
   .bigt .hl{{color:#3B9EFF}}
@@ -346,7 +357,6 @@ def main():
   tl.from('#beat0 .bigt', {{opacity:0, y:30, duration:.7}}, .35);
   tl.from('#b0-vis', {{opacity:0, y:26, rotate:2, duration:.7}}, .8);
   tl.from('#b0-key', {{opacity:0, x:-18, duration:.45}}, 1.15);
-  tl.from('#beat0 .beatnum', {{opacity:0, x:40, duration:.7}}, .5);
   {"".join(chr(10) + "  " + x for x in trans)}
   {"".join(chr(10) + "  " + x for x in calls)}
   tl.to({{}}, {{duration:{total}}});
@@ -380,7 +390,7 @@ def mux(render_mp4, vo_mp3, out_mp4, variant):
         jingle = os.path.join(ASSETS, "fastlis-jingle.wav")
     dur = audio_duration(vo_mp3)
     fade_st = max(0, round(dur - 2.5, 1))
-    fc = (f"[1:a]volume=1.0[vo];[2:a]atrim=0:{round(dur + 1)},volume=0.22,"
+    fc = (f"[1:a]volume=1.0[vo];[2:a]atrim=0:{round(dur + 1)},volume=0.12,"
           f"afade=t=in:st=0:d=1.5,afade=t=out:st={fade_st}:d=2.5[bg];"
           f"[vo][bg]amix=inputs=2:duration=longest:dropout_transition=0[a]")
     cp = subprocess.run(
