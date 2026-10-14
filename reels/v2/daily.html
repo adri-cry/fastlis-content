@@ -13,14 +13,16 @@
   #canvas{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}
   #vignette{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}
   .progress{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}
-  .beat{position:absolute;inset:0;z-index:3;padding:110px 72px 0}
+  .beat{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:40px 72px 360px}
   .chlabel{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}
   .bigt{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}
   .bigt .hl{color:#3B9EFF}
-  .polaroid{margin-top:40px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}
-  .polaroid img{width:100%;height:520px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}
+  .polaroid{margin-top:34px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}
+  .polaroid img{width:100%;height:600px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}
   .polaroid .cap{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:25px;color:#334155;padding:18px 6px;letter-spacing:1px}
   .polaroid .tape{position:absolute;top:-22px;left:50%;width:180px;height:44px;background:rgba(230,236,245,.85);transform:translateX(-50%) rotate(3deg);border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12)}
+  .keystrip{margin-top:26px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:18px;padding:24px 28px;font-size:33px;font-weight:600;color:#fff;line-height:1.4;display:flex;align-items:center;gap:18px}
+  .keystrip .kdot{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#3B9EFF;box-shadow:0 0 14px rgba(59,158,255,.8)}
   .card{margin-top:40px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:24px;padding:36px 38px}
   .card .big{font-size:54px;font-weight:800;color:#fff;line-height:1.2}
   .card .asksub{font-size:34px;color:rgba(255,255,255,.85);margin-top:14px;font-weight:600}
@@ -37,7 +39,7 @@
   <div id="canvas"></div>
   <div id="vignette"></div>
   <div class="progress" id="prog"></div>
-  <div class="beat" id="beat0"><div class="chlabel">BAGIAN 01 &middot; PRE-ANALITIK</div><div class="bigt">Serum pasien kamu<br><span class="hl">kok merah banget?</span></div><div class="polaroid" id="b0-vis"><div class="tape"></div><img src="../assets/lab-13.jpg"><div class="cap">Serum pasien kamu kok merah banget</div></div></div><div class="beat" id="beat1" style="opacity:0"><div class="chlabel">BAGIAN 02 &middot; APA ITU HIL</div><div class="bigt">Hemolisis, Lipemia,<br><span class="hl">Ikterus.</span></div><div class="polaroid" id="b1-vis"><div class="tape"></div><img src="../assets/lab-20.jpg"><div class="cap">Hemolisis, Lipemia, Ikterus.</div></div></div><div class="beat" id="beat2" style="opacity:0"><div class="chlabel">BAGIAN 03 &middot; SEL DARAH PECAH</div><div class="bigt">01 · Hemolisis</div><div class="polaroid" id="b2-vis"><div class="tape"></div><img src="../assets/lab-02.jpg"><div class="cap">01 · Hemolisis</div></div></div><div class="beat" id="beat3" style="opacity:0"><div class="chlabel">BAGIAN 04 &middot; LEMAK DARAH TINGGI</div><div class="bigt">02 · Lipemia</div><div class="polaroid" id="b3-vis"><div class="tape"></div><img src="../assets/lab-14.jpg"><div class="cap">02 · Lipemia</div></div></div><div class="beat" id="beat4" style="opacity:0"><div class="chlabel">BAGIAN 05 &middot; BILIRUBIN TINGGI</div><div class="bigt">03 · Ikterus</div><div class="polaroid" id="b4-vis"><div class="tape"></div><img src="../assets/lab-21.jpg"><div class="cap">03 · Ikterus</div></div></div><div class="beat" id="beat5" style="opacity:0"><div class="chlabel">PENUTUP</div><div class="bigt">Catat flag HIL<br><span class="hl">di LIS.</span></div><div class="card ask" id="b5-vis"><div class="big">Pernah nemu serum aneh? Cerita di komentar.</div><div class="pillrow"><span class="pill">Pre-analitik</span><span class="pill">HIL</span><span class="pill">FASTLIS</span></div></div></div>
+  <div class="beat" id="beat0"><div class="chlabel">BAGIAN 01 &middot; PRE-ANALITIK</div><div class="bigt">Serum pasien kamu<br><span class="hl">kok merah banget?</span></div><div class="polaroid" id="b0-vis"><div class="tape"></div><img src="../assets/lab-08.jpg"><div class="cap">Serum pasien kamu kok merah banget</div></div><div class="keystrip" id="b0-key"><span class="kdot"></span>Kenalin HIL, biang keroknya.</div></div><div class="beat" id="beat1" style="opacity:0"><div class="chlabel">BAGIAN 02 &middot; APA ITU HIL</div><div class="bigt">Hemolisis, Lipemia,<br><span class="hl">Ikterus.</span></div><div class="polaroid" id="b1-vis"><div class="tape"></div><img src="../assets/lab-03.jpg"><div class="cap">Hemolisis, Lipemia, Ikterus.</div></div><div class="keystrip" id="b1-key"><span class="kdot"></span>Tiga pengganggu hasil lab dari pre-analitik.</div></div><div class="beat" id="beat2" style="opacity:0"><div class="chlabel">BAGIAN 03 &middot; SEL DARAH PECAH</div><div class="bigt">01 · Hemolisis</div><div class="polaroid" id="b2-vis"><div class="tape"></div><img src="../assets/lab-15.jpg"><div class="cap">01 · Hemolisis</div></div><div class="keystrip" id="b2-key"><span class="kdot"></span>Serum jadi merah. Tourniquet maks 1 menit, jarum 21-22G.</div></div><div class="beat" id="beat3" style="opacity:0"><div class="chlabel">BAGIAN 04 &middot; LEMAK DARAH TINGGI</div><div class="bigt">02 · Lipemia</div><div class="polaroid" id="b3-vis"><div class="tape"></div><img src="../assets/lab-18.jpg"><div class="cap">02 · Lipemia</div></div><div class="keystrip" id="b3-key"><span class="kdot"></span>Serum keruh kayak susu. Puasa 8-12 jam sebelum ambil.</div></div><div class="beat" id="beat4" style="opacity:0"><div class="chlabel">BAGIAN 05 &middot; BILIRUBIN TINGGI</div><div class="bigt">03 · Ikterus</div><div class="polaroid" id="b4-vis"><div class="tape"></div><img src="../assets/lab-22.jpg"><div class="cap">03 · Ikterus</div></div><div class="keystrip" id="b4-key"><span class="kdot"></span>Serum kuning pekat. Catat 'ikterik' di LIS.</div></div><div class="beat" id="beat5" style="opacity:0"><div class="chlabel">PENUTUP</div><div class="bigt">Catat flag HIL<br><span class="hl">di LIS.</span></div><div class="card ask" id="b5-vis"><div class="big">Pernah nemu serum aneh? Cerita di komentar.</div><div class="pillrow"><span class="pill">Pre-analitik</span><span class="pill">HIL</span><span class="pill">FASTLIS</span></div></div></div>
   <div id="karaoke"><div class="phrase" id="p0" style="display:none"><span class="kw" id="w0">Serum</span> <span class="kw" id="w1">pasien</span> <span class="kw" id="w2">kamu</span> <span class="kw" id="w3">kok</span> <span class="kw" id="w4">merah</span> <span class="kw" id="w5">banget?</span> <span class="kw" id="w6">Kenalin</span> <span class="kw" id="w7">HIL,</span> <span class="kw" id="w8">biang</span> <span class="kw" id="w9">keroknya.</span></div><div class="phrase" id="p1" style="display:none"><span class="kw" id="w10">Hemolisis,</span> <span class="kw" id="w11">Lipemia,</span> <span class="kw" id="w12">Ikterus.</span> <span class="kw" id="w13">Tiga</span> <span class="kw" id="w14">pengganggu</span> <span class="kw" id="w15">hasil</span> <span class="kw" id="w16">lab</span> <span class="kw" id="w17">dari</span> <span class="kw" id="w18">pre-analitik.</span></div><div class="phrase" id="p2" style="display:none"><span class="kw" id="w19">01</span> <span class="kw" id="w20">·</span> <span class="kw" id="w21">Hemolisis.</span> <span class="kw" id="w22">Sel</span> <span class="kw" id="w23">darah</span> <span class="kw" id="w24">pecah.</span> <span class="kw" id="w25">Serum</span> <span class="kw" id="w26">jadi</span> <span class="kw" id="w27">merah.</span> <span class="kw" id="w28">Tourniquet</span> <span class="kw" id="w29">maks</span> <span class="kw" id="w30">1</span> <span class="kw" id="w31">menit,</span> <span class="kw" id="w32">jarum</span> <span class="kw" id="w33">21-22G.</span></div><div class="phrase" id="p3" style="display:none"><span class="kw" id="w34">02</span> <span class="kw" id="w35">·</span> <span class="kw" id="w36">Lipemia.</span> <span class="kw" id="w37">Lemak</span> <span class="kw" id="w38">darah</span> <span class="kw" id="w39">tinggi.</span> <span class="kw" id="w40">Serum</span> <span class="kw" id="w41">keruh</span> <span class="kw" id="w42">kayak</span> <span class="kw" id="w43">susu.</span> <span class="kw" id="w44">Puasa</span> <span class="kw" id="w45">8-12</span> <span class="kw" id="w46">jam</span> <span class="kw" id="w47">sebelum</span> <span class="kw" id="w48">ambil.</span></div><div class="phrase" id="p4" style="display:none"><span class="kw" id="w49">03</span> <span class="kw" id="w50">·</span> <span class="kw" id="w51">Ikterus.</span> <span class="kw" id="w52">Bilirubin</span> <span class="kw" id="w53">tinggi.</span> <span class="kw" id="w54">Serum</span> <span class="kw" id="w55">kuning</span> <span class="kw" id="w56">pekat.</span> <span class="kw" id="w57">Catat</span> <span class="kw" id="w58">'ikterik'</span> <span class="kw" id="w59">di</span> <span class="kw" id="w60">LIS.</span></div><div class="phrase" id="p5" style="display:none"><span class="kw" id="w61">Catat</span> <span class="kw" id="w62">flag</span> <span class="kw" id="w63">HIL</span> <span class="kw" id="w64">di</span> <span class="kw" id="w65">LIS.</span> <span class="kw" id="w66">Pernah</span> <span class="kw" id="w67">nemu</span> <span class="kw" id="w68">serum</span> <span class="kw" id="w69">aneh?</span> <span class="kw" id="w70">Cerita</span> <span class="kw" id="w71">di</span> <span class="kw" id="w72">komentar.</span></div></div>
 </div>
 <script>
@@ -63,32 +65,38 @@
   tl.from('#beat0 .chlabel', {opacity:0, y:16, duration:.5}, .15);
   tl.from('#beat0 .bigt', {opacity:0, y:30, duration:.7}, .35);
   tl.from('#b0-vis', {opacity:0, y:26, rotate:2, duration:.7}, .8);
+  tl.from('#b0-key', {opacity:0, x:-18, duration:.45}, 1.15);
   
-  tl.to("#beat0", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 5.15);
-  tl.fromTo("#beat1", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 5.15);
+  tl.to("#beat0", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 5.15);
+  tl.fromTo("#beat1", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 5.33);
   tl.from("#beat1 .chlabel", {opacity:0, y:14, duration:.45}, 5.3);
   tl.from("#beat1 .bigt", {opacity:0, y:26, duration:.6}, 5.45);
   tl.from("#b1-vis", {opacity:0, y:22, scale:.97, duration:.55}, 5.7);
-  tl.to("#beat1", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 11.79);
-  tl.fromTo("#beat2", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 11.79);
+  tl.from("#b1-key", {opacity:0, x:-18, duration:.45}, 5.95);
+  tl.to("#beat1", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 11.79);
+  tl.fromTo("#beat2", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 11.97);
   tl.from("#beat2 .chlabel", {opacity:0, y:14, duration:.45}, 11.94);
   tl.from("#beat2 .bigt", {opacity:0, y:26, duration:.6}, 12.09);
   tl.from("#b2-vis", {opacity:0, y:22, scale:.97, duration:.55}, 12.34);
-  tl.to("#beat2", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 19.81);
-  tl.fromTo("#beat3", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 19.81);
+  tl.from("#b2-key", {opacity:0, x:-18, duration:.45}, 12.59);
+  tl.to("#beat2", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 19.81);
+  tl.fromTo("#beat3", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 19.99);
   tl.from("#beat3 .chlabel", {opacity:0, y:14, duration:.45}, 19.96);
   tl.from("#beat3 .bigt", {opacity:0, y:26, duration:.6}, 20.11);
   tl.from("#b3-vis", {opacity:0, y:22, scale:.97, duration:.55}, 20.36);
-  tl.to("#beat3", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 27.48);
-  tl.fromTo("#beat4", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 27.48);
+  tl.from("#b3-key", {opacity:0, x:-18, duration:.45}, 20.61);
+  tl.to("#beat3", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 27.48);
+  tl.fromTo("#beat4", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 27.66);
   tl.from("#beat4 .chlabel", {opacity:0, y:14, duration:.45}, 27.63);
   tl.from("#beat4 .bigt", {opacity:0, y:26, duration:.6}, 27.78);
   tl.from("#b4-vis", {opacity:0, y:22, scale:.97, duration:.55}, 28.03);
-  tl.to("#beat4", {opacity:0, y:-36, duration:.7, ease:"power2.inOut"}, 34.38);
-  tl.fromTo("#beat5", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, ease:"power2.inOut"}, 34.38);
+  tl.from("#b4-key", {opacity:0, x:-18, duration:.45}, 28.28);
+  tl.to("#beat4", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 34.38);
+  tl.fromTo("#beat5", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 34.56);
   tl.from("#beat5 .chlabel", {opacity:0, y:14, duration:.45}, 34.53);
   tl.from("#beat5 .bigt", {opacity:0, y:26, duration:.6}, 34.68);
   tl.from("#b5-vis", {opacity:0, y:22, scale:.97, duration:.55}, 34.93);
+  tl.from("#b5-key", {opacity:0, x:-18, duration:.45}, 35.18);
   
   tl.call(setWord, [0], 0.0);
   tl.call(setWord, [1], 0.431);

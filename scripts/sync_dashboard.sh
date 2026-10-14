@@ -37,12 +37,19 @@ find "$DASH/media" -maxdepth 1 -type d -name "20*" | while read -r d; do
   fi
 done
 
+echo "[sync] stage render-status.json"
+if [ -f "$BASE/reels/v2/render_status.json" ]; then
+  cp -f "$BASE/reels/v2/render_status.json" "$DASH/render-status.json"
+else
+  echo '{"stage":"idle","progress":0,"detail":"","updated_at":"","video":null}' > "$DASH/render-status.json"
+fi
+
 echo "[sync] buka forwarder SSH"
 ~/workspace/bin/sabaraya-fwd.sh &>/dev/null &
 sleep 4
 
 echo "[sync] kirim ke server"
-eval $RSYNC "$DASH/data.json" "$DASH/index.html" "$DASH/logo.png" "$DASH/DESIGN.md" root@localhost:/srv/fastlis-dashboard/ || echo "[sync] WARN: kirim data.json/index.html gagal"
+eval $RSYNC "$DASH/data.json" "$DASH/index.html" "$DASH/logo.png" "$DASH/DESIGN.md" "$DASH/render-status.json" root@localhost:/srv/fastlis-dashboard/ || echo "[sync] WARN: kirim data.json/index.html gagal"
 eval $RSYNC --delete "$DASH/media/" root@localhost:/srv/fastlis-dashboard/media/ || echo "[sync] WARN: kirim media gagal"
 # nginx (www-data) harus bisa baca: rsync membawa permission 660 lokal
 $SSH root@localhost "chmod -R 755 /srv/fastlis-dashboard" 2>/dev/null || true

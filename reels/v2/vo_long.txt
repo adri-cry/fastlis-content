@@ -1,0 +1,10 @@
+Serum pasien kamu kok merah banget? Kenalin HIL, biang keroknya.
+Hemolisis, Lipemia, Ikterus. Tiga pengganggu hasil lab yang asalnya dari pre-analitik.
+Satu. Hemolisis. Sel darah pecah, serum jadi merah. Biang keroknya: tourniquet kelamaan, jarum kekecilan, atau tabung dikocok.
+Dua. Cara cegahnya. Tourniquet maksimal satu menit. Pakai jarum 21 sampai 22G. Balik tabung delapan sampai sepuluh kali, pelan. Jangan dikocok.
+Tiga. Lipemia. Serum keruh kayak susu. Penyebabnya lemak darah tinggi. Pasien nggak puasa, atau lagi dapat nutrisi parenteral.
+Empat. Cara atasinya. Minta pasien puasa delapan sampai dua belas jam sebelum diambil. Kalau masih keruh, catat lipemik dan diskusikan dengan dokter. Ultrasentrifugasi bisa jadi opsi terakhir untuk lipemia berat, sesuai SOP lab.
+Lima. Ikterus. Serum kuning pekat, tandanya bilirubin tinggi. Jangan asal encerkan. Catat ikterik di LIS supaya hasilnya bisa diinterpretasi dengan benar.
+Enam. Deteksi. Analyzer modern punya HIL index. Kadar hemolisis, lipemia, dan ikterus diukur otomatis di setiap sampel. Kalau indeksnya tinggi, analyzer kasih flag. Jangan diabaikan, itu peringatan.
+Tujuh. Keputusan. Kapan sampel harus ditolak? Kalau HIL-nya mengganggu hasil kritis, misalnya kalium. Tolak, minta ambil ulang, dan jelaskan alasannya. Dokumentasikan penolakan di LIS. Komunikasi yang jelas mencegah kejadian terulang.
+Pernah hasil lab bikin bingung gara-gara HIL? Ceritain pengalamanmu di kolom komentar. Follow FastLIS untuk edukasi lab setiap hari.

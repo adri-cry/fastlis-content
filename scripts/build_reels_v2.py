@@ -76,11 +76,75 @@ def audio_duration(p):
     return float(r.stdout.strip().split("=")[1])
 
 
-def compute_timings(beats, total):
+WHISPER_PY = os.path.expanduser("~/workspace/venvs/whisper/bin/python")
+WHISPER_TIMES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whisper_times.py")
+
+
+def _norm_w(s):
+    return "".join(c for c in s.lower() if c.isalnum())
+
+
+def real_word_timings(vo_path, narr_words):
+    """Timestamp kata asli dari audio via whisper. Kembalikan list t0 per kata
+    narasi, atau None kalau gagal (fallback ke estimasi proporsional)."""
+    import difflib
+    try:
+        cp = subprocess.run(
+            [WHISPER_PY, WHISPER_TIMES, vo_path],
+            capture_output=True, text=True, timeout=600)
+        wt = json.loads(cp.stdout)
+        if not wt or isinstance(wt, dict):
+            return None
+        nw = [_norm_w(w) for w in narr_words]
+        ww = [_norm_w(x["w"]) for x in wt]
+        sm = difflib.SequenceMatcher(None, nw, ww, autojunk=False)
+        t0s = [None] * len(nw)
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            if tag == "equal" and i2 > i1:
+                for k in range(i2 - i1):
+                    t0s[i1 + k] = wt[j1 + k]["t0"]
+            else:
+                # interpolasi linier di celah yang tidak match
+                t_start = wt[j1]["t0"] if j1 < len(wt) else (wt[-1]["t1"] if wt else 0)
+                t_end = wt[j2 - 1]["t1"] if j2 > j1 else t_start + 0.3 * max(1, i2 - i1)
+                n = max(1, i2 - i1)
+                for k in range(n):
+                    t0s[i1 + k] = round(t_start + (t_end - t_start) * k / n, 3)
+        # isi yang masih None (di ujung) dengan tetangga terdekat
+        last = 0.0
+        for i in range(len(t0s)):
+            if t0s[i] is None:
+                t0s[i] = last
+            else:
+                last = t0s[i]
+        return t0s
+    except Exception as e:
+        print(f"whisper timing gagal ({e}), pakai estimasi proporsional")
+        return None
+
+
+def compute_timings(beats, total, vo_path=None):
     words = []
     for bi, b in enumerate(beats):
         for w in b["narr"].split(" "):
             words.append({"w": w, "bi": bi})
+    if vo_path:
+        rt = real_word_timings(vo_path, [w["w"] for w in words])
+        if rt:
+            t = 0.0
+            for wd, t0 in zip(words, rt):
+                wd["t0"] = round(max(t0, t), 3)
+                # durasi kata = sampai kata berikut (min 0.12 dtk)
+                t = wd["t0"]
+            for i, wd in enumerate(words):
+                nxt = rt[i + 1] if i + 1 < len(rt) else total
+                wd["t1"] = round(max(wd["t0"] + 0.12, min(nxt, wd["t0"] + 1.2)), 3)
+            print(f"timing karaoke: REAL (whisper, {len(words)} kata)")
+            bounds = []
+            for bi in range(len(beats)):
+                ws = [w for w in words if w["bi"] == bi]
+                bounds.append((ws[0]["t0"], ws[-1]["t1"]))
+            return words, bounds
     weights = []
     for wd in words:
         wgt = len(wd["w"])
@@ -179,7 +243,7 @@ def main():
     # s1: hook
     d1 = r.get("s1", {})
     beats.append({
-        "label": f"BAGIAN 01 &middot; {esc(strip_html(d1.get('kicker', '')).upper())}",
+        "label": f"{esc(strip_html(d1.get('kicker', '')).upper())}",
         "title": blue_to_hl(d1.get("h1", "")),
         "narr": join_spoken(strip_html(d1.get('h1', '')), strip_html(d1.get('sub', ''))),
         "key": strip_html(d1.get('sub', '')),
@@ -188,7 +252,7 @@ def main():
     # s2: konteks
     d2 = r.get("s2", {})
     beats.append({
-        "label": f"BAGIAN 02 &middot; {esc(strip_html(d2.get('kicker', '')).upper())}",
+        "label": f"{esc(strip_html(d2.get('kicker', '')).upper())}",
         "title": blue_to_hl(d2.get("h1", "")),
         "narr": join_spoken(strip_html(d2.get('h1', '')), strip_html(d2.get('sub', ''))),
         "key": strip_html(d2.get('sub', '')),
@@ -198,7 +262,7 @@ def main():
     for i, key in enumerate(("s3", "s4", "s5"), start=3):
         dd = r.get(key, {})
         beats.append({
-            "label": f"BAGIAN 0{i} &middot; {esc(strip_html(dd.get('sub', '')).upper())}",
+            "label": f"{esc(strip_html(dd.get('sub', '')).upper())}",
             "title": blue_to_hl(dd.get("title", "")),
             "narr": join_spoken(strip_html(dd.get('title', '')), strip_html(dd.get('sub', '')),
                          strip_html(dd.get('desc', ''))),
@@ -211,13 +275,26 @@ def main():
     beats.append({
         "label": "PENUTUP",
         "title": blue_to_hl(d6.get("h1", "")),
-        "narr": join_spoken(strip_html(d6.get('h1', '')), strip_html(d6.get('sub', ''))),
+        "narr": join_spoken(strip_html(d6.get('h1', '')), strip_html(d6.get('sub', '')),
+                         "Follow FastLIS untuk edukasi lab setiap hari."),
         "bg": "",
         "pills": pills,
         "ask_sub": strip_html(d6.get("sub", "")),
+        "promo": "Follow FastLIS untuk edukasi lab setiap hari.",
     })
 
     return build_from_beats(beats, "daily", doy, track=True)
+
+
+def write_status(stage, progress=0, detail="", video=None):
+    """Tulis reels/v2/render_status.json untuk dipantau dashboard."""
+    st = {"stage": stage, "progress": round(progress, 1), "detail": detail,
+          "updated_at": today_wib().strftime("%Y-%m-%dT%H:%M:%S+07:00"),
+          "video": video}
+    try:
+        json.dump(st, open(os.path.join(V2, "render_status.json"), "w"))
+    except Exception:
+        pass
 
 
 def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
@@ -253,7 +330,7 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
     total = round(dur + 0.4, 2)
     print(f"VO jadi: {dur:.1f}s")
 
-    words, bounds = compute_timings(beats, dur)
+    words, bounds = compute_timings(beats, dur, vo_path=os.path.join(V2, f"vo_{prefix}.mp3"))
     json.dump({"words": words, "bounds": bounds, "total": total,
                "date": t.strftime("%Y-%m-%d")},
               open(os.path.join(V2, f"timings_{prefix}.json"), "w"), indent=1)
@@ -278,8 +355,10 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
         if "pills" in b:  # penutup
             q = b["ask_sub"]
             vis = (f'<div class="card ask" id="b{bi}-vis">'
+                   f'<div class="brandpill">FastLIS</div>'
                    f'<div class="big">{esc(q)}</div>'
-                   f'<div class="pillrow">{b["pills"]}</div></div>')
+                   f'<div class="pillrow">{b["pills"]}</div>'
+                   f'<div class="promo">{esc(b.get("promo", ""))}</div></div>')
         else:
             cap = strip_html(b["title"]).split("?")[0][:48]
             vis = (f'<div class="polaroid" id="b{bi}-vis"><div class="tape"></div>'
@@ -314,6 +393,7 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
   #canvas{{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}}
   #vignette{{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}}
   .progress{{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}}
+  #brandlogo{{position:absolute;top:26px;right:72px;height:52px;z-index:6;opacity:.92}}
   .beat{{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:40px 72px 360px}}
   .chlabel{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}}
   .bigt{{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}}
@@ -340,6 +420,7 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
   <div id="canvas"></div>
   <div id="vignette"></div>
   <div class="progress" id="prog"></div>
+  <img id="brandlogo" src="../assets/fastlis-logo.png" alt="FastLIS">
   {''.join(beat_divs)}
   <div id="karaoke">{''.join(karaoke_divs)}</div>
 </div>
@@ -379,6 +460,7 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
     print(f"{prefix}.html ditulis ({total}s, {len(words)} kata). Varian jingle hari ini: {variant}")
     print(f"VARIANT={variant}")
 
+    write_status("siap-render", 100, f"{prefix}.html siap dirender")
     # ---- tracking foto ----
     if not track:
         return 0
