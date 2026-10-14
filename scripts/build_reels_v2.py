@@ -120,7 +120,7 @@ def _is_lab_photo(fn, tags):
     return any(k in t for t in tg for k in LAB_KEYS)
 
 
-def pick_photos(beats_kw, dayofyear):
+def pick_photos(beats_kw, dayofyear, ignore_used=False):
     """Pilih foto per beat berdasarkan relevansi tag; unik antar beat; hindari yang baru dipakai."""
     cands = sorted(glob.glob(os.path.join(ASSETS, "lab-*.jpg")))
     cands = [os.path.basename(c) for c in cands]
@@ -130,11 +130,12 @@ def pick_photos(beats_kw, dayofyear):
     except Exception:
         tags = {}
     used = set()
-    try:
-        uj = json.load(open(os.path.join(BASE, "data", "used_images.json")))
-        used.update(uj.get("today_video", []))
-    except Exception:
-        pass
+    if not ignore_used:
+        try:
+            uj = json.load(open(os.path.join(BASE, "data", "used_images.json")))
+            used.update(uj.get("today_video", []))
+        except Exception:
+            pass
 
     def score(fn, kws):
         tg = " ".join(str(x).lower() for x in tags.get(fn, []))
@@ -216,8 +217,17 @@ def main():
         "ask_sub": strip_html(d6.get("sub", "")),
     })
 
+    return build_from_beats(beats, "daily", doy, track=True)
+
+
+def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
+    """Pipeline generik: foto -> TTS -> timing -> html. prefix: daily/long."""
+    t = today_wib()
+
     # ---- foto per beat (kecuali penutup) ----
-    auto = pick_photos(BEAT_KW, doy)
+    auto = pick_photos([b.get("kw") or BEAT_KW[i % len(BEAT_KW)]
+                        for i, b in enumerate(beats[:-1])], doy,
+                        ignore_used=ignore_used)
     ai = 0
     for b in beats[:-1]:
         bg = b.get("bg", "")
@@ -231,22 +241,22 @@ def main():
 
     # ---- TTS ----
     narr_text = "\n".join(b["narr"] for b in beats)
-    open(os.path.join(V2, "vo_daily.txt"), "w").write(narr_text)
+    open(os.path.join(V2, f"vo_{prefix}.txt"), "w").write(narr_text)
     print("naskah VO:", narr_text[:120], "...")
     cp = subprocess.run([TTS, "speak", "--language", "id", "--voice", VOICE,
-                         "--output", VO_OUT, "--text-stdin"],
+                         "--output", os.path.join(V2, f"vo_{prefix}.mp3"), "--text-stdin"],
                         input=narr_text.encode(), capture_output=True)
-    if cp.returncode != 0 or not os.path.exists(VO_OUT):
+    if cp.returncode != 0 or not os.path.exists(os.path.join(V2, f"vo_{prefix}.mp3")):
         print("TTS GAGAL:", cp.stderr.decode()[:500])
         return 1
-    dur = audio_duration(VO_OUT)
+    dur = audio_duration(os.path.join(V2, f"vo_{prefix}.mp3"))
     total = round(dur + 0.4, 2)
     print(f"VO jadi: {dur:.1f}s")
 
     words, bounds = compute_timings(beats, dur)
     json.dump({"words": words, "bounds": bounds, "total": total,
                "date": t.strftime("%Y-%m-%d")},
-              open(os.path.join(V2, "timings_daily.json"), "w"), indent=1)
+              open(os.path.join(V2, f"timings_{prefix}.json"), "w"), indent=1)
 
     # ---- HTML ----
     wi = 0
@@ -364,12 +374,14 @@ def main():
 </body>
 </html>
 """
-    open(HTML_OUT, "w").write(html)
+    open(os.path.join(V2, f"{prefix}.html"), "w").write(html)
     variant = JINGLE_VARIANTS[doy % 4]
-    print(f"daily.html ditulis ({total}s, {len(words)} kata). Varian jingle hari ini: {variant}")
+    print(f"{prefix}.html ditulis ({total}s, {len(words)} kata). Varian jingle hari ini: {variant}")
     print(f"VARIANT={variant}")
 
     # ---- tracking foto ----
+    if not track:
+        return 0
     try:
         used_p = os.path.join(BASE, "data", "used_images.json")
         used = json.load(open(used_p))
