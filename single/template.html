@@ -24,7 +24,9 @@
     box-shadow: 6px 6px 14px rgba(4,105,220,.30), -4px -4px 10px rgba(255,255,255,.9), inset 2px 2px 4px rgba(255,255,255,.45), inset -3px -3px 6px rgba(0,40,90,.3);
     margin-bottom: 10px; }
   .s-kicker:empty { display: none; }
-  .s-body { flex: 1; z-index: 2; padding: 20px 56px 0 56px; display: flex; flex-direction: column; min-height: 0; justify-content: center; }
+  .s-body { flex: 1; z-index: 2; padding: 20px 56px 0 56px; display: flex; flex-direction: column; min-height: 0; justify-content: safe center; }
+  /* safe center: konten tetap ter-center kalau muat; kalau konten kepanjangan,
+     overflow ke bawah (bukan ke atas menutupi logo/kicker di s-top) */
   .s-title { font-weight: 800; font-size: 78px; line-height: 1.06; letter-spacing: -1.5px; color: #0B2B4F; }
   .s-title .hl { background: #FFE9A8; padding: 4px 22px 10px; border-radius: 20px; display: inline-block;
     border: 3px solid rgba(255,255,255,.9);
