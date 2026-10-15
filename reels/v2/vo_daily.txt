@@ -1,6 +1,6 @@
-Serum pasien kamu kok merah banget? Kenalin HIL, biang keroknya.
-Hemolisis, Lipemia, Ikterus. Tiga pengganggu hasil lab dari pre-analitik.
-01 · Hemolisis. Sel darah pecah. Serum jadi merah. Tourniquet maks 1 menit, jarum 21-22G.
-02 · Lipemia. Lemak darah tinggi. Serum keruh kayak susu. Puasa 8-12 jam sebelum ambil.
-03 · Ikterus. Bilirubin tinggi. Serum kuning pekat. Catat 'ikterik' di LIS.
-Catat flag HIL di LIS. Pernah nemu serum aneh? Cerita di komentar.
+Hasilnya kritis, kapan wajib nelpon dokter? Flag L/H ≠ nilai kritis.
+Nilai kritis itu alarm darurat lab. Hasil ekstrem LL/HH, ancam nyawa.
+Mitos 1: flag = kritis. Cuma info di layar. Flag L/H = di luar rentang normal. Muncul otomatis di LIS.
+Mitos 2: batas kritis seragam. Prinsipnya sama. Tiap lab tentukan batas sendiri. Tapi lapornya ≤ 60 menit.
+Mitos 3: WA = selesai. WA doang belum cukup. Catat penerima + jam. Minta read-back hasilnya.
+Kenali batas kritis di lab kamu. Pernah lapor kritis? Cerita di komentar. Follow FastLIS untuk edukasi lab setiap hari.
