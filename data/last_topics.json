@@ -54,6 +54,11 @@
       "date": "2026-10-15",
       "topik": "Nilai kritis (LL/HH) + flagging L/H: kapan hasil dikategorikan kritis dan cara melaporkannya",
       "format": "mitos-vs-fakta"
+    },
+    {
+      "date": "2026-10-16",
+      "topik": "Delta check: bandingkan hasil hari ini dengan hasil kunjungan sebelumnya sebelum rilis hasil",
+      "format": "kuis (jawaban di slide 5)"
     }
   ]
 }
