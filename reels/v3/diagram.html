@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../assets/fonts-poppins.css">
+<script src="../assets/gsap.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;background:#071418;overflow:hidden;font-family:'Poppins',sans-serif;color:#fff}
+  #root{width:1080px;height:1920px;position:relative;overflow:hidden}
+  #bg{position:absolute;inset:0;
+    background:
+      radial-gradient(900px 600px at 12% 6%, rgba(45,212,191,.07), transparent 60%),
+      radial-gradient(1000px 700px at 88% 94%, rgba(59,158,255,.08), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.022) 0 2px, transparent 2px 26px),
+      #071418;}
+  /* chrome */
+  #progtrack{position:absolute;top:0;left:0;width:1080px;height:8px;background:rgba(255,255,255,.08)}
+  #prog{position:absolute;top:0;left:0;width:0;height:8px;background:linear-gradient(90deg,#2DD4BF,#3B9EFF)}
+  #logowrap{position:absolute;top:26px;right:52px;background:#fff;border-radius:18px;padding:12px 20px}
+  #brandlogo{height:52px;display:block;opacity:.95}
+  #dots{position:absolute;bottom:52px;left:0;width:1080px;display:flex;justify-content:center;gap:18px}
+  #dots span{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.22)}
+  #dots span.on{background:#2DD4BF;box-shadow:0 0 12px #2DD4BF}
+  /* scenes */
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    padding:170px 84px 120px;opacity:0;visibility:hidden}
+  .pill{font-family:ui-monospace,Menlo,monospace;font-size:30px;letter-spacing:6px;color:#2DD4BF;
+    border:2px solid rgba(45,212,191,.55);border-radius:999px;padding:14px 34px;margin-bottom:44px}
+  .pill.red{color:#FF6B6B;border-color:rgba(255,107,107,.55)}
+  .pill.blue{color:#3B9EFF;border-color:rgba(59,158,255,.55)}
+  .bigt{font-size:92px;font-weight:800;line-height:1.12;text-align:center;margin-bottom:20px}
+  .bigt .acc{color:#2DD4BF}
+  .bigt .accR{color:#FF6B6B}
+  .bigt .accB{color:#3B9EFF}
+  .sub{font-size:40px;color:rgba(255,255,255,.75);text-align:center;margin-bottom:56px}
+  .vis{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+  /* compare cards */
+  .cmp{display:flex;gap:36px;width:100%;align-items:stretch}
+  .card{flex:1;border-radius:28px;padding:44px 36px;background:rgba(255,255,255,.045);
+    border:2px solid rgba(255,255,255,.12);text-align:center}
+  .card.blue{border-color:rgba(59,158,255,.6);background:rgba(59,158,255,.08)}
+  .card.red{border-color:rgba(255,107,107,.6);background:rgba(255,107,107,.08)}
+  .card h3{font-size:44px;font-weight:800;margin:22px 0 18px;letter-spacing:2px}
+  .card.blue h3{color:#3B9EFF}.card.red h3{color:#FF6B6B}
+  .card p{font-size:34px;color:rgba(255,255,255,.8);line-height:1.5}
+  .neq{font-size:120px;font-weight:800;color:#2DD4BF;align-self:center}
+  /* table */
+  table.dtab{width:100%;border-collapse:collapse;font-size:36px}
+  table.dtab th{font-family:ui-monospace,monospace;font-size:30px;letter-spacing:3px;color:#2DD4BF;
+    text-align:left;padding:20px 28px;border-bottom:2px solid rgba(45,212,191,.4)}
+  table.dtab td{padding:26px 28px;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
+  table.dtab td.v{font-family:ui-monospace,monospace;color:#F0A030;font-weight:700}
+  .tnote{margin-top:36px;font-size:34px;color:rgba(255,255,255,.7);text-align:center;line-height:1.5}
+  /* flow steps */
+  #s4 .vis{justify-content:flex-start;padding-top:24px}
+  .steps{display:flex;flex-direction:column;gap:0;width:100%}
+  .step{display:flex;gap:32px;align-items:center;background:rgba(255,255,255,.045);
+    border:2px solid rgba(255,255,255,.12);border-radius:24px;padding:34px 40px}
+  .step .n{flex:0 0 84px;height:84px;border-radius:50%;background:#2DD4BF;color:#071418;
+    font-size:44px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .step p{font-size:38px;line-height:1.4}
+  .step p b{color:#2DD4BF}
+  .conn{width:4px;height:34px;background:rgba(45,212,191,.5);margin-left:80px}
+  /* summary */
+  .sumcard{display:flex;gap:32px;align-items:center;width:100%;background:rgba(255,255,255,.045);
+    border:2px solid rgba(255,255,255,.12);border-radius:24px;padding:36px 40px;margin-bottom:28px}
+  .sumcard .n{font-family:ui-monospace,monospace;font-size:56px;font-weight:800;color:#2DD4BF;flex:0 0 110px}
+  .sumcard p{font-size:40px;line-height:1.4}
+  .brandrow{display:flex;align-items:center;gap:24px;margin-top:44px}
+  .brandpill{font-size:40px;font-weight:800;background:#3B9EFF;border-radius:999px;padding:16px 44px}
+  .follow{font-size:36px;color:rgba(255,255,255,.85)}
+  /* svg helpers */
+  .pulse{transform-origin:center;transform-box:fill-box}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="diagram" data-start="0" data-duration="52.0" data-width="1080" data-height="1920">
+<div id="bg"></div>
+<div id="progtrack"><div id="prog"></div></div>
+<div id="logowrap"><img id="brandlogo" src="../assets/fastlis-logo.png" alt="FastLIS"></div>
+<div id="dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<!-- SCENE 0 : HOOK -->
+<div class="scene" id="s0">
+  <div class="pill">HOOK</div>
+  <div class="bigt">Hasilnya kritis,<br><span class="acc">kapan wajib nelpon dokter?</span></div>
+  <div class="sub">Flag L/H &ne; nilai kritis.</div>
+  <div class="vis">
+    <svg id="s0svg" width="420" height="420" viewBox="0 0 420 420" fill="none">
+      <circle class="pulse" id="s0ring" cx="210" cy="210" r="150" stroke="#2DD4BF" stroke-width="6" opacity=".5"/>
+      <circle cx="210" cy="210" r="110" stroke="rgba(255,255,255,.25)" stroke-width="4"/>
+      <text x="210" y="265" text-anchor="middle" font-size="150" font-weight="800" fill="#2DD4BF" font-family="Poppins">?</text>
+    </svg>
+  </div>
+</div>
+
+<!-- SCENE 1 : KONSEP -->
+<div class="scene" id="s1">
+  <div class="pill red">KONSEP</div>
+  <div class="bigt">Nilai kritis itu<br><span class="accR">alarm darurat lab.</span></div>
+  <div class="sub">Hasil ekstrem LL / HH, ancam nyawa.</div>
+  <div class="vis">
+    <div style="display:flex;gap:48px;align-items:center">
+      <svg id="bell" width="220" height="240" viewBox="0 0 220 240" fill="none">
+        <path d="M110 20 C60 20 45 80 45 120 L30 160 H190 L175 120 C175 80 160 20 110 20Z" stroke="#FF6B6B" stroke-width="10" stroke-linejoin="round"/>
+        <circle cx="110" cy="195" r="18" fill="#FF6B6B"/>
+        <path d="M70 55 L45 30 M150 55 L175 30" stroke="#FF6B6B" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:28px">
+        <div class="llhh" style="font-family:ui-monospace,monospace;font-size:72px;font-weight:800;color:#FF6B6B;border:3px solid #FF6B6B;border-radius:20px;padding:18px 44px;text-align:center">LL</div>
+        <div class="llhh" style="font-family:ui-monospace,monospace;font-size:72px;font-weight:800;color:#FF6B6B;border:3px solid #FF6B6B;border-radius:20px;padding:18px 44px;text-align:center">HH</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 2 : MITOS 1 -->
+<div class="scene" id="s2">
+  <div class="pill blue">MITOS 1</div>
+  <div class="bigt">Flag = kritis<span class="accB">?</span></div>
+  <div class="sub">Dua hal yang beda jauh.</div>
+  <div class="vis">
+    <div class="cmp">
+      <div class="card blue" id="cA">
+        <svg width="120" height="100" viewBox="0 0 120 100" fill="none">
+          <rect x="8" y="8" width="104" height="66" rx="8" stroke="#3B9EFF" stroke-width="7"/>
+          <rect x="52" y="82" width="16" height="10" fill="#3B9EFF"/>
+          <text x="60" y="55" text-anchor="middle" font-size="38" font-weight="800" fill="#3B9EFF" font-family="ui-monospace">L</text>
+        </svg>
+        <h3>FLAG L/H</h3>
+        <p>Info di layar<br>Otomatis di LIS<br>Di luar rentang normal</p>
+      </div>
+      <div class="neq" id="s2neq">&ne;</div>
+      <div class="card red" id="cB">
+        <svg width="120" height="100" viewBox="0 0 120 100" fill="none">
+          <path d="M60 8 C35 8 28 40 28 58 L20 78 H100 L92 58 C92 40 85 8 60 8Z" stroke="#FF6B6B" stroke-width="7" stroke-linejoin="round"/>
+          <circle cx="60" cy="90" r="8" fill="#FF6B6B"/>
+        </svg>
+        <h3>NILAI KRITIS</h3>
+        <p>Alarm darurat<br>Ancam nyawa<br>Wajib lapor cepat</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3 : MITOS 2 -->
+<div class="scene" id="s3">
+  <div class="pill blue">MITOS 2</div>
+  <div class="bigt">Batas kritis<br><span class="accB">nggak selalu sama.</span></div>
+  <div class="sub">Tiap lab tentukan batas sendiri.</div>
+  <div class="vis" style="flex-direction:column">
+    <table class="dtab">
+      <tr><th>TES</th><th>LAB A</th><th>LAB B</th></tr>
+      <tr class="trow"><td>Kalium (K)</td><td class="v">&lt; 2,8</td><td class="v">&lt; 3,0</td></tr>
+      <tr class="trow"><td>Glukosa</td><td class="v">&gt; 500</td><td class="v">&gt; 450</td></tr>
+      <tr class="trow"><td>Hemoglobin</td><td class="v">&lt; 7</td><td class="v">&lt; 6,5</td></tr>
+    </table>
+    <div class="tnote" id="s3note">Beda lab, beda angka.<br>Prinsipnya sama: <b style="color:#2DD4BF">lapor cepat.</b></div>
+  </div>
+</div>
+
+<!-- SCENE 4 : MITOS 3 -->
+<div class="scene" id="s4">
+  <div class="pill red">MITOS 3</div>
+  <div class="bigt">WA doang<br><span class="accR">belum cukup.</span></div>
+  <div class="sub">Begini cara lapor yang benar:</div>
+  <div class="vis">
+    <div class="steps">
+      <div class="step st"><div class="n">1</div><p>Hasil kritis keluar dari analyzer</p></div>
+      <div class="conn"></div>
+      <div class="step st"><div class="n">2</div><p><b>Telpon dokter</b>, jangan cuma WA</p></div>
+      <div class="conn"></div>
+      <div class="step st"><div class="n">3</div><p>Catat <b>nama penerima + jam</b> lapor</p></div>
+      <div class="conn"></div>
+      <div class="step st"><div class="n">4</div><p>Minta <b>read-back</b> hasilnya</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 5 : RANGKUMAN -->
+<div class="scene" id="s5">
+  <div class="pill">RANGKUMAN</div>
+  <div class="bigt" style="font-size:76px">Tiga hal yang<br><span class="acc">wajib diingat.</span></div>
+  <div class="vis" style="flex-direction:column">
+    <div class="sumcard sc"><div class="n">01</div><p>Flag L/H &ne; nilai kritis</p></div>
+    <div class="sumcard sc"><div class="n">02</div><p>Kenali batas kritis di lab kamu</p></div>
+    <div class="sumcard sc"><div class="n">03</div><p>Lapor cepat + read-back</p></div>
+    <div class="brandrow" id="s5promo">
+      <div class="brandpill">FastLIS</div>
+      <div class="follow">Follow FastLIS untuk edukasi lab setiap hari.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var DUR = 52.0;
+// scene bounds: [start,end]
+var B = [[0,6.3],[6.3,13.0],[13.0,23.3],[23.3,32.9],[32.9,42.6],[42.6,52.0]];
+var dots = document.querySelectorAll('#dots span');
+function setDot(i){ dots.forEach(function(d,k){ d.classList.toggle('on', k===i); }); }
+
+var tl = gsap.timeline({defaults:{ease:'power2.out'}});
+tl.fromTo('#prog',{width:0},{width:1080,duration:DUR,ease:'none'},0);
+
+// generic scene enter/exit
+function enter(i, t){
+  tl.call(setDot,[i],t);
+  tl.fromTo('#s'+i,{opacity:0,visibility:'visible',y:60},{opacity:1,y:0,duration:.5},t);
+}
+function exit(i, t){
+  tl.to('#s'+i,{opacity:0,y:-50,duration:.35,ease:'power2.in'},t);
+}
+
+// S0 HOOK [0,6.3]
+enter(0, 0);
+tl.from('#s0 .pill',{opacity:0,y:14,duration:.4},.1);
+tl.from('#s0 .bigt',{opacity:0,y:28,duration:.6},.3);
+tl.from('#s0 .sub',{opacity:0,y:18,duration:.5},.7);
+tl.from('#s0svg',{opacity:0,scale:.9,duration:.6},1.1);
+tl.to('#s0ring',{scale:1.18,opacity:.15,duration:1.2,repeat:4,yoyo:true,ease:'sine.inOut'},1.6);
+exit(0, 5.85);
+
+// S1 KONSEP [6.3,13.0]
+enter(1, 6.03);
+tl.from('#s1 .pill',{opacity:0,y:14,duration:.4},6.1);
+tl.from('#s1 .bigt',{opacity:0,y:28,duration:.6},6.25);
+tl.from('#s1 .sub',{opacity:0,y:18,duration:.5},6.55);
+tl.from('#bell',{opacity:0,scale:.85,duration:.5},6.9);
+tl.to('#bell',{rotation:12,duration:.12,repeat:24,yoyo:true,transformOrigin:'top center',ease:'sine.inOut'},7.4);
+tl.from('#s1 .llhh',{opacity:0,x:30,stagger:.35,duration:.5},7.6);
+exit(1, 12.55);
+
+// S2 MITOS 1 [13.0,23.3]
+enter(2, 12.73);
+tl.from('#s2 .pill',{opacity:0,y:14,duration:.4},12.8);
+tl.from('#s2 .bigt',{opacity:0,y:28,duration:.6},12.95);
+tl.from('#s2 .sub',{opacity:0,y:18,duration:.5},13.25);
+tl.from('#cA',{opacity:0,x:-40,duration:.55},13.6);
+tl.from('#s2neq',{opacity:0,scale:.5,duration:.45},14.2);
+tl.from('#cB',{opacity:0,x:40,duration:.55},14.6);
+exit(2, 22.85);
+
+// S3 MITOS 2 [23.3,32.9]
+enter(3, 23.03);
+tl.from('#s3 .pill',{opacity:0,y:14,duration:.4},23.1);
+tl.from('#s3 .bigt',{opacity:0,y:28,duration:.6},23.25);
+tl.from('#s3 .sub',{opacity:0,y:18,duration:.5},23.55);
+tl.from('#s3 .trow',{opacity:0,y:24,stagger:.5,duration:.5},24.0);
+tl.from('#s3note',{opacity:0,y:18,duration:.5},26.2);
+exit(3, 32.45);
+
+// S4 MITOS 3 [32.9,42.6]
+enter(4, 32.63);
+tl.from('#s4 .pill',{opacity:0,y:14,duration:.4},32.7);
+tl.from('#s4 .bigt',{opacity:0,y:28,duration:.6},32.85);
+tl.from('#s4 .sub',{opacity:0,y:18,duration:.5},33.15);
+tl.from('#s4 .st',{opacity:0,x:-40,stagger:.55,duration:.5},33.6);
+tl.from('#s4 .conn',{opacity:0,stagger:.55,duration:.4},33.85);
+exit(4, 42.15);
+
+// S5 RANGKUMAN [42.6,52.0]
+enter(5, 42.33);
+tl.from('#s5 .pill',{opacity:0,y:14,duration:.4},42.4);
+tl.from('#s5 .bigt',{opacity:0,y:28,duration:.6},42.55);
+tl.from('#s5 .sc',{opacity:0,y:26,stagger:.45,duration:.5},43.0);
+tl.from('#s5promo',{opacity:0,y:20,duration:.6},45.0);
+</script>
+</div>
+</body>
+</html>
