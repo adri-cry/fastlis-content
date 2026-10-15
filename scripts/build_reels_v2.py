@@ -420,7 +420,7 @@ def build_from_beats(beats, prefix, doy, track=True, ignore_used=False):
   <div id="canvas"></div>
   <div id="vignette"></div>
   <div class="progress" id="prog"></div>
-  <img id="brandlogo" src="../assets/fastlis-logo.png" alt="FastLIS">
+  <img id="brandlogo" src="../assets/fastlis-logo-dark.png" alt="FastLIS">
   {''.join(beat_divs)}
   <div id="karaoke">{''.join(karaoke_divs)}</div>
 </div>
