@@ -120,12 +120,13 @@ def scene_stage(s, si):
 
 def scene_stamp(s, si):
     _new_scene()
-    cid, tid = f"s{si}-sp-circ", f"s{si}-sp-txt"
+    cid, tid, pid = f"s{si}-sp-circ", f"s{si}-sp-txt", f"s{si}-punch"
     _reg(cid, s["circ_trigger"], "draw")
     _reg(tid, s["stamp_trigger"], "reveal")
+    _reg(pid, s["stamp_trigger"], "punch", offset=0.1)
     return (f'<div class="wrap"><h1 class="hand">{esc(s["top"])}</h1>'
             f'<p class="sub">{esc(s["sub"])}</p>'
-            f'<div style="position:relative;display:inline-block;margin-top:36px">'
+            f'<div id="{pid}" style="position:relative;display:inline-block;margin-top:36px">'
             f'<svg viewBox="0 0 560 300" style="width:560px;display:block" filter="url(#wobble)">'
             f'<ellipse class="ink-red draw" id="s{si}-sp-circ" pathLength="1" cx="280" cy="150" rx="250" ry="125"/>'
             f'<text x="280" y="185" text-anchor="middle" font-size="100" font-family="Caveat" fill="#E23B3B" transform="rotate(-6 280 150)" opacity="0" id="{tid}">{s["stamp"]}</text>'
@@ -219,22 +220,33 @@ function clearWords() {
   document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
 }
 var BEAT_DURS = __BEATDURS__;
+var BEAT_CAM = __BEATCAM__;
 function drawEl(id) {
   var el = document.getElementById(id); if(!el) return;
   gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, ease:'power1.inOut'});
 }
 function revealEl(id) {
   var el = document.getElementById(id); if(!el) return;
-  gsap.fromTo(el, {opacity:0, y:24}, {opacity:1, y:0, duration:0.6, ease:'power2.out'});
+  gsap.fromTo(el, {opacity:0, y:26, scale:0.92}, {opacity:1, y:0, scale:1, duration:0.55, ease:'back.out(1.5)'});
 }
-function drift(si) {
+function camera(si) {
   var el = document.querySelector('#s'+si+' .wrap'); if(!el) return;
-  gsap.fromTo(el, {scale:1}, {scale:1.05, duration:BEAT_DURS[si]||8, ease:'none', transformOrigin:'50% 50%'});
+  var dur = BEAT_DURS[si]||8, kind = BEAT_CAM[si]||'zin', o = {transformOrigin:'50% 50%', ease:'power1.inOut'};
+  if (kind==='zin') gsap.fromTo(el, {scale:1}, {scale:1.08, duration:dur, ...o});
+  else if (kind==='zout') gsap.fromTo(el, {scale:1.08}, {scale:1.0, duration:dur, ...o});
+  else if (kind==='panr') gsap.fromTo(el, {x:-55, scale:1.04}, {x:55, scale:1.04, duration:dur, ...o});
+  else if (kind==='panl') gsap.fromTo(el, {x:55, scale:1.04}, {x:-55, scale:1.04, duration:dur, ...o});
+}
+function punch(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.timeline()
+    .to(el, {scale:1.16, duration:0.22, ease:'power3.out', transformOrigin:'50% 50%'})
+    .to(el, {scale:1.0, duration:0.5, ease:'back.out(1.6)'});
 }
 function showScene(si) {
   document.querySelectorAll('.scene').forEach(e=>e.classList.remove('on'));
   var el = document.getElementById('s'+si); if(el) el.classList.add('on');
-  drift(si);
+  camera(si);
 }
 __CALLS__
 """
@@ -317,12 +329,16 @@ def main():
             if t is None:
                 t = a + (bb - a) * (0.12 + 0.76 * (k + 1) / (n + 1))
             t = round(t + r["offset"], 3)
-            fn = "drawEl" if r["kind"] == "draw" else "revealEl"
+            fn = {"draw": "drawEl", "reveal": "revealEl", "punch": "punch"}[r["kind"]]
             calls.append(f"tl.call({fn}, ['{r['id']}'], {t});")
     calls.append(f'tl.call(clearWords, [], {total - 0.05});')
 
     beat_durs = [round(bb - a, 2) for a, bb in bounds]
+    cam = {"title": "zin", "flow": "panr", "stage": "zin", "stamp": "zin",
+           "checklist": "zout", "closing": "zout"}
+    beat_cams = [cam[b["scene"]["type"]] for b in BEATS]
     js = JS.replace("__BEATDURS__", json.dumps(beat_durs)).replace(
+        "__BEATCAM__", json.dumps(beat_cams)).replace(
         "__CALLS__", "\n".join(calls))
 
     html = (f'<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">'
