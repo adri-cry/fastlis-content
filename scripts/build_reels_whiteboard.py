@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """Whiteboard reels builder — TEMPLATE BARU FastLIS (menggantikan cinematic v2).
 Gaya: kertas putih, tulisan tangan Caveat, garis digambar progresif (wobble),
-aksen biru FastLIS, karaoke stabilo kuning, konten center vertikal.
+aksen biru FastLIS, karaoke stabilo kuning, konten center vertikal,
+kamera variatif per tipe scene (zin/zout/pan) + punch + reveal pop.
 
-Pakai: python3 scripts/build_reels_whiteboard.py  (beats di BEATS bawah)
-Output: reels/v2/whiteboard.html + vo_whiteboard.mp3 + timings_whiteboard.json
-Render: render_reels.py --html v2/whiteboard.html --out v2/whiteboard_raw.mp4 --duration <total>
-Mux VO saja: ffmpeg -i raw -i vo_whiteboard.mp3 -c:v copy -c:a aac -shortest -movflags +faststart out.mp4
+Pakai:
+  python3 scripts/build_reels_whiteboard.py                 # BEATS hardcoded -> whiteboard.html
+  python3 scripts/build_reels_whiteboard.py --beats f.json [--prefix p]
+      # beats dari JSON (skema sama kayak BEATS) -> reels/v2/<p>.html
+  python3 scripts/build_reels_whiteboard.py --daily        # susun beats generik
+      # dari content/hari-ini.json key "reels" (s1..s6) -> reels/v2/daily.html
+      # (nama file SAMA kayak builder v2 supaya langkah cron 4-8 tidak berubah)
+Render: render_reels.py --html v2/<prefix>.html --out v2/<prefix>_raw.mp4 --duration <total>
+Mux VO saja: ffmpeg -i raw -i vo_<prefix>.mp3 -c:v copy -c:a aac -shortest -movflags +faststart out.mp4
 """
-import json, os, subprocess, sys
+import json, os, re, subprocess, sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 V2 = os.path.join(BASE, "reels", "v2")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
-from build_reels_v2 import real_word_timings, audio_duration, esc, TTS, VOICE
+from build_reels_v2 import real_word_timings, audio_duration, esc, TTS, VOICE, strip_html, join_spoken
 
 # ---------------------------------------------------------------- beats
 # scene: dict dengan type + param. types: title, flow, stage, stamp, checklist, closing
@@ -164,6 +170,103 @@ def scene_closing(_s=None, _si=None):
 BUILDERS = {"title": scene_title, "flow": scene_flow, "stage": scene_stage,
             "stamp": scene_stamp, "checklist": scene_checklist, "closing": scene_closing}
 
+
+# ------------------------------------------------- composer generik harian
+# Petakan s1..s6 hari-ini.json (struktur yang sama dipakai builder v2)
+# ke scene whiteboard. Trigger animasi dipilih dari kata isi narasi;
+# kalau kata tidak ketemu di timing whisper, builder pakai fallback
+# proporsional (tidak error, animasi tetap jalan).
+_STOP = {"yang", "dan", "atau", "dengan", "untuk", "dari", "ini", "itu",
+        "adalah", "bisa", "akan", "jadi", "sudah", "belum", "tidak", "nggak",
+        "jangan", "kamu", "kita", "mereka", "saya", "apa", "bagaimana",
+        "kenapa", "kapan", "berapa", "agar", "supaya", "saat", "ketika",
+        "dalam", "pada", "oleh", "antara", "setiap", "semua", "ada", "pun",
+        "saja", "juga", "sangat", "lebih", "kurang", "bukan", "kalau"}
+
+
+def _pick_trigger(narr, fallback=""):
+    for w in narr.split(" "):
+        k = w.lower().strip(".,!?;:\"'()")
+        if len(k) > 3 and k not in _STOP and k.isalpha():
+            return k
+    return fallback
+
+
+def compose_daily_beats(path=None):
+    """Susun beats whiteboard generik dari content/hari-ini.json key 'reels'."""
+    jp = path or os.path.join(BASE, "content", "hari-ini.json")
+    r = json.load(open(jp))["reels"]
+    beats = []
+
+    # s1: hook -> title (underline digambar pas kata kunci disebut)
+    d1 = r.get("s1", {})
+    n1 = join_spoken(strip_html(d1.get("h1", "")), strip_html(d1.get("sub", "")))
+    beats.append({
+        "narr": n1,
+        "scene": {"type": "title",
+                  "title": d1.get("h1", ""),
+                  "sub": strip_html(d1.get("sub", "")),
+                  "ul_trigger": _pick_trigger(n1)}})
+
+    # s2: konteks/kasus -> stage (kotak besar + 2 baris penjelasan)
+    d2 = r.get("s2", {})
+    n2 = join_spoken(strip_html(d2.get("h1", "")), strip_html(d2.get("sub", "")))
+    kicker = strip_html(d2.get("kicker", "info")).split(" ")
+    word2 = (kicker[0] if kicker else "info").upper()[:10] or "INFO"
+    h1b, sub2 = strip_html(d2.get("h1", "")), strip_html(d2.get("sub", ""))
+    beats.append({
+        "narr": n2,
+        "scene": {"type": "stage", "word": word2, "color": "#1B5FD9",
+                  "box_trigger": _pick_trigger(n2, word2.lower()),
+                  "descs": [[h1b, _pick_trigger(h1b)],
+                            [sub2, _pick_trigger(sub2)]]}})
+
+    # s3-s5: 3 poin bernomor -> stage (angka besar di kotak)
+    for k in ("s3", "s4", "s5"):
+        dd = r.get(k, {})
+        title = strip_html(dd.get("title", ""))
+        m = re.match(r"\s*(\d+)", title)
+        word = m.group(1) if m else "•"
+        desc, sub = strip_html(dd.get("desc", "")), strip_html(dd.get("sub", ""))
+        n = join_spoken(title, sub, desc)
+        beats.append({
+            "narr": n,
+            "scene": {"type": "stage", "word": word, "color": "#1a1a1a",
+                      "box_trigger": _pick_trigger(n, word),
+                      "descs": [[desc, _pick_trigger(desc)],
+                                [sub, _pick_trigger(sub)]]}})
+
+    # s6: closing -> checklist dari pills (takeaway hari ini)
+    d6 = r.get("s6", {})
+    n6 = join_spoken(strip_html(d6.get("h1", "")), strip_html(d6.get("sub", "")))
+    pills = [p for p in (d6.get("pills") or []) if strip_html(p)]
+    if pills:
+        items = [[strip_html(p), _pick_trigger(strip_html(p), "fastlis")]
+                 for p in pills]
+        beats.append({
+            "narr": n6,
+            "scene": {"type": "checklist", "title": d6.get("h1", ""), "items": items}})
+    else:
+        beats.append({
+            "narr": n6,
+            "scene": {"type": "title", "title": d6.get("h1", ""),
+                      "sub": strip_html(d6.get("sub", "")),
+                      "ul_trigger": _pick_trigger(n6)}})
+
+    # variasi kamera: jangan dua beat berurutan pakai gerakan yang sama
+    # (beat "cam" opsional; kalau tidak diisi, build_from_beats pakai default per tipe)
+    _flip = {"zin": "zout", "zout": "zin", "panr": "panl", "panl": "panr"}
+    _defcam = {"title": "zin", "flow": "panr", "stage": "zin",
+               "stamp": "zin", "checklist": "zout", "closing": "zout"}
+    last = None
+    for b in beats:
+        c = _defcam[b["scene"]["type"]]
+        if c == last:
+            c = _flip.get(c, c)
+        b["cam"] = c
+        last = c
+    return beats
+
 CSS = """
 @font-face { font-family:'Caveat'; src:url('../assets/fonts/caveat-700.woff2') format('woff2'); font-weight:700; }
 @font-face { font-family:'Poppins'; src:url('../assets/fonts/poppins-6.woff2') format('woff2'); font-weight:600; }
@@ -252,11 +355,16 @@ __CALLS__
 """
 
 
-def main():
+def build_from_beats(beats, prefix="whiteboard"):
+    """Bangun VO + timing karaoke + HTML whiteboard dari daftar beats generik.
+
+    beats: list of {"narr": str, "scene": {"type": ..., ...}}
+    Output: reels/v2/<prefix>.html, vo_<prefix>.mp3, timings_<prefix>.json
+    """
     # ---- TTS ----
-    narr_text = "\n".join(b["narr"] for b in BEATS)
-    vo_path = os.path.join(V2, "vo_whiteboard.mp3")
-    open(os.path.join(V2, "vo_whiteboard.txt"), "w").write(narr_text)
+    narr_text = "\n".join(b["narr"] for b in beats)
+    vo_path = os.path.join(V2, f"vo_{prefix}.mp3")
+    open(os.path.join(V2, f"vo_{prefix}.txt"), "w").write(narr_text)
     cp = subprocess.run([TTS, "speak", "--language", "id", "--voice", VOICE,
                          "--output", vo_path, "--text-stdin"],
                         input=narr_text.encode(), capture_output=True)
@@ -265,14 +373,21 @@ def main():
     dur = audio_duration(vo_path)
     total = round(dur + 0.6, 2)
     print(f"VO jadi: {dur:.1f}s, total render {total}s")
+    # ---- penjaga durasi: tangkap halusinasi TTS tanpa dengerin manual ----
+    est = max(1, len(narr_text.replace("\n", " "))) / 850 * 60
+    if abs(dur - est) / est > 0.30:
+        print(f"PERINGATAN durasi VO: aktual {dur:.1f}s vs estimasi {est:.1f}s "
+              f"(selisih >30%, mungkin halusinasi TTS — cek vo_{prefix}.mp3)")
 
     # ---- timings (whisper) ----
     words, bounds = [], []
     try:
-        allw = [w for b in BEATS for w in b["narr"].split(" ")]
+        allw = [w for b in beats for w in b["narr"].split(" ")]
         rt = real_word_timings(vo_path, allw)
+        if not rt or len(rt) < len(allw):
+            raise ValueError("timing whisper tidak lengkap")
         t = 0.0
-        for b in BEATS:
+        for b in beats:
             ws = b["narr"].split(" ")
             t0 = t
             for w in ws:
@@ -283,9 +398,10 @@ def main():
         print(f"timing karaoke: REAL (whisper, {len(words)} kata)")
     except Exception as e:
         print(f"whisper gagal ({e}), pakai estimasi proporsional")
+        words, bounds = [], []  # buang hasil parsial supaya tidak tercampur
         t = 0.0
         tot_chars = max(1, len(narr_text.replace("\n", " ")))
-        for b in BEATS:
+        for b in beats:
             ws = b["narr"].split(" ")
             bd = dur * len(" ".join(ws)) / tot_chars
             for j, w in enumerate(ws):
@@ -293,20 +409,20 @@ def main():
             bounds.append((round(t, 3), round(t + bd, 3)))
             t += bd + 0.15
     json.dump({"words": words, "bounds": bounds, "total": total},
-              open(os.path.join(V2, "timings_whiteboard.json"), "w"), indent=1)
+              open(os.path.join(V2, f"timings_{prefix}.json"), "w"), indent=1)
 
     # ---- scenes ----
     global _draw_ids
     _draw_ids = []
     scene_divs = []
-    for si, b in enumerate(BEATS):
+    for si, b in enumerate(beats):
         fn = BUILDERS[b["scene"]["type"]]
         scene_divs.append(f'<div class="scene" id="s{si}">{fn(b["scene"], si)}</div>')
 
     # ---- karaoke ----
     wi = 0
     karaoke_divs = []
-    for bi, b in enumerate(BEATS):
+    for bi, b in enumerate(beats):
         spans = [f'<span class="kw" id="w{wi + j}">{esc(w)}</span>'
                  for j, w in enumerate(b["narr"].split(" "))]
         wi += len(spans)
@@ -336,7 +452,7 @@ def main():
     beat_durs = [round(bb - a, 2) for a, bb in bounds]
     cam = {"title": "zin", "flow": "panr", "stage": "zin", "stamp": "zin",
            "checklist": "zout", "closing": "zout"}
-    beat_cams = [cam[b["scene"]["type"]] for b in BEATS]
+    beat_cams = [b.get("cam") or cam[b["scene"]["type"]] for b in beats]
     js = JS.replace("__BEATDURS__", json.dumps(beat_durs)).replace(
         "__BEATCAM__", json.dumps(beat_cams)).replace(
         "__CALLS__", "\n".join(calls))
@@ -350,8 +466,31 @@ def main():
             f'<div id="karaoke">{"".join(karaoke_divs)}</div></div>'
             f'<script src="../assets/gsap.min.js"></script><script>{js}</script>'
             f'</body></html>')
-    open(os.path.join(V2, "whiteboard.html"), "w").write(html)
-    print(f"whiteboard.html ditulis ({total}s), {len(BEATS)} scene")
+    open(os.path.join(V2, f"{prefix}.html"), "w").write(html)
+    print(f"{prefix}.html ditulis ({total}s), {len(beats)} scene")
+
+
+def main():
+    beats, prefix = BEATS, "whiteboard"
+    args = sys.argv[1:]
+    daily = "--daily" in args
+    if daily:
+        beats = compose_daily_beats()
+        prefix = "daily"
+        print(f"mode daily: {len(beats)} beats dari content/hari-ini.json")
+    elif "--beats" in args:
+        i = args.index("--beats")
+        beats = json.load(open(args[i + 1]))
+        if "--prefix" in args:
+            prefix = args[args.index("--prefix") + 1]
+        print(f"mode beats-file: {len(beats)} beats, prefix={prefix}")
+    build_from_beats(beats, prefix)
+    if daily:
+        # paritas dengan builder v2 supaya langkah cron 2 & 5 tidak berubah
+        from build_reels_v2 import write_status, JINGLE_VARIANTS, today_wib
+        doy = today_wib().timetuple().tm_yday
+        print(f"VARIANT={JINGLE_VARIANTS[doy % 4]}")
+        write_status("siap-render", 100, "daily.html siap dirender")
 
 
 if __name__ == "__main__":
