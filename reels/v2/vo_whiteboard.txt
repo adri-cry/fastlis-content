@@ -1,0 +1,10 @@
+Hasil lab sudah keluar dari alat, tapi kok belum boleh dikasih ke dokter? Tenang, bukan error. Memang ada alurnya. Bayangkan pasien menunggu dan dokter menelepon, tapi sistem belum kasih lampu hijau.
+Di dalam LIS, setiap hasil harus melewati tiga tahap: pending, completed, lalu authorized. Tiga pintu berurutan, nggak bisa loncat.
+Tahap satu, pending. Artinya hasil baru saja masuk dari alat atau input manual, dan belum dicek oleh siapa pun. Statusnya masih mentah, bisa saja salah karena sampel bermasalah atau alat error.
+Tahap dua, completed. Analis sudah memeriksa dan memverifikasi hasilnya, memastikan cocok dengan kondisi sampel dan riwayat pasien. Tapi ingat, ini belum final.
+Tahap tiga, authorized. Dokter penanggung jawab, biasanya dokter patologi klinik, sudah menyetujui hasilnya. Hanya di tahap inilah hasil boleh dirilis dan dikirim ke pasien.
+Contoh jejak audit asli: tercatat Result flag updated to L by SYSTEM, lengkap dengan jam dan nilai inputnya. Kalau ada kesalahan, ketahuan siapa dan kapan.
+Kenapa harus seribet ini? Karena satu angka yang salah bisa mengubah diagnosis dan terapi pasien. Ingat kasus kalium 6,5 kemarin? Otorisasi itu rem daruratnya lab.
+Bonusnya, setiap perpindahan tahap tercatat otomatis di jejak audit: siapa yang verifikasi, jam berapa, dan apa yang diubah. Transparan.
+Tips praktis: jangan pernah rilis hasil yang masih pending atau completed, walau dokternya sudah menelepon minta. Tunggu sampai authorized.
+Jadi ingat urutannya: pending, completed, authorized. Follow FastLIS untuk edukasi lab setiap hari.

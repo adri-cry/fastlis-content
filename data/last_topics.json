@@ -59,6 +59,11 @@
       "date": "2026-10-16",
       "topik": "Delta check: bandingkan hasil hari ini dengan hasil kunjungan sebelumnya sebelum rilis hasil",
       "format": "kuis (jawaban di slide 5)"
+    },
+    {
+      "date": "2026-10-17",
+      "topik": "TAT (turnaround time): target waktu rilis hasil lab + 3 cara menjaga timer tidak jebol",
+      "format": "tips praktis"
     }
   ]
 }

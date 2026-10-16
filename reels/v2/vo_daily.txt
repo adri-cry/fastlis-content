@@ -1,6 +1,6 @@
-Hasilnya kritis, kapan wajib nelpon dokter? Flag L/H ≠ nilai kritis.
-Nilai kritis itu alarm darurat lab. Hasil ekstrem LL/HH, ancam nyawa.
-Mitos 1: flag = kritis. Cuma info di layar. Flag L/H = di luar rentang normal. Muncul otomatis di LIS.
-Mitos 2: batas kritis seragam. Prinsipnya sama. Tiap lab tentukan batas sendiri. Tapi lapornya ≤ 60 menit.
-Mitos 3: WA = selesai. WA doang belum cukup. Catat penerima + jam. Minta read-back hasilnya.
-Kenali batas kritis di lab kamu. Pernah lapor kritis? Cerita di komentar. Follow FastLIS untuk edukasi lab setiap hari.
+Hasil hari ini beda jauh dari hasil kemarin? Kuis: rilis atau tahan?
+Kalium 4,1 jadi 6,5 dalam seminggu. QC lolos. Rilis atau tahan?
+1. Cek sampelnya. Hemolisis? Label benar? Pastikan sampel dan identitas pasien tidak tertukar.
+2. Cek kondisinya. Terapi atau puasa berubah? Kondisi pasien bisa menggeser hasil secara wajar.
+3. Cek riwayatnya. Bandingkan hasil lama. Lewat batas delta check? Tahan dan konfirmasi ulang.
+Delta check itu rem darurat sebelum hasil dirilis. Kamu jawab A atau B? Tulis di komentar. Follow FastLIS untuk edukasi lab setiap hari.

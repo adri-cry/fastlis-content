@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-10-16",
+  "last_run": "2026-10-17",
   "pool": [
     "dashboard.webp",
     "lab-01.jpg",
@@ -29,24 +29,25 @@
     "lab-25.jpg"
   ],
   "today_carousel": [
-    "lab-14.jpg",
-    "demo-ui-flags.png",
-    "lab-25.jpg",
-    "dashboard.webp",
-    "lab-21.jpg"
+    "lab-08.jpg",
+    "demo-worklist-filled.png",
+    "demo-workstation.png",
+    "demo-dashboard.png",
+    "demo-ui-toast.png"
   ],
   "today_single": [
-    "lab-19.jpg"
+    "lab-07.jpg"
   ],
   "today_video": [
-    "lab-08.jpg",
-    "lab-03.jpg",
-    "lab-15.jpg",
-    "lab-18.jpg",
-    "lab-22.jpg"
+    "lab-25.jpg",
+    "lab-01.jpg",
+    "lab-02.jpg",
+    "lab-20.jpg",
+    "lab-16.jpg"
   ],
   "used": [
     "dashboard.webp",
+    "demo-dashboard.png",
     "demo-panic-report.png",
     "demo-qc-chart.png",
     "demo-s1.jpg",
@@ -57,7 +58,9 @@
     "demo-single.jpg",
     "demo-ui-flags.png",
     "demo-ui-status.png",
+    "demo-ui-toast.png",
     "demo-worklist-filled.png",
+    "demo-workstation.png",
     "lab-01.jpg",
     "lab-02.jpg",
     "lab-03.jpg",
