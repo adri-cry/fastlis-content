@@ -19,82 +19,99 @@ from build_reels_v2 import real_word_timings, audio_duration, esc, TTS, VOICE
 # scene: dict dengan type + param. types: title, flow, stage, stamp, checklist, closing
 BEATS = [
     {"narr": "Hasil lab sudah keluar dari alat, tapi kok belum boleh dikasih ke dokter? Tenang, bukan error. Memang ada alurnya. Bayangkan pasien menunggu dan dokter menelepon, tapi sistem belum kasih lampu hijau.",
-     "scene": {"type": "title", "title": 'Kok belum boleh<br><span class="hl">dikasih ke dokter?</span>',
+     "scene": {"type": "title", "ul_trigger": "dokter",
+               "title": 'Kok belum boleh<br><span class="hl">dikasih ke dokter?</span>',
                "sub": "bukan error, memang ada alurnya"}},
     {"narr": "Di dalam LIS, setiap hasil harus melewati tiga tahap: pending, completed, lalu authorized. Tiga pintu berurutan, nggak bisa loncat.",
      "scene": {"type": "flow", "title": 'Tiga <span class="blue">tahap</span> wajib',
                "steps": ["PENDING", "COMPLETED", "AUTHORIZED"]}},
     {"narr": "Tahap satu, pending. Artinya hasil baru saja masuk dari alat atau input manual, dan belum dicek oleh siapa pun. Statusnya masih mentah, bisa saja salah karena sampel bermasalah atau alat error.",
-     "scene": {"type": "stage", "word": "PENDING", "color": "#1a1a1a",
-               "descs": ["hasil baru masuk", "belum dicek siapa pun"]}},
+     "scene": {"type": "stage", "word": "PENDING", "color": "#1a1a1a", "box_trigger": "pending",
+               "descs": [["hasil baru masuk", "masuk"], ["belum dicek siapa pun", "dicek"]]}},
     {"narr": "Tahap dua, completed. Analis sudah memeriksa dan memverifikasi hasilnya, memastikan cocok dengan kondisi sampel dan riwayat pasien. Tapi ingat, ini belum final.",
-     "scene": {"type": "stage", "word": "COMPLETED", "color": "#1a1a1a",
-               "descs": ["sudah diverifikasi analis", "tapi belum final"]}},
+     "scene": {"type": "stage", "word": "COMPLETED", "color": "#1a1a1a", "box_trigger": "completed",
+               "descs": [["sudah diverifikasi analis", "memverifikasi"], ["tapi belum final", "final"]]}},
     {"narr": "Tahap tiga, authorized. Dokter penanggung jawab, biasanya dokter patologi klinik, sudah menyetujui hasilnya. Hanya di tahap inilah hasil boleh dirilis dan dikirim ke pasien.",
-     "scene": {"type": "stage", "word": "AUTHORIZED", "color": "#1B5FD9",
-               "descs": ["disetujui dokter PJ", "baru boleh dirilis"]}},
+     "scene": {"type": "stage", "word": "AUTHORIZED", "color": "#1B5FD9", "box_trigger": "authorized",
+               "descs": [["disetujui dokter PJ", "menyetujui"], ["baru boleh dirilis", "dirilis"]]}},
     {"narr": "Contoh jejak audit asli: tercatat Result flag updated to L by SYSTEM, lengkap dengan jam dan nilai inputnya. Kalau ada kesalahan, ketahuan siapa dan kapan.",
      "scene": {"type": "checklist", "title": '<span class="blue">jejak audit</span> nyata',
-               "items": ["flag updated to L", "tercatat jamnya", "ketahuan siapa"]}},
+               "items": [["flag updated to L", "flag"], ["tercatat jamnya", "jam"], ["ketahuan siapa", "ketahuan"]]}},
     {"narr": "Kenapa harus seribet ini? Karena satu angka yang salah bisa mengubah diagnosis dan terapi pasien. Ingat kasus kalium 6,5 kemarin? Otorisasi itu rem daruratnya lab.",
-     "scene": {"type": "stamp", "top": "1 angka salah",
-               "stamp": "BAHAYA!", "sub": "bisa ubah diagnosis pasien"}},
+     "scene": {"type": "stamp", "top": "1 angka salah", "circ_trigger": "salah",
+               "stamp": "BAHAYA!", "stamp_trigger": "darurat", "sub": "bisa ubah diagnosis pasien"}},
     {"narr": "Bonusnya, setiap perpindahan tahap tercatat otomatis di jejak audit: siapa yang verifikasi, jam berapa, dan apa yang diubah. Transparan.",
      "scene": {"type": "checklist", "title": 'tercatat <span class="blue">otomatis</span>',
-               "items": ["siapa yang verifikasi", "jam berapa", "apa yang diubah"]}},
+               "items": [["siapa yang verifikasi", "siapa"], ["jam berapa", "jam"], ["apa yang diubah", "diubah"]]}},
     {"narr": "Tips praktis: jangan pernah rilis hasil yang masih pending atau completed, walau dokternya sudah menelepon minta. Tunggu sampai authorized.",
-     "scene": {"type": "title", "title": 'Jangan rilis<br><span class="hl">sebelum <span class="blue">authorized</span></span>',
+     "scene": {"type": "title", "ul_trigger": "authorized",
+               "title": 'Jangan rilis<br><span class="hl">sebelum <span class="blue">authorized</span></span>',
                "sub": "walau dokternya sudah menelepon"}},
     {"narr": "Jadi ingat urutannya: pending, completed, authorized. Follow FastLIS untuk edukasi lab setiap hari.",
      "scene": {"type": "closing"}},
 ]
+
 
 WOBBLE = ('<svg width="0" height="0"><defs><filter id="wobble">'
           '<feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="n"/>'
           '<feDisplacementMap in="SourceGraphic" in2="n" scale="7"/>'
           '</filter></defs></svg>')
 
-_draw_ids = []  # per scene: list of element ids to draw-in
+_draw_ids = []  # per scene: list of {id, trigger, kind, offset}
 
 
-def _reg(*ids):
-    _draw_ids.append(list(ids))
+def _new_scene():
+    _draw_ids.append([])
+
+
+def _reg(id, trigger=None, kind="draw", offset=0):
+    _draw_ids[-1].append({"id": id, "trigger": trigger, "kind": kind,
+                          "offset": offset})
 
 
 def scene_title(s, si):
-    _reg()
+    _new_scene()
+    uid = f"s{si}-ul"
+    _reg(uid, s.get("ul_trigger"), "draw")
     return (f'<div class="wrap"><h1 class="hand">{s["title"]}</h1>'
+            f'<svg viewBox="0 0 600 40" style="width:600px;margin:6px auto 0;display:block" filter="url(#wobble)">'
+            f'<path class="ink-blue draw" id="{uid}" pathLength="1" d="M20 22 C 200 12, 400 32, 580 20"/></svg>'
             f'<p class="sub">{esc(s["sub"])}</p></div>')
 
 
 def scene_flow(s, si):
+    _new_scene()
     steps = s["steps"]
-    # 3 kotak horizontal + panah
-    boxes, ids = [], []
+    boxes = []
     xs = [20, 340, 660]
     for i, (st, x) in enumerate(zip(steps, xs)):
-        bid = f"fl-b{i}"
-        ids.append(bid)
+        trig = st.lower()
+        bid = f"s{si}-fl-b{i}"
+        _reg(bid, trig, "draw")
         boxes.append(
             f'<rect class="ink draw" id="{bid}" pathLength="1" x="{x}" y="60" width="260" height="150" rx="18"/>'
             f'<text x="{x+130}" y="150" text-anchor="middle" font-size="46" font-family="Caveat" fill="#1B5FD9">{st}</text>')
         if i < 2:
-            aid = f"fl-a{i}"
-            ids.append(aid)
+            aid = f"s{si}-fl-a{i}"
+            _reg(aid, trig, "draw", offset=0.6)
             x1 = x + 260
             boxes.append(
                 f'<path class="ink-blue draw" id="{aid}" pathLength="1" d="M{x1+8} 135 L{x1+52} 135 M{x1+32} 115 L{x1+54} 137 L{x1+32} 159"/>')
-    _reg(*ids)
     inner = "\n".join(boxes)
     return (f'<div class="wrap"><h1 class="hand">{s["title"]}</h1>'
             f'<svg viewBox="0 0 940 270" style="width:940px;margin-top:30px" filter="url(#wobble)">{inner}</svg></div>')
 
 
 def scene_stage(s, si):
+    _new_scene()
     bid = f"s{si}-box"
-    _reg(bid)
-    descs = "".join(f'<div class="checkline"><span class="dot"></span><span>{esc(d)}</span></div>'
-                    for d in s["descs"])
+    _reg(bid, s["box_trigger"], "draw")
+    descs = ""
+    for j, (d, trig) in enumerate(s["descs"]):
+        did = f"s{si}-d{j}"
+        _reg(did, trig, "reveal")
+        descs += (f'<div class="checkline rv" id="{did}"><span class="dot"></span>'
+                  f'<span>{esc(d)}</span></div>')
     return (f'<div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)">'
             f'<rect class="ink draw" id="{bid}" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/>'
             f'<text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="{s["color"]}">{s["word"]}</text>'
@@ -102,34 +119,39 @@ def scene_stage(s, si):
 
 
 def scene_stamp(s, si):
-    _reg(f"s{si}-sp-circ")
+    _new_scene()
+    cid, tid = f"s{si}-sp-circ", f"s{si}-sp-txt"
+    _reg(cid, s["circ_trigger"], "draw")
+    _reg(tid, s["stamp_trigger"], "reveal")
     return (f'<div class="wrap"><h1 class="hand">{esc(s["top"])}</h1>'
             f'<p class="sub">{esc(s["sub"])}</p>'
             f'<div style="position:relative;display:inline-block;margin-top:36px">'
             f'<svg viewBox="0 0 560 300" style="width:560px;display:block" filter="url(#wobble)">'
             f'<ellipse class="ink-red draw" id="s{si}-sp-circ" pathLength="1" cx="280" cy="150" rx="250" ry="125"/>'
-            f'<text x="280" y="185" text-anchor="middle" font-size="100" font-family="Caveat" fill="#E23B3B" transform="rotate(-6 280 150)">{s["stamp"]}</text>'
+            f'<text x="280" y="185" text-anchor="middle" font-size="100" font-family="Caveat" fill="#E23B3B" transform="rotate(-6 280 150)" opacity="0" id="{tid}">{s["stamp"]}</text>'
             f'</svg></div></div>')
 
 
 def scene_checklist(s, si):
-    ids = []
+    _new_scene()
     rows = []
-    for i, it in enumerate(s["items"]):
-        b, c = f"s{si}-ck-b{i}", f"s{si}-ck-c{i}"
-        ids += [b, c]
+    for i, (it, trig) in enumerate(s["items"]):
+        b, c, t = f"s{si}-ck-b{i}", f"s{si}-ck-c{i}", f"s{si}-ck-t{i}"
+        _reg(b, trig, "draw")
+        _reg(t, trig, "reveal", offset=0.15)
+        _reg(c, trig, "draw", offset=0.45)
         rows.append(
             f'<div class="check"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)">'
             f'<rect class="ink-blue draw" id="{b}" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/>'
             f'<path class="ink-red draw" id="{c}" pathLength="1" d="M22 46 L40 64 L70 28"/></svg>'
-            f'<span>{esc(it)}</span></div>')
-    _reg(*ids)
+            f'<span id="{t}" class="rv">{esc(it)}</span></div>')
     return (f'<div class="wrap"><h1 class="hand">{s["title"]}</h1>'
             f'<div style="margin-top:30px">{"".join(rows)}</div></div>')
 
 
 def scene_closing(_s=None, _si=None):
-    _reg(f"s{_si}-cl-pill")
+    _new_scene()
+    _reg(f"s{_si}-cl-pill", "fastlis", "draw")
     return (f'<div class="wrap" style="text-align:center">'
             f'<svg viewBox="0 0 700 220" style="width:700px;margin:0 auto;display:block" filter="url(#wobble)">'
             f'<rect class="ink-blue draw" id="s{_si}-cl-pill" pathLength="1" x="60" y="30" width="580" height="150" rx="75"/>'
@@ -176,6 +198,7 @@ h1.hand .blue, .blue { color:#1B5FD9; }
 .phrase { font-family:'Poppins',sans-serif; font-weight:600; font-size:42px; line-height:1.5; color:#1a1a1a; }
 .kw { padding:2px 8px; border-radius:8px; transition:background .12s; }
 .kw.on { background:#FFE45E; }
+.rv { opacity:0; }
 #brand { position:absolute; top:56px; left:70px; font-family:'Poppins',sans-serif;
   font-weight:800; font-size:34px; letter-spacing:2px; }
 #brand b { color:#1B5FD9; }
@@ -191,20 +214,27 @@ function showPhrase(bi) {
   document.querySelectorAll('.phrase').forEach(e=>e.style.display='none');
   var el = document.getElementById('p'+bi); if(el) el.style.display='block';
 }
-function showScene(si) {
-  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('on'));
-  var el = document.getElementById('s'+si); if(el) el.classList.add('on');
-  drawIn(si);
-}
+
 function clearWords() {
   document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
 }
-var DRAW_MAP = __DRAWMAP__;
-function drawIn(si) {
-  (DRAW_MAP[si]||[]).forEach(function(id, k) {
-    var el = document.getElementById(id); if(!el) return;
-    gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, delay:k*0.4, ease:'power1.inOut'});
-  });
+var BEAT_DURS = __BEATDURS__;
+function drawEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, ease:'power1.inOut'});
+}
+function revealEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {opacity:0, y:24}, {opacity:1, y:0, duration:0.6, ease:'power2.out'});
+}
+function drift(si) {
+  var el = document.querySelector('#s'+si+' .wrap'); if(!el) return;
+  gsap.fromTo(el, {scale:1}, {scale:1.05, duration:BEAT_DURS[si]||8, ease:'none', transformOrigin:'50% 50%'});
+}
+function showScene(si) {
+  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('on'));
+  var el = document.getElementById('s'+si); if(el) el.classList.add('on');
+  drift(si);
 }
 __CALLS__
 """
@@ -272,12 +302,27 @@ def main():
             f'<div class="phrase" id="p{bi}" style="display:none">{" ".join(spans)}</div>')
 
     calls = [f'tl.call(setWord, [{i}], {wd["t0"]});' for i, wd in enumerate(words)]
-    for bi, (a, _) in enumerate(bounds):
+    for bi, (a, bb) in enumerate(bounds):
         calls.append(f'tl.call(showPhrase, [{bi}], {a});')
         calls.append(f'tl.call(showScene, [{bi}], {a});')
+        wmap = {}
+        for wd in words:
+            if a - 0.01 <= wd["t0"] <= bb + 0.01:
+                key = wd["w"].lower().strip(".,!?;:\"'")
+                wmap.setdefault(key, wd["t0"])
+        regs = _draw_ids[bi]
+        n = len(regs)
+        for k, r in enumerate(regs):
+            t = wmap.get((r["trigger"] or "").lower()) if r["trigger"] else None
+            if t is None:
+                t = a + (bb - a) * (0.12 + 0.76 * (k + 1) / (n + 1))
+            t = round(t + r["offset"], 3)
+            fn = "drawEl" if r["kind"] == "draw" else "revealEl"
+            calls.append(f"tl.call({fn}, ['{r['id']}'], {t});")
     calls.append(f'tl.call(clearWords, [], {total - 0.05});')
 
-    js = JS.replace("__DRAWMAP__", json.dumps(_draw_ids)).replace(
+    beat_durs = [round(bb - a, 2) for a, bb in bounds]
+    js = JS.replace("__BEATDURS__", json.dumps(beat_durs)).replace(
         "__CALLS__", "\n".join(calls))
 
     html = (f'<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">'
