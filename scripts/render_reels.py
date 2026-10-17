@@ -18,7 +18,7 @@ import time
 BASE = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 V2 = os.path.join(BASE, "reels", "v2")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_reels_v2 import write_status  # noqa: E402
+from build_reels_whiteboard import write_status  # noqa: E402
 
 
 def main():

@@ -14,12 +14,133 @@ Pakai:
 Render: render_reels.py --html v2/<prefix>.html --out v2/<prefix>_raw.mp4 --duration <total>
 Mux VO saja: ffmpeg -i raw -i vo_<prefix>.mp3 -c:v copy -c:a aac -shortest -movflags +faststart out.mp4
 """
+import datetime
 import json, os, re, subprocess, sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 V2 = os.path.join(BASE, "reels", "v2")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
-from build_reels_v2 import real_word_timings, audio_duration, esc, TTS, VOICE, strip_html, join_spoken
+ASSETS = os.path.join(BASE, "reels", "assets")
+TTS = "/opt/hatch/bin/tts"
+VOICE = "avocado_v2:MAI_01"
+JINGLE_VARIANTS = ["original", "chill", "energetic", "minimal"]
+WHISPER_PY = os.path.expanduser("~/workspace/venvs/whisper/bin/python")
+WHISPER_TIMES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whisper_times.py")
+
+
+def today_wib():
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7)))
+
+
+def strip_html(s):
+    s = re.sub(r"<br\s*/?>", " ", s)
+    s = re.sub(r"<[^>]+>", "", s)
+    s = s.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def esc(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def join_spoken(*parts):
+    """Gabung potongan copy jadi kalimat narasi tanpa tanda baca dobel."""
+    out = []
+    for p in parts:
+        p = p.strip()
+        if not p:
+            continue
+        if out:
+            prev = out[-1]
+            if prev and prev[-1] not in ".?!…":
+                out[-1] = prev + "."
+        out.append(p)
+    text = " ".join(out)
+    if text and text[-1] not in ".?!…":
+        text += "."
+    return text
+
+
+def audio_duration(p):
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                        "format=duration", "-of", "default=noprint_wrappers=1", p],
+                       capture_output=True, text=True)
+    return float(r.stdout.strip().split("=")[1])
+
+
+def _norm_w(s):
+    return "".join(c for c in s.lower() if c.isalnum())
+
+
+def real_word_timings(vo_path, narr_words):
+    """Timestamp kata asli dari audio via whisper. Kembalikan list t0 per kata
+    narasi, atau None kalau gagal (fallback ke estimasi proporsional)."""
+    import difflib
+    try:
+        cp = subprocess.run(
+            [WHISPER_PY, WHISPER_TIMES, vo_path],
+            capture_output=True, text=True, timeout=600)
+        wt = json.loads(cp.stdout)
+        if not wt or isinstance(wt, dict):
+            return None
+        nw = [_norm_w(w) for w in narr_words]
+        ww = [_norm_w(x["w"]) for x in wt]
+        sm = difflib.SequenceMatcher(None, nw, ww, autojunk=False)
+        t0s = [None] * len(nw)
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            if tag == "equal" and i2 > i1:
+                for k in range(i2 - i1):
+                    t0s[i1 + k] = wt[j1 + k]["t0"]
+            else:
+                t_start = wt[j1]["t0"] if j1 < len(wt) else (wt[-1]["t1"] if wt else 0)
+                t_end = wt[j2 - 1]["t1"] if j2 > j1 else t_start + 0.3 * max(1, i2 - i1)
+                n = max(1, i2 - i1)
+                for k in range(n):
+                    t0s[i1 + k] = round(t_start + (t_end - t_start) * k / n, 3)
+        last = 0.0
+        for i in range(len(t0s)):
+            if t0s[i] is None:
+                t0s[i] = last
+            else:
+                last = t0s[i]
+        return t0s
+    except Exception as e:
+        print(f"whisper timing gagal ({e}), pakai estimasi proporsional")
+        return None
+
+
+def write_status(stage, progress=0, detail="", video=None):
+    """Tulis reels/v2/render_status.json untuk dipantau dashboard."""
+    st = {"stage": stage, "progress": round(progress, 1), "detail": detail,
+          "updated_at": today_wib().strftime("%Y-%m-%dT%H:%M:%S+07:00"),
+          "video": video}
+    try:
+        json.dump(st, open(os.path.join(V2, "render_status.json"), "w"))
+    except Exception:
+        pass
+
+
+def mux(render_mp4, vo_mp3, out_mp4, variant):
+    """Gabung render + VO + jingle varian -> mp4 faststart siap WhatsApp."""
+    jingle = os.path.join(ASSETS, f"jingle-{variant}.wav")
+    if not os.path.exists(jingle):
+        jingle = os.path.join(ASSETS, "fastlis-jingle.wav")
+    dur = audio_duration(vo_mp3)
+    fade_st = max(0, round(dur - 2.5, 1))
+    fc = (f"[1:a]volume=1.0[vo];[2:a]atrim=0:{round(dur + 1)},volume=0.12,"
+          f"afade=t=in:st=0:d=1.5,afade=t=out:st={fade_st}:d=2.5[bg];"
+          f"[vo][bg]amix=inputs=2:duration=longest:dropout_transition=0[a]")
+    cp = subprocess.run(
+        ["ffmpeg", "-y", "-v", "error", "-i", render_mp4, "-i", vo_mp3, "-i", jingle,
+         "-filter_complex", fc, "-map", "0:v", "-map", "[a]",
+         "-c:v", "copy", "-c:a", "aac", "-b:a", "128k",
+         "-movflags", "+faststart", out_mp4],
+        capture_output=True, text=True)
+    if cp.returncode != 0:
+        print("MUX GAGAL:", cp.stderr[-500:])
+        return 1
+    print("mux ok:", out_mp4, f"(jingle: {os.path.basename(jingle)})")
+    return 0
 
 # ---------------------------------------------------------------- beats
 # scene: dict dengan type + param. types: title, flow, stage, stamp, checklist, closing
@@ -487,11 +608,15 @@ def main():
     build_from_beats(beats, prefix)
     if daily:
         # paritas dengan builder v2 supaya langkah cron 2 & 5 tidak berubah
-        from build_reels_v2 import write_status, JINGLE_VARIANTS, today_wib
         doy = today_wib().timetuple().tm_yday
         print(f"VARIANT={JINGLE_VARIANTS[doy % 4]}")
         write_status("siap-render", 100, "daily.html siap dirender")
 
 
 if __name__ == "__main__":
+    args = sys.argv[1:]
+    if len(args) == 4 and args[0] == "--mux":
+        # --mux <render_mp4> <vo_mp3> <out_mp4> ; varian dari VARIANT hari ini
+        doy = today_wib().timetuple().tm_yday
+        sys.exit(mux(args[1], args[2], args[3], JINGLE_VARIANTS[doy % 4]))
     main()

@@ -7,7 +7,7 @@ import json, os, subprocess, sys
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 V2 = os.path.join(BASE, "reels", "v2")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
-from build_reels_v2 import (real_word_timings, audio_duration, esc,
+from build_reels_whiteboard import (real_word_timings, audio_duration, esc,
                             TTS, VOICE)
 
 BEATS = [
