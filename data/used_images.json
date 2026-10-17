@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-10-17",
+  "last_run": "2026-10-18",
   "pool": [
     "dashboard.webp",
     "lab-01.jpg",
@@ -29,14 +29,14 @@
     "lab-25.jpg"
   ],
   "today_carousel": [
-    "lab-08.jpg",
-    "demo-worklist-filled.png",
-    "demo-workstation.png",
-    "demo-dashboard.png",
-    "demo-ui-toast.png"
+    "lab-14.jpg",
+    "lab-01.jpg",
+    "demo-worklist.png",
+    "lab-05.jpg",
+    "lab-02.jpg"
   ],
   "today_single": [
-    "lab-07.jpg"
+    "lab-17.jpg"
   ],
   "today_video": [
     "lab-08.jpg",
@@ -60,6 +60,7 @@
     "demo-ui-status.png",
     "demo-ui-toast.png",
     "demo-worklist-filled.png",
+    "demo-worklist.png",
     "demo-workstation.png",
     "lab-01.jpg",
     "lab-02.jpg",
