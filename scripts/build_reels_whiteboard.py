@@ -120,18 +120,60 @@ def write_status(stage, progress=0, detail="", video=None):
         pass
 
 
+def _build_sfx_track(sched, total_dur, out_wav):
+    """Campur SFX sesuai jadwal -> satu track wav (volume 25% sesuai spec)."""
+    import wave
+    import numpy as np
+    sr = 44100
+    n = int((total_dur + 1.0) * sr)
+    mix = np.zeros(n, dtype=np.float32)
+    cache = {}
+    for ev in sched:
+        name = ev["sfx"]
+        if name not in cache:
+            p = os.path.join(ASSETS, f"sfx-{name}.wav")
+            if not os.path.exists(p):
+                continue
+            w = wave.open(p, "rb")
+            s = w.readframes(w.getnframes())
+            w.close()
+            cache[name] = np.frombuffer(s, dtype=np.int16).astype(np.float32) / 32768.0
+        if name not in cache:
+            continue
+        y = cache[name] * 0.25
+        at = int(ev["t"] * sr)
+        if 0 <= at < n:
+            m = min(len(y), n - at)
+            mix[at:at + m] += y[:m]
+    mix = np.clip(mix, -1, 1)
+    w = wave.open(out_wav, "wb")
+    w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
+    w.writeframes((mix * 32767).astype(np.int16).tobytes())
+    w.close()
+    return out_wav
+
+
 def mux(render_mp4, vo_mp3, out_mp4, variant):
-    """Gabung render + VO + jingle varian -> mp4 faststart siap WhatsApp."""
+    """Gabung render + VO + jingle varian + SFX -> mp4 faststart siap WhatsApp."""
     jingle = os.path.join(ASSETS, f"jingle-{variant}.wav")
     if not os.path.exists(jingle):
         jingle = os.path.join(ASSETS, "fastlis-jingle.wav")
     dur = audio_duration(vo_mp3)
+    # SFX: dari sfx_<prefix>.json (prefix dari nama vo)
+    _pre = os.path.basename(vo_mp3).replace("vo_", "").replace(".mp3", "")
+    _sched_p = os.path.join(V2, f"sfx_{_pre}.json")
+    _sfx_wav = os.path.join(V2, f"sfx_{_pre}.wav")
+    _sched = json.load(open(_sched_p)) if os.path.exists(_sched_p) else []
+    _build_sfx_track(_sched, dur, _sfx_wav)
+    print(f"sfx: {len(_sched)} event -> {_sfx_wav}")
     fade_st = max(0, round(dur - 2.5, 1))
     fc = (f"[1:a]volume=1.0[vo];[2:a]atrim=0:{round(dur + 1)},volume=0.12,"
           f"afade=t=in:st=0:d=1.5,afade=t=out:st={fade_st}:d=2.5[bg];"
-          f"[vo][bg]amix=inputs=2:duration=longest:dropout_transition=0[a]")
+          f"[3:a]volume=1.0[fx];"
+          f"[vo][bg][fx]amix=inputs=3:duration=longest:dropout_transition=0[a]")
     cp = subprocess.run(
-        ["ffmpeg", "-y", "-v", "error", "-i", render_mp4, "-i", vo_mp3, "-i", jingle,
+        ["ffmpeg", "-y", "-v", "error", "-i", render_mp4, "-i", vo_mp3,
+         "-i", jingle, "-i", _sfx_wav,
          "-filter_complex", fc, "-map", "0:v", "-map", "[a]",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "128k",
          "-movflags", "+faststart", out_mp4],
@@ -180,7 +222,7 @@ BEATS = [
 
 
 WOBBLE = ('<svg width="0" height="0"><defs><filter id="wobble">'
-          '<feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="n"/>'
+          '<feTurbulence id="boilTurb" type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="7" result="n"/>'
           '<feDisplacementMap in="SourceGraphic" in2="n" scale="7"/>'
           '</filter></defs></svg>')
 
@@ -191,12 +233,52 @@ def _new_scene():
     _draw_ids.append([])
 
 
-def _reg(id, trigger=None, kind="draw", offset=0):
-    _draw_ids[-1].append({"id": id, "trigger": trigger, "kind": kind,
-                          "offset": offset})
+def _reg(id, trigger=None, kind="draw", offset=0, **kw):
+    d = {"id": id, "trigger": trigger, "kind": kind, "offset": offset}
+    d.update(kw)
+    _draw_ids[-1].append(d)
 
 
-def scene_title(s, si):
+def _key(w):
+    return w.lower().strip(".,!?;:\"'()…")
+
+
+MARKER = ('<g class="marker" opacity="0"><g transform="translate(0,-14) rotate(30)">'
+          '<rect x="-13" y="-115" width="26" height="105" rx="9" fill="#1B5FD9"/>'
+          '<rect x="-13" y="-115" width="26" height="30" rx="9" fill="#0d3a8a"/>'
+          '<polygon points="-13,-10 13,-10 0,14" fill="#1a1a1a"/>'
+          '<circle cx="0" cy="-142" r="24" fill="#f0b48a"/>'
+          '<rect x="-26" y="-162" width="52" height="26" rx="12" fill="#f0b48a"/>'
+          '</g></g>')
+
+
+def _w3(html, si, pfx):
+    """Bungkus tiap kata jadi span.w3; kembalikan (html, [(id, kata)])."""
+    parts = re.split(r"(<br\s*/?>|<span[^>]*>|</span>)", html)
+    out, ids, n = [], [], [0]
+    for p in parts:
+        if not p:
+            continue
+        if p.startswith("<span") and p != "</span>":
+            out.append('<span class="blue">' if "blue" in p else "<span>")
+            continue
+        if p == "</span>":
+            out.append("</span>")
+            continue
+        if p.startswith("<br"):
+            out.append("<br>")
+            continue
+        for w in p.split(" "):
+            if not w:
+                continue
+            wid = f"s{si}-{pfx}w{n[0]}"
+            n[0] += 1
+            ids.append((wid, w))
+            out.append(f'<span class="w3" id="{wid}">{esc(w)}</span> ')
+    return "".join(out), ids
+
+
+def scene_title(s, si, narr=None):
     _new_scene()
     uid = f"s{si}-ul"
     _reg(uid, s.get("ul_trigger"), "draw")
@@ -206,7 +288,7 @@ def scene_title(s, si):
             f'<p class="sub">{esc(s["sub"])}</p></div>')
 
 
-def scene_flow(s, si):
+def scene_flow(s, si, narr=None):
     _new_scene()
     steps = s["steps"]
     boxes = []
@@ -229,7 +311,7 @@ def scene_flow(s, si):
             f'<svg viewBox="0 0 940 270" style="width:940px;margin-top:30px" filter="url(#wobble)">{inner}</svg></div>')
 
 
-def scene_stage(s, si):
+def scene_stage(s, si, narr=None):
     _new_scene()
     bid = f"s{si}-box"
     _reg(bid, s["box_trigger"], "draw")
@@ -245,7 +327,7 @@ def scene_stage(s, si):
             f'</svg></div><div class="desclist">{descs}</div></div>')
 
 
-def scene_stamp(s, si):
+def scene_stamp(s, si, narr=None):
     _new_scene()
     cid, tid, pid = f"s{si}-sp-circ", f"s{si}-sp-txt", f"s{si}-punch"
     _reg(cid, s["circ_trigger"], "draw")
@@ -260,7 +342,7 @@ def scene_stamp(s, si):
             f'</svg></div></div>')
 
 
-def scene_checklist(s, si):
+def scene_checklist(s, si, narr=None):
     _new_scene()
     rows = []
     for i, (it, trig) in enumerate(s["items"]):
@@ -277,7 +359,7 @@ def scene_checklist(s, si):
             f'<div style="margin-top:30px">{"".join(rows)}</div></div>')
 
 
-def scene_closing(_s=None, _si=None):
+def scene_closing(_s=None, _si=None, narr=None):
     _new_scene()
     _reg(f"s{_si}-cl-pill", "fastlis", "draw")
     return (f'<div class="wrap" style="text-align:center">'
@@ -288,8 +370,253 @@ def scene_closing(_s=None, _si=None):
             f'<div style="margin-top:40px"><span class="pill">Follow!</span></div></div>')
 
 
+
+# ------------------------------------------------- scene TAT (spec Adri 2026-10-17)
+
+def _ticks(cx, cy, r1, r2, n=12, cls="ink", sw=6):
+    import math
+    out = []
+    for i in range(n):
+        a = i / n * 2 * math.pi
+        x1, y1 = cx + r1 * math.cos(a), cy + r1 * math.sin(a)
+        x2, y2 = cx + r2 * math.cos(a), cy + r2 * math.sin(a)
+        out.append(f'<line class="{cls}" x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}" stroke-width="{sw}"/>')
+    return "".join(out)
+
+
+def scene_title_sw(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    _reg(f"{P}-sw-circ", "^", "draw", offset=0)
+    _reg(f"{P}-sw-arc", "^", "draw", offset=0.1, dur=0.5)
+    _reg(f"{P}-sw-ticks", "^", "pop", offset=0.2)
+    _reg(f"{P}-sw-hands", "^", "spin", offset=0, svgOrigin="200 180")
+    _reg(f"{P}-sw-btn", "^", "pop", offset=0.25)
+    thtml, wids = _w3(s["title"], si, "t")
+    emph_id = None
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+        if _key(w) == "telat":
+            emph_id = wid
+    if emph_id:
+        _reg(emph_id, "telat", "emphasis", offset=0.1)
+    _reg(f"{P}-t-ul", "telat", "draw", offset=0.05, dur=0.5)
+    _reg(f"{P}-t-sub", "3", "pop")
+    ticks = _ticks(200, 180, 108, 124)
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<svg viewBox="0 0 400 380" style="width:360px;margin:0 auto;display:block" filter="url(#wobble)">'
+            f'<rect class="ink pop0" id="{P}-sw-btn" x="182" y="14" width="36" height="30" rx="9"/>'
+            f'<line class="ink" x1="200" y1="44" x2="200" y2="58" stroke-width="8"/>'
+            f'<circle class="ink draw" id="{P}-sw-circ" pathLength="1" cx="200" cy="180" r="130"/>'
+            f'<path class="ink-red draw" id="{P}-sw-arc" pathLength="1" d="M200 50 A130 130 0 1 1 196 52"/>'
+            f'<g id="{P}-sw-ticks" class="pop0">{ticks}</g>'
+            f'<g id="{P}-sw-hands"><line class="ink" x1="200" y1="180" x2="200" y2="92" stroke-width="9"/>'
+            f'<line class="ink" x1="200" y1="180" x2="262" y2="180" stroke-width="9"/>'
+            f'<circle cx="200" cy="180" r="12" fill="#1a1a1a"/></g>'
+            f'{MARKER}</svg>'
+            f'<h1 class="hand" style="margin-top:26px">{thtml}</h1>'
+            f'<svg viewBox="0 0 640 44" style="width:560px;margin:6px auto 0;display:block" filter="url(#wobble)">'
+            f'<path class="ink-red draw" id="{P}-t-ul" pathLength="1" d="M40 24 C 200 12, 420 34, 600 20"/>'
+            f'{MARKER}</svg>'
+            f'<p class="sub pop0" id="{P}-t-sub" style="font-size:40px">{esc(s["sub"])}</p></div>')
+
+
+def scene_timeline(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    _reg(f"{P}-tl-box", "timer", "draw")
+    _reg(f"{P}-tl-tube", "sampel", "draw")
+    _reg(f"{P}-tl-tubein", "sampel", "pop", offset=0.35)
+    _reg(f"{P}-tl-line", "sampel", "draw", offset=0.4, dur=1.2)
+    _reg(f"{P}-tl-msw", "sampel", "slidex", offset=0.4, x=740, dur=1.2)
+    _reg(f"{P}-tl-paper", "dirilis", "pop")
+    _reg(f"{P}-tl-paper", "dirilis", "emphasis", offset=0.2)
+    _reg(f"{P}-tl-lab1", "sampel", "pop", offset=0.5)
+    _reg(f"{P}-tl-lab2", "dirilis", "pop", offset=0.3)
+    bhtml, wids = _w3(" ".join(s["baris"]), si, "b")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<svg viewBox="0 0 760 210" style="width:640px;margin:0 auto;display:block" filter="url(#wobble)">'
+            f'<rect class="ink draw" id="{P}-tl-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/>'
+            f'<text x="380" y="140" text-anchor="middle" font-size="104" font-family="Caveat" fill="{s["color"]}">DEFINISI</text>'
+            f'{MARKER}</svg>'
+            f'<svg viewBox="0 0 920 400" style="width:880px;margin:26px auto 0;display:block" filter="url(#wobble)">'
+            f'<g><rect class="ink draw" id="{P}-tl-tube" pathLength="1" x="60" y="110" width="96" height="170" rx="22"/>'
+            f'<rect id="{P}-tl-tubein" class="pop0" x="76" y="180" width="64" height="84" rx="12" fill="#1B5FD9" opacity="0.75"/></g>'
+            f'<path class="ink draw" id="{P}-tl-line" pathLength="1" d="M170 195 L750 195"/>'
+            f'<g id="{P}-tl-msw" transform="translate(170,195)"><circle class="ink" cx="0" cy="0" r="36" fill="#FBF9F4"/>'
+            f'<line class="ink" x1="0" y1="0" x2="0" y2="-20" stroke-width="7"/>'
+            f'<line class="ink" x1="0" y1="0" x2="14" y2="0" stroke-width="7"/></g>'
+            f'<g id="{P}-tl-paper" class="pop0"><rect class="ink" x="740" y="105" width="130" height="180" rx="12" fill="#fff"/>'
+            f'<line class="ink" x1="760" y1="150" x2="850" y2="150" stroke-width="6"/>'
+            f'<line class="ink" x1="760" y1="185" x2="850" y2="185" stroke-width="6"/>'
+            f'<line class="ink-blue" x1="760" y1="220" x2="830" y2="220" stroke-width="8"/></g>'
+            f'<text id="{P}-tl-lab1" class="pop0" x="108" y="330" text-anchor="middle" font-size="44" font-family="Poppins" font-weight="600">SAMPEL DITERIMA</text>'
+            f'<text id="{P}-tl-lab2" class="pop0" x="805" y="330" text-anchor="middle" font-size="44" font-family="Poppins" font-weight="600">HASIL DIRILIS</text>'
+            f'{MARKER}</svg>'
+            f'<p class="bar1" style="margin-top:18px">{bhtml}</p></div>')
+
+
+def scene_steps(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    _reg(f"{P}-st-circ", "satu", "draw")
+    hhtml, wids = _w3(s["baris"][0], si, "h")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+        if _key(w) == "catat":
+            _reg(wid, "catat", "emphasis", offset=0.1)
+    _reg(f"{P}-st-line", "^", "draw", offset=1.0, dur=0.8)
+    pts = [("Terima", "terima", "08:02", 110), ("Analisis", "analisis", "08:20", 460), ("Rilis", "rilis", "08:41", 810)]
+    ptsvg = []
+    for i, (lab, trig, tm, x) in enumerate(pts):
+        _reg(f"{P}-st-pt{i}", trig, "pop")
+        _reg(f"{P}-st-tm{i}", trig, "pop", offset=0.25)
+        ptsvg.append(
+            f'<g id="{P}-st-pt{i}" class="pop0"><circle class="ink" cx="{x}" cy="110" r="46" fill="#FBF9F4"/>'
+            f'<text x="{x}" y="128" text-anchor="middle" font-size="40" font-family="Poppins" font-weight="700">{lab}</text></g>'
+            f'<text id="{P}-st-tm{i}" class="pop0" x="{x}" y="215" text-anchor="middle" font-size="52" font-family="Caveat">{tm}</text>')
+    _reg(f"{P}-st-strike", "tebakan", "draw", offset=0, dur=0.4)
+    _reg(f"{P}-st-teb", "tebakan", "pop", offset=0.15)
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<div style="display:flex;align-items:center;justify-content:center;gap:30px">'
+            f'<svg viewBox="0 0 180 180" style="width:150px;flex:none" filter="url(#wobble)">'
+            f'<circle class="ink draw" id="{P}-st-circ" pathLength="1" cx="90" cy="90" r="72"/>'
+            f'<text x="90" y="125" text-anchor="middle" font-size="100" font-family="Caveat">1</text>{MARKER}</svg>'
+            f'<p class="bar1" style="flex:1;min-width:0;max-width:700px">{hhtml}</p></div>'
+            f'<svg viewBox="0 0 920 260" style="width:880px;margin:30px auto 0;display:block" filter="url(#wobble)">'
+            f'<path class="ink draw" id="{P}-st-line" pathLength="1" d="M110 110 L810 110"/>'
+            f'{"".join(ptsvg)}{MARKER}</svg>'
+            f'<svg viewBox="0 0 640 130" style="width:560px;margin:16px auto 0;display:block" filter="url(#wobble)">'
+            f'<text x="150" y="88" text-anchor="middle" font-size="76" font-family="Caveat">TAT</text>'
+            f'<path class="ink-red draw" id="{P}-st-strike" pathLength="1" d="M40 62 L262 62"/>'
+            f'<text id="{P}-st-teb" class="pop0" x="430" y="88" text-anchor="middle" font-size="76" font-family="Caveat" fill="#E5484D">tebakan?</text>'
+            f'{MARKER}</svg>'
+            f'<p class="bar2" style="margin-top:6px">{esc(s["baris"][1])}</p></div>')
+
+
+def scene_dashboard(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    _reg(f"{P}-db-circ", "dua", "draw")
+    _hl = s["baris"][0].replace("Pantau dashboard real-time",
+                                "Pantau dashboard<br>real-time")
+    hhtml, wids = _w3(_hl, si, "h")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+    _reg(f"{P}-db-frame", "pantau", "draw", dur=0.7)
+    _reg(f"{P}-db-head", "pantau", "pop", offset=0.4)
+    cols = ["#34A853", "#34A853", "#FBBC04", "#FBBC04", "#E5484D", "#E5484D"]
+    tubes = []
+    for i in range(6):
+        x = 150 + i * 115
+        h = 110 + i * 42
+        y = 430 - h
+        _reg(f"{P}-db-tb{i}", "tumpukan", "drop", offset=i * 0.14)
+        tubes.append(
+            f'<g id="{P}-db-tb{i}" class="drop0"><rect x="{x}" y="{y}" width="88" height="{h}" rx="14" fill="{cols[i]}" opacity="0.85"/>'
+            f'<rect class="ink" x="{x}" y="{y}" width="88" height="{h}" rx="14"/></g>')
+    _reg(f"{P}-db-tb5", "jebol", "emphasis", offset=0.1)
+    _reg(f"{P}-db-rcirc", "jebol", "draw", offset=0.15, dur=0.5)
+    _reg(f"{P}-db-arrow", "kelihatan", "draw", offset=0.2, dur=0.5)
+    _reg(f"{P}-db-cnt", "kelihatan", "countup", target=47, dur=2.0)
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<div style="display:flex;align-items:center;justify-content:center;gap:30px">'
+            f'<svg viewBox="0 0 180 180" style="width:150px;flex:none" filter="url(#wobble)">'
+            f'<circle class="ink draw" id="{P}-db-circ" pathLength="1" cx="90" cy="90" r="72"/>'
+            f'<text x="90" y="125" text-anchor="middle" font-size="100" font-family="Caveat">2</text>{MARKER}</svg>'
+            f'<p class="bar1" style="flex:1;min-width:0;max-width:700px">{hhtml}</p></div>'
+            f'<svg viewBox="0 0 920 560" style="width:880px;margin:24px auto 0;display:block" filter="url(#wobble)">'
+            f'<rect class="ink draw" id="{P}-db-frame" pathLength="1" x="60" y="30" width="800" height="500" rx="26"/>'
+            f'<text id="{P}-db-head" class="pop0" x="110" y="105" font-size="52" font-family="Poppins" font-weight="700">DASHBOARD LAB</text>'
+            f'<text id="{P}-db-cnt" x="780" y="105" text-anchor="end" font-size="60" font-family="Caveat" fill="#E5484D">0</text>'
+            f'{"".join(tubes)}'
+            f'<ellipse class="ink-red draw" id="{P}-db-rcirc" pathLength="1" cx="807" cy="265" rx="105" ry="180"/>'
+            f'<path class="ink-blue draw" id="{P}-db-arrow" pathLength="1" d="M700 120 A150 150 0 0 1 830 220 M800 195 L832 222 L800 248"/>'
+            f'<text x="640" y="90" font-size="52" font-family="Caveat" fill="#1B5FD9" transform="rotate(-8 640 90)">numpuk!</text>'
+            f'{MARKER}</svg></div>')
+
+
+def scene_alarm(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    _reg(f"{P}-al-circ", "tiga", "draw")
+    hhtml, wids = _w3(s["baris"][0], si, "h")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+    _reg(f"{P}-al-bell", "pengingat", "swing", offset=0, svgOrigin="200 240", amp=10)
+    _reg(f"{P}-al-bell", "pengingat", "emphasis", offset=0.15)
+    _reg(f"{P}-al-swc", "^", "draw", offset=0.3, dur=0.6)
+    _reg(f"{P}-al-arc", "lewat", "draw", offset=0, dur=0.8)
+    _reg(f"{P}-al-hp", "peringatan", "pop")
+    _reg(f"{P}-al-notif", "notif", "slideup", offset=0, sfx="ding")
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<div style="display:flex;align-items:center;justify-content:center;gap:30px">'
+            f'<svg viewBox="0 0 180 180" style="width:150px;flex:none" filter="url(#wobble)">'
+            f'<circle class="ink draw" id="{P}-al-circ" pathLength="1" cx="90" cy="90" r="72"/>'
+            f'<text x="90" y="125" text-anchor="middle" font-size="100" font-family="Caveat">3</text>{MARKER}</svg>'
+            f'<p class="bar1" style="flex:1;min-width:0;max-width:700px">{hhtml}</p></div>'
+            f'<svg viewBox="0 0 920 560" style="width:880px;margin:24px auto 0;display:block" filter="url(#wobble)">'
+            f'<g id="{P}-al-bell"><path class="ink" d="M140 300 A60 60 0 0 1 260 300 L260 330 L140 330 Z" fill="#FBF9F4"/>'
+            f'<circle class="ink" cx="200" cy="352" r="16" fill="#FBF9F4"/>'
+            f'<line class="ink" x1="140" y1="300" x2="120" y2="280" stroke-width="7"/>'
+            f'<line class="ink" x1="260" y1="300" x2="280" y2="280" stroke-width="7"/></g>'
+            f'<circle class="ink draw" id="{P}-al-swc" pathLength="1" cx="470" cy="330" r="120"/>'
+            f'<path class="ink-red draw" id="{P}-al-arc" pathLength="1" d="M470 210 A120 120 0 1 1 462 212"/>'
+            f'<g id="{P}-al-hp" class="pop0"><rect class="ink" x="600" y="140" width="190" height="340" rx="28" fill="#fff"/>'
+            f'<rect class="ink" x="620" y="180" width="150" height="220" rx="10"/>'
+            f'<circle class="ink" cx="695" cy="445" r="10"/></g>'
+            f'<g id="{P}-al-notif" class="drop0"><rect x="580" y="60" width="230" height="110" rx="18" fill="#FFE45E" stroke="#1a1a1a" stroke-width="6"/>'
+            f'<text x="695" y="112" text-anchor="middle" font-size="34" font-family="Poppins" font-weight="700">Sampel hampir</text>'
+            f'<text x="695" y="148" text-anchor="middle" font-size="34" font-family="Poppins" font-weight="700">lewat batas TAT</text></g>'
+            f'{MARKER}</svg></div>')
+
+
+def scene_closing_stamp(s, si, narr=None):
+    _new_scene()
+    P = f"s{si}"
+    thtml, wids = _w3(s["title"], si, "t")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+    rows = []
+    for i, it in enumerate(s["items"]):
+        off = 0.8 + i * 0.8
+        _reg(f"{P}-cs-b{i}", "^", "draw", offset=off, dur=0.4)
+        _reg(f"{P}-cs-t{i}", "^", "pop", offset=off + 0.15)
+        _reg(f"{P}-cs-c{i}", "^", "draw", offset=off + 0.35, dur=0.3, sfx="ding")
+        rows.append(
+            f'<div class="check" style="margin:22px 60px"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)">'
+            f'<rect class="ink-blue draw" id="{P}-cs-b{i}" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/>'
+            f'<path class="ink-blue draw" id="{P}-cs-c{i}" pathLength="1" d="M22 46 L40 64 L70 28"/></svg>'
+            f'<span id="{P}-cs-t{i}" class="pop0" style="font-size:64px">{esc(it)}</span></div>')
+    _reg(f"{P}-cs-stamp", "jebol", "drop", offset=0.2)
+    _reg(f"{P}-cs-shake", "jebol", "shake", offset=0.65, px=6)
+    _reg(f"{P}-cs-rip", "jebol", "draw", offset=0.7, dur=0.6)
+    _reg(f"{P}-cs-conf", "jebol", "confetti", offset=0.9)
+    _reg(f"{P}-cs-push", "jebol", "campush", offset=0.7)
+    _reg(f"{P}-cs-komen", "komen", "pop", offset=0.9)
+    _reg(f"{P}-cs-arrow", "komen", "draw", offset=1.0, dur=0.4)
+    _reg(f"{P}-cs-arrow", "komen", "idle", offset=1.5)
+    return (f'<div class="wrap" style="text-align:center">'
+            f'<h1 class="hand" style="font-size:96px">{thtml}</h1>'
+            f'<div style="margin-top:24px">{"".join(rows)}</div>'
+            f'<svg viewBox="0 0 700 300" style="width:640px;margin:10px auto 0;display:block" filter="url(#wobble)">'
+            f'<g id="{P}-cs-stamp" class="drop0"><rect class="ink-blue" x="150" y="60" width="400" height="150" rx="30" fill="#1B5FD9" opacity="0.92" transform="rotate(-4 350 135)"/>'
+            f'<text x="350" y="170" text-anchor="middle" font-size="88" font-family="Poppins" font-weight="800" fill="#fff" transform="rotate(-4 350 135)">FASTLIS</text></g>'
+            f'<ellipse class="ink-blue draw" id="{P}-cs-rip" pathLength="1" cx="350" cy="135" rx="230" ry="105"/>'
+            f'{MARKER}</svg>'
+            f'<p id="{P}-cs-komen" class="pop0" style="font-family:Poppins,sans-serif;font-weight:700;font-size:52px;margin-top:10px">Komen: AMAN / JEBOL</p>'
+            f'<svg viewBox="0 0 200 120" style="width:130px;margin:6px auto 0;display:block" filter="url(#wobble)">'
+            f'<path class="ink-blue draw" id="{P}-cs-arrow" pathLength="1" d="M100 8 L100 88 M72 62 L100 92 L128 62"/>'
+            f'{MARKER}</svg></div>')
+
+
 BUILDERS = {"title": scene_title, "flow": scene_flow, "stage": scene_stage,
-            "stamp": scene_stamp, "checklist": scene_checklist, "closing": scene_closing}
+            "stamp": scene_stamp, "checklist": scene_checklist, "closing": scene_closing,
+            "title_sw": scene_title_sw, "timeline": scene_timeline, "steps": scene_steps,
+            "dashboard": scene_dashboard, "alarm": scene_alarm,
+            "closing_stamp": scene_closing_stamp}
 
 
 # ------------------------------------------------- composer generik harian
@@ -502,11 +829,11 @@ def beats_to_md(beats, topik, date, variant=None, est_dur=None):
 def md_to_beats(path):
     """Parse .md naskah -> (date, beats). Raise ValueError kalau format rusak."""
     txt = open(path).read()
-    m = re.search(r"^# Naskah Reels \u2014 (\d{4}-\d{2}-\d{2})", txt, re.M)
+    m = re.search(r"^#{0,1}\s*(?:Naskah\s+)?Reels \u2014 (\d{4}-\d{2}-\d{2})", txt, re.M)
     if not m:
         raise ValueError("header '# Naskah Reels \u2014 YYYY-MM-DD' tidak ketemu")
     date = m.group(1)
-    parts = re.split(r"^## Beat \d+ \u2014 (\w+)\s*$", txt, flags=re.M)
+    parts = re.split(r"^(?:##\s+)?Beat \d+ \u2014 (\w+)[^\n]*$", txt, flags=re.M)
     beats = []
     for j in range(1, len(parts), 2):
         t, body = parts[j], parts[j + 1]
@@ -524,10 +851,14 @@ def md_to_beats(path):
         narr = F.get("Narasi", "")
         if not narr:
             raise ValueError(f"beat bertipe '{t}': field 'Narasi:' wajib ada")
-        cam = CAM_DARI_MD.get(F.get("Kamera", "").strip().lower())
+        _kam = re.sub(r"\s*\(.*\)", "", F.get("Kamera", "")).strip().lower()
+        cam = CAM_DARI_MD.get(_kam)
         beat = {"narr": narr, "scene": {}}
         if cam:
             beat["cam"] = cam
+        _tr = re.search(r"T[1-5]", F.get("Transisi keluar", ""))
+        if _tr:
+            beat["trans"] = _tr.group(0)
         if t == "title":
             beat["scene"] = {"type": "title", "title": F.get("Judul", ""),
                              "sub": F.get("Sub", ""),
@@ -554,6 +885,19 @@ def md_to_beats(path):
         elif t == "closing":
             beat["scene"] = {"type": "closing", "title": F.get("Judul", ""),
                              "sub": F.get("Sub", "")}
+        elif t == "title_sw":
+            beat["scene"] = {"type": "title_sw", "title": F.get("Judul", ""),
+                             "sub": F.get("Sub", "")}
+        elif t in ("timeline", "steps", "dashboard", "alarm"):
+            kot, _, warna = F.get("Kotak", " | hitam").partition("|")
+            baris = [x.strip() for x in F.get("Baris", "").split("|") if x.strip()]
+            beat["scene"] = {"type": t, "word": kot.strip(),
+                             "color": "#1B5FD9" if warna.strip() == "biru" else "#1a1a1a",
+                             "baris": baris}
+        elif t == "closing_stamp":
+            beat["scene"] = {"type": "closing_stamp", "title": F.get("Judul", ""),
+                             "items": [x for x in items],
+                             "stempel": F.get("Stempel", "FASTLIS")}
         else:
             raise ValueError(f"tipe scene '{t}' tidak dikenal")
         beats.append(beat)
@@ -568,21 +912,25 @@ CSS = """
 * { margin:0; padding:0; box-sizing:border-box; }
 #root { width:1080px; height:1920px; position:relative; overflow:hidden;
   background:#FBF9F4; font-family:'Caveat',cursive; color:#1a1a1a; }
-#root::before { content:''; position:absolute; inset:0;
-  background-image:radial-gradient(#00000008 1px, transparent 1px);
+/* safe zone: x 80-1000, y 220-1450 */
+.scene { position:absolute; inset:0; display:none; padding:220px 80px 470px 80px; }
+.scene.on { display:block; }
+.scene .dots { position:absolute; inset:-200px;
+  background-image:radial-gradient(#00000010 1.5px, transparent 1.5px);
   background-size:28px 28px; }
-.scene { position:absolute; inset:0; display:none; padding:40px 70px 300px 70px; }
-.scene.on { display:flex; flex-direction:column; }
-.scene.on > *:first-child { margin-top:auto; }
-.scene.on > *:last-child { margin-bottom:auto; }
+.scene .wrap { position:absolute; inset:0; padding:220px 80px 470px 80px;
+  display:flex; flex-direction:column; justify-content:center; }
 .ink { stroke:#1a1a1a; stroke-width:7; fill:none; stroke-linecap:round; stroke-linejoin:round; }
-.ink-red { stroke:#E23B3B; stroke-width:9; fill:none; stroke-linecap:round; }
+.ink-red { stroke:#E5484D; stroke-width:9; fill:none; stroke-linecap:round; }
 .ink-blue { stroke:#1B5FD9; stroke-width:7; fill:none; stroke-linecap:round; }
 .draw { stroke-dasharray:1; stroke-dashoffset:1; }
-h1.hand { font-size:104px; line-height:1.08; text-align:center; }
+h1.hand { font-size:110px; line-height:1.08; text-align:center; }
 h1.hand .hl { background:linear-gradient(transparent 8%, #FFE45E 8%, #FFE45E 92%, transparent 92%); padding:0 14px; }
 h1.hand .blue, .blue { color:#1B5FD9; }
+h1.hand .red, .red { color:#E5484D; }
 .sub { font-family:'Poppins',sans-serif; font-size:34px; color:#555; text-align:center; margin-top:18px; }
+.bar1 { font-family:'Caveat',cursive; font-size:72px; text-align:center; line-height:1.15; }
+.bar2 { font-family:'Caveat',cursive; font-size:60px; text-align:center; line-height:1.15; color:#333; }
 .wrap { width:100%; }
 .stagecard { display:flex; justify-content:center; }
 .desclist { margin-top:34px; }
@@ -592,48 +940,129 @@ h1.hand .blue, .blue { color:#1B5FD9; }
 .check { display:flex; align-items:center; gap:26px; margin:26px 60px; font-size:60px; }
 .pill { display:inline-block; border:5px solid #1a1a1a; border-radius:999px;
   padding:18px 54px; font-size:56px; background:#fff; box-shadow:5px 5px 0 #1a1a1a22; }
-#karaoke { position:absolute; left:60px; right:60px; bottom:90px; min-height:190px;
-  display:flex; align-items:center; justify-content:center; text-align:center; }
-.phrase { font-family:'Poppins',sans-serif; font-weight:600; font-size:42px; line-height:1.5; color:#1a1a1a; }
-.kw { padding:2px 8px; border-radius:8px; transition:background .12s; }
+#karaoke { position:absolute; left:80px; right:80px; top:1350px; min-height:200px;
+  display:flex; align-items:center; justify-content:center; text-align:center; z-index:5; }
+.phrase { font-family:'Poppins',sans-serif; font-weight:700; font-size:64px; line-height:1.45; color:#1a1a1a; }
+.kw { padding:2px 10px; border-radius:10px; }
 .kw.on { background:#FFE45E; }
 .rv { opacity:0; }
+.pop0 { opacity:0; }
+.drop0 { opacity:0; }
+.w3 { opacity:0; display:inline-block; }
 #brand { position:absolute; top:56px; left:70px; font-family:'Poppins',sans-serif;
-  font-weight:800; font-size:34px; letter-spacing:2px; }
+  font-weight:800; font-size:34px; letter-spacing:2px; z-index:6; }
 #brand b { color:#1B5FD9; }
+#tracker { position:absolute; left:80px; top:250px; display:none; gap:18px; z-index:6; }
+#tracker .tdot { width:34px; height:34px; border-radius:50%; border:5px solid #1a1a1a; background:#FBF9F4; }
+#tracker .tdot.on { background:#1B5FD9; border-color:#1B5FD9; }
+#fx { position:absolute; inset:0; pointer-events:none; z-index:20; }
+.marker { opacity:0; }
+.ripple { stroke:#1B5FD9; stroke-width:6; fill:none; opacity:0; }
 """
+
 
 JS = """
 var tl = gsap.timeline();
-function setWord(i) {
-  document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
-  var el = document.getElementById('w'+i); if(el) el.classList.add('on');
-}
-function showPhrase(bi) {
-  document.querySelectorAll('.phrase').forEach(e=>e.style.display='none');
-  var el = document.getElementById('p'+bi); if(el) el.style.display='block';
-}
-
-function clearWords() {
-  document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
-}
+var TOTAL = __TOTAL__;
 var BEAT_DURS = __BEATDURS__;
 var BEAT_CAM = __BEATCAM__;
-function drawEl(id) {
+var CAM_DETAIL = __CAMDETAIL__;
+var svgNS = 'http://www.w3.org/2000/svg';
+/* ---------- karaoke M6 ---------- */
+function setWord(i) {
+  document.querySelectorAll('.kw.on').forEach(function(e){ e.classList.remove('on'); e.style.transform='scale(1)'; });
+  var el = document.getElementById('w'+i);
+  if(el){ el.classList.add('on'); el.style.transform='scale(1.08)'; }
+}
+function showPhrase(bi) {
+  document.querySelectorAll('.phrase').forEach(function(e){ e.style.display='none'; });
+  var el = document.getElementById('p'+bi); if(el) el.style.display='block';
+}
+function clearWords() {
+  document.querySelectorAll('.kw.on').forEach(function(e){ e.classList.remove('on'); e.style.transform='scale(1)'; });
+}
+/* ---------- M1 DRAW + spidol ---------- */
+function drawEl(id, dur) {
   var el = document.getElementById(id); if(!el) return;
-  gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, ease:'power1.inOut'});
+  dur = dur || 0.55;
+  var svg = el.closest('svg'), marker = svg ? svg.querySelector('.marker') : null;
+  var len = 1; try { len = el.getTotalLength(); } catch(e) {}
+  var tw = gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:dur, ease:'power1.inOut',
+    onStart: function(){
+      if(marker){ marker.style.opacity=1;
+        try { var pt0 = el.getPointAtLength(0); marker.setAttribute('transform','translate('+pt0.x+','+pt0.y+')'); } catch(e){} }
+    },
+    onUpdate: function(){
+      if(!marker) return;
+      try { var pt = el.getPointAtLength(len*tw.progress()); marker.setAttribute('transform','translate('+pt.x+','+pt.y+')'); } catch(e){}
+    },
+    onComplete: function(){
+      if(!marker) return;
+      var bb = svg.viewBox.baseVal;
+      gsap.to(marker, {attr:{transform:'translate('+(bb.width+140)+','+(bb.height+140)+')'}, duration:0.35, ease:'power2.in',
+        onComplete:function(){ marker.style.opacity=0; }});
+    }});
+}
+/* ---------- M2 POP ---------- */
+function popEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.timeline()
+    .fromTo(el, {scale:0.5, y:30, rotation:-4, opacity:0, transformOrigin:'50% 50%'},
+      {scale:1.15, y:0, rotation:0, opacity:1, duration:0.22, ease:'back.out(2)'})
+    .to(el, {scale:1, duration:0.08, ease:'power1.inOut'});
+}
+/* ---------- M3 WORD-IN ---------- */
+function wordIn(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {opacity:0, y:36}, {opacity:1, y:0, duration:0.18, ease:'power2.out'});
+}
+/* ---------- M4 IDLE ---------- */
+function idleEl(id, dur) {
+  var el = document.getElementById(id); if(!el) return;
+  dur = dur || 4;
+  gsap.to(el, {y:'+=6', duration:1, yoyo:true, repeat:Math.max(1,Math.round(dur)), ease:'sine.inOut', delay:0.6});
+}
+function spinEl(id, dur, speed, svgOrigin) {
+  var el = document.getElementById(id); if(!el) return;
+  var o = {rotation:'+=360', duration:speed||2.5, repeat:Math.ceil((dur||4)/(speed||2.5)), ease:'none'};
+  if(svgOrigin) o.svgOrigin = svgOrigin; else o.transformOrigin = '50% 50%';
+  gsap.to(el, o);
+}
+function swingEl(id, dur, amp, svgOrigin) {
+  var el = document.getElementById(id); if(!el) return;
+  var o = {duration:0.9, yoyo:true, repeat:Math.ceil((dur||4)/0.9), ease:'sine.inOut'};
+  if(svgOrigin){ o.svgOrigin = svgOrigin; } else { o.transformOrigin = '50% 0%'; }
+  gsap.fromTo(el, {rotation:-(amp||8)}, Object.assign({rotation:(amp||8)}, o));
+}
+/* ---------- M5 EMPHASIS ---------- */
+function emphasisEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  var fx = document.getElementById('fxsvg');
+  var r = el.getBoundingClientRect(), root = document.getElementById('root').getBoundingClientRect();
+  var cx = r.left - root.left + r.width/2, cy = r.top - root.top + r.height/2;
+  for(var i=0;i<5;i++){
+    (function(i){
+      var a = (i/5)*Math.PI*2 + 0.4;
+      var x1 = cx + Math.cos(a)*(r.width/2+16), y1 = cy + Math.sin(a)*(r.height/2+16);
+      var x2 = cx + Math.cos(a)*(r.width/2+52), y2 = cy + Math.sin(a)*(r.height/2+52);
+      var ln = document.createElementNS(svgNS,'line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
+      ln.setAttribute('x2',x1); ln.setAttribute('y2',y1);
+      ln.setAttribute('stroke','#1B5FD9'); ln.setAttribute('stroke-width','7');
+      ln.setAttribute('stroke-linecap','round');
+      fx.appendChild(ln);
+      gsap.to(ln, {attr:{x2:x2, y2:y2}, opacity:1, duration:0.16, delay:i*0.03,
+        onComplete:function(){ gsap.to(ln,{opacity:0,duration:0.3,onComplete:function(){ln.remove();}}); }});
+    })(i);
+  }
+  gsap.timeline()
+    .to(el, {scale:1.18, duration:0.12, ease:'power2.out', transformOrigin:'50% 50%'}, 0)
+    .to(el, {scale:1, duration:0.13, ease:'power2.inOut'}, 0.12)
+    .to(el, {x:3, duration:0.04}, 0).to(el, {x:-3, duration:0.04}, 0.04).to(el, {x:0, duration:0.04}, 0.08);
 }
 function revealEl(id) {
   var el = document.getElementById(id); if(!el) return;
   gsap.fromTo(el, {opacity:0, y:26, scale:0.92}, {opacity:1, y:0, scale:1, duration:0.55, ease:'back.out(1.5)'});
-}
-function camera(si) {
-  var el = document.querySelector('#s'+si+' .wrap'); if(!el) return;
-  var dur = BEAT_DURS[si]||8, kind = BEAT_CAM[si]||'zin', o = {transformOrigin:'50% 50%', ease:'power1.inOut'};
-  if (kind==='zin') gsap.fromTo(el, {scale:1}, {scale:1.08, duration:dur, ...o});
-  else if (kind==='zout') gsap.fromTo(el, {scale:1.08}, {scale:1.0, duration:dur, ...o});
-  else if (kind==='panr') gsap.fromTo(el, {x:-55, scale:1.04}, {x:55, scale:1.04, duration:dur, ...o});
-  else if (kind==='panl') gsap.fromTo(el, {x:55, scale:1.04}, {x:-55, scale:1.04, duration:dur, ...o});
 }
 function punch(id) {
   var el = document.getElementById(id); if(!el) return;
@@ -641,13 +1070,145 @@ function punch(id) {
     .to(el, {scale:1.16, duration:0.22, ease:'power3.out', transformOrigin:'50% 50%'})
     .to(el, {scale:1.0, duration:0.5, ease:'back.out(1.6)'});
 }
+function dropEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {y:-260, opacity:0}, {y:0, opacity:1, duration:0.5, ease:'bounce.out'});
+}
+function shakeCam(px) {
+  var w = document.querySelector('.scene.on .wrap'); if(!w) return;
+  px = px || 6;
+  gsap.timeline().to(w,{x:px,duration:0.05}).to(w,{x:-px,duration:0.05}).to(w,{x:px/2,duration:0.05}).to(w,{x:0,duration:0.05});
+}
+/* ---------- kamera: kontinu + drift + parallax ---------- */
+function camera(si) {
+  var wrap = document.querySelector('#s'+si+' .wrap');
+  var dots = document.querySelector('#s'+si+' .dots');
+  if(!wrap) return;
+  var dur = BEAT_DURS[si]||8, kind = BEAT_CAM[si]||'zin', d = CAM_DETAIL[si]||{};
+  gsap.set(wrap, {transformOrigin:'50% 50%'});
+  var o = {duration:dur, ease:'power1.inOut'};
+  var s0, s1, x0, x1, sc;
+  if(kind==='zin'){ s0=d.s0||1; s1=d.s1||1.08; gsap.fromTo(wrap,{scale:s0},{scale:s1,...o}); }
+  else if(kind==='zout'){ s0=d.s0||1.08; s1=d.s1||1.0; gsap.fromTo(wrap,{scale:s0},{scale:s1,...o}); }
+  else { x0=(d.x0!==undefined?d.x0:(kind==='panr'?-55:55)); x1=(d.x1!==undefined?d.x1:(kind==='panr'?55:-55));
+    var ps0=(d.s0!==undefined?d.s0:(d.s||1.04)), ps1=(d.s1!==undefined?d.s1:(d.s||1.04));
+    gsap.fromTo(wrap,{x:x0,scale:ps0},{x:x1,scale:ps1,...o}); }
+  if(dots){
+    gsap.set(dots,{transformOrigin:'50% 50%'});
+    var o2={duration:dur, ease:'power1.inOut'};
+    if(kind==='zin'||kind==='zout'){ gsap.fromTo(dots,{scale:s0},{scale:(s0+s1)/2,...o2}); }
+    else { gsap.fromTo(dots,{x:x0/2,scale:ps0},{x:x1/2,scale:(ps0+ps1)/2,...o2}); }
+  }
+  gsap.fromTo(wrap, {rotation:-0.4}, {rotation:0.4, duration:1.5, yoyo:true,
+    repeat:Math.ceil(dur/1.5), ease:'sine.inOut'});
+}
+/* ---------- transisi T1-T5 ---------- */
 function showScene(si) {
-  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.scene').forEach(function(e){ e.classList.remove('on'); });
   var el = document.getElementById('s'+si); if(el) el.classList.add('on');
   camera(si);
 }
+function transEl(kind, nextSi){
+  var fx = document.getElementById('fx'), fxs = document.getElementById('fxsvg');
+  if(kind==='T1'){
+    var c = document.createElement('div');
+    c.style.cssText='position:absolute;left:50%;top:42%;width:140px;height:140px;margin:-70px;border:8px solid #1a1a1a;border-radius:50%;background:#FBF9F4;';
+    fx.appendChild(c);
+    gsap.to(c,{scale:17,duration:0.25,ease:'power2.in',onComplete:function(){
+      showScene(nextSi); gsap.to(c,{opacity:0,duration:0.15,onComplete:function(){c.remove();}}); }});
+  } else if(kind==='T2'){
+    var w = document.createElement('div');
+    w.style.cssText='position:absolute;top:0;bottom:0;left:1080px;width:1080px;background:#FBF9F4;box-shadow:-24px 0 48px rgba(0,0,0,.18);';
+    fx.appendChild(w);
+    gsap.to(w,{x:-1080,duration:0.2,ease:'power3.in',onComplete:function(){
+      showScene(nextSi);
+      gsap.to(w,{x:-2160,duration:0.22,ease:'power3.out',onComplete:function(){w.remove();}}); }});
+  } else if(kind==='T3'){
+    var p = document.createElementNS(svgNS,'path');
+    p.setAttribute('d','M-60 260 L1140 460 L-60 660 L1140 860 L-60 1060 L1140 1260 L-60 1460 L1140 1660');
+    p.setAttribute('stroke','#1a1a1a'); p.setAttribute('stroke-width','70'); p.setAttribute('fill','none');
+    p.setAttribute('stroke-linecap','round'); fxs.appendChild(p);
+    var len = p.getTotalLength();
+    gsap.fromTo(p,{strokeDasharray:len,strokeDashoffset:len},{strokeDashoffset:0,duration:0.25,ease:'power2.in',onComplete:function(){
+      showScene(nextSi);
+      gsap.to(p,{y:-1920,duration:0.16,ease:'power2.in',onComplete:function(){p.remove();}}); }});
+  } else if(kind==='T4'){
+    var f = document.createElement('div');
+    f.style.cssText='position:absolute;inset:0;background:#fff;opacity:0;'; fx.appendChild(f);
+    gsap.to(f,{opacity:1,duration:0.08,onComplete:function(){
+      showScene(nextSi);
+      for(var i=0;i<8;i++){ (function(i){
+        var a=(i/8)*Math.PI*2, ln=document.createElementNS(svgNS,'line');
+        var cx=540, cy=960;
+        ln.setAttribute('x1',cx); ln.setAttribute('y1',cy); ln.setAttribute('x2',cx); ln.setAttribute('y2',cy);
+        ln.setAttribute('stroke','#E5484D'); ln.setAttribute('stroke-width','10'); ln.setAttribute('stroke-linecap','round');
+        fxs.appendChild(ln);
+        gsap.to(ln,{attr:{x2:cx+Math.cos(a)*320, y2:cy+Math.sin(a)*320}, opacity:0, duration:0.4, ease:'power2.out',
+          onComplete:function(){ln.remove();}});
+      })(i); }
+      gsap.to(f,{opacity:0,duration:0.2,onComplete:function(){f.remove();}}); }});
+  } else if(kind==='T5'){
+    var cur = document.querySelector('.scene.on .wrap');
+    var ns = document.getElementById('s'+nextSi); ns.classList.add('on');
+    var nxt = ns.querySelector('.wrap');
+    var sh = document.createElement('div');
+    sh.style.cssText='position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(rgba(0,0,0,.22),transparent);opacity:0;';
+    fx.appendChild(sh);
+    gsap.set(nxt,{y:1920}); camera(nextSi);
+    gsap.to(sh,{opacity:1,duration:0.1});
+    gsap.to(cur,{y:-1920,duration:0.4,ease:'power2.inOut'});
+    gsap.to(nxt,{y:0,duration:0.4,ease:'power2.inOut',onComplete:function(){
+      document.querySelectorAll('.scene').forEach(function(e){ if(e.id!=='s'+nextSi) e.classList.remove('on'); });
+      gsap.set([cur,nxt],{y:0}); sh.remove(); }});
+  } else { showScene(nextSi); }
+}
+function slideX(id, x, dur) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.to(el, {x:x, duration:dur||1, ease:'power1.inOut'});
+}
+function slideUpEl(id, dist) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {y:dist||80, opacity:0}, {y:0, opacity:1, duration:0.4, ease:'back.out(1.4)'});
+}
+function countUp(id, target, dur) {
+  var el = document.getElementById(id); if(!el) return;
+  var o = {v:0};
+  gsap.to(o, {v:target, duration:dur||1.5, ease:'power1.out',
+    onUpdate:function(){ el.textContent = Math.round(o.v); }});
+}
+function confettiBurst() {
+  var fxs = document.getElementById('fxsvg');
+  for(var i=0;i<24;i++){ (function(i){
+    var ln = document.createElementNS(svgNS,'line');
+    var x = 200+Math.random()*680, y = 480+Math.random()*420;
+    ln.setAttribute('x1',x); ln.setAttribute('y1',y); ln.setAttribute('x2',x); ln.setAttribute('y2',y);
+    ln.setAttribute('stroke', i%3 ? '#1B5FD9' : '#E5484D'); ln.setAttribute('stroke-width','9');
+    ln.setAttribute('stroke-linecap','round');
+    fxs.appendChild(ln);
+    gsap.to(ln, {attr:{x2:x+(Math.random()*180-90), y2:y+(Math.random()*180-90)}, opacity:0,
+      duration:0.9, delay:Math.random()*0.3, ease:'power2.out', onComplete:function(){ln.remove();}});
+  })(i); }
+}
+function camPush(si) {
+  var w = document.querySelector('#s'+si+' .wrap'); if(!w) return;
+  gsap.to(w, {scale:1.04, duration:0.35, ease:'power2.out'});
+}
+/* ---------- progress tracker ---------- */
+function trackerDot(n){
+  var tr = document.getElementById('tracker');
+  if(n<0){ tr.style.display='none'; return; }
+  tr.style.display='flex';
+  tr.querySelectorAll('.tdot').forEach(function(d,i){ d.classList.toggle('on', i===n); });
+}
+/* ---------- garis boil 8fps ---------- */
+(function(){
+  var turb = document.getElementById('boilTurb'); if(!turb) return;
+  var iv = setInterval(function(){ turb.setAttribute('seed', Math.floor(Math.random()*90)+5); }, 125);
+  setTimeout(function(){ clearInterval(iv); }, (TOTAL+2)*1000);
+})();
 __CALLS__
 """
+
 
 
 def build_from_beats(beats, prefix="whiteboard"):
@@ -657,15 +1218,40 @@ def build_from_beats(beats, prefix="whiteboard"):
     Output: reels/v2/<prefix>.html, vo_<prefix>.mp3, timings_<prefix>.json
     """
     assign_cams(beats)
-    # ---- TTS ----
+    # ---- TTS per beat + jeda 0.2 dtk antar beat (spec produksi) ----
+    import wave
     narr_text = "\n".join(b["narr"] for b in beats)
     vo_path = os.path.join(V2, f"vo_{prefix}.mp3")
     open(os.path.join(V2, f"vo_{prefix}.txt"), "w").write(narr_text)
-    cp = subprocess.run([TTS, "speak", "--language", "id", "--voice", VOICE,
-                         "--output", vo_path, "--text-stdin"],
-                        input=narr_text.encode(), capture_output=True)
-    if cp.returncode != 0 or not os.path.exists(vo_path):
-        print("TTS GAGAL:", cp.stderr.decode()[:500]); sys.exit(1)
+    segs, sr, nch, sw = [], None, 1, 2
+    for bi, b in enumerate(beats):
+        tmp = os.path.join(V2, f"_vo_{prefix}_{bi}.wav")
+        cp = subprocess.run([TTS, "speak", "--language", "id", "--voice", VOICE,
+                             "--format", "wav", "--output", tmp,
+                             "--text-stdin"],
+                            input=b["narr"].encode(), capture_output=True)
+        if cp.returncode != 0 or not os.path.exists(tmp):
+            print("TTS GAGAL:", cp.stderr.decode()[:500]); sys.exit(1)
+        d = open(tmp, "rb").read()
+        d = d[d.find(b"RIFF"):]  # buang junk bytes CLI
+        open(tmp, "wb").write(d)
+        w = wave.open(tmp, "rb")
+        if sr is None:
+            sr, nch, sw = w.getframerate(), w.getnchannels(), w.getsampwidth()
+        segs.append(w.readframes(w.getnframes()))
+        w.close()
+        os.remove(tmp)
+    gap = b"\x00" * int(sr * 0.2) * nch * sw
+    pcm = gap.join(segs)
+    vo_wav = os.path.join(V2, f"vo_{prefix}.wav")
+    w = wave.open(vo_wav, "wb")
+    w.setnchannels(nch); w.setsampwidth(sw); w.setframerate(sr)
+    w.writeframes(pcm); w.close()
+    cp = subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", vo_wav,
+                         "-c:a", "libmp3lame", "-b:a", "128k", vo_path],
+                        capture_output=True)
+    if cp.returncode != 0:
+        print("konversi mp3 GAGAL"); sys.exit(1)
     dur = audio_duration(vo_path)
     total = round(dur + 0.6, 2)
     print(f"VO jadi: {dur:.1f}s, total render {total}s")
@@ -713,7 +1299,7 @@ def build_from_beats(beats, prefix="whiteboard"):
     scene_divs = []
     for si, b in enumerate(beats):
         fn = BUILDERS[b["scene"]["type"]]
-        scene_divs.append(f'<div class="scene" id="s{si}">{fn(b["scene"], si)}</div>')
+        scene_divs.append(f'<div class="scene" id="s{si}"><div class="dots"></div>{fn(b["scene"], si, b["narr"])}</div>')
 
     # ---- karaoke ----
     wi = 0
@@ -726,38 +1312,104 @@ def build_from_beats(beats, prefix="whiteboard"):
             f'<div class="phrase" id="p{bi}" style="display:none">{" ".join(spans)}</div>')
 
     calls = [f'tl.call(setWord, [{i}], {wd["t0"]});' for i, wd in enumerate(words)]
+    sfx = []  # (t, nama)
+    _SFX_KIND = {"draw": "scribble", "pop": "pop", "emphasis": "pop",
+                 "drop": "pop", "slideup": "pop"}
+    _JSFN = {"draw": "drawEl", "pop": "popEl", "wordin": "wordIn",
+             "idle": "idleEl", "spin": "spinEl", "swing": "swingEl",
+             "emphasis": "emphasisEl", "reveal": "revealEl", "punch": "punch",
+             "drop": "dropEl", "slidex": "slideX", "slideup": "slideUpEl",
+             "countup": "countUp", "confetti": "confettiBurst",
+             "shake": "shakeCam", "campush": "camPush"}
+    skip_show = set()
+    for bi, b in enumerate(beats):
+        if b.get("trans") and bi + 1 < len(beats):
+            skip_show.add(bi + 1)
     for bi, (a, bb) in enumerate(bounds):
         calls.append(f'tl.call(showPhrase, [{bi}], {a});')
-        calls.append(f'tl.call(showScene, [{bi}], {a});')
+        if bi not in skip_show:
+            calls.append(f'tl.call(showScene, [{bi}], {a});')
+        if bi in (2, 3, 4):
+            calls.append(f'tl.call(trackerDot, [{bi - 2}], {a});')
         wmap = {}
         for wd in words:
             if a - 0.01 <= wd["t0"] <= bb + 0.01:
-                key = wd["w"].lower().strip(".,!?;:\"'")
-                wmap.setdefault(key, wd["t0"])
+                wmap.setdefault(_key(wd["w"]), wd["t0"])
         regs = _draw_ids[bi]
         n = len(regs)
         for k, r in enumerate(regs):
-            t = wmap.get((r["trigger"] or "").lower()) if r["trigger"] else None
+            trig = r["trigger"]
+            if trig == "^":
+                t = a
+            elif trig:
+                t = wmap.get(_key(trig))
+            else:
+                t = None
             if t is None:
                 t = a + (bb - a) * (0.12 + 0.76 * (k + 1) / (n + 1))
             t = round(t + r["offset"], 3)
-            fn = {"draw": "drawEl", "reveal": "revealEl", "punch": "punch"}[r["kind"]]
-            calls.append(f"tl.call({fn}, ['{r['id']}'], {t});")
+            fn = _JSFN[r["kind"]]
+            eid = r["id"]
+            if r["kind"] == "draw":
+                calls.append(f"tl.call({fn}, ['{eid}', {r.get('dur', 0.55)}], {t});")
+            elif r["kind"] in ("idle", "spin", "swing"):
+                _so = f", '{r['svgOrigin']}'" if r.get("svgOrigin") else ""
+                calls.append(f"tl.call({fn}, ['{eid}', {round(bb - a, 2)}{_so}], {t});")
+            elif r["kind"] == "slidex":
+                calls.append(f"tl.call({fn}, ['{eid}', {r.get('x', 0)}, {r.get('dur', 1)}], {t});")
+            elif r["kind"] == "countup":
+                calls.append(f"tl.call({fn}, ['{eid}', {r.get('target', 10)}, {r.get('dur', 1.5)}], {t});")
+            elif r["kind"] == "confetti":
+                calls.append(f"tl.call({fn}, [], {t});")
+            elif r["kind"] == "shake":
+                calls.append(f"tl.call({fn}, [{r.get('px', 6)}], {t});")
+            elif r["kind"] == "campush":
+                calls.append(f"tl.call({fn}, [{bi}], {t});")
+            else:
+                calls.append(f"tl.call({fn}, ['{eid}'], {t});")
+            sn = r.get("sfx", _SFX_KIND.get(r["kind"]))
+            if sn:
+                sfx.append((t, sn))
+        tr = beats[bi].get("trans")
+        if tr and bi + 1 < len(beats):
+            tt = round(bb - 0.4, 3)
+            calls.append(f"tl.call(transEl, ['{tr}', {bi + 1}], {tt});")
+            sfx.append((tt, "swoosh"))
+        if beats[bi]["scene"]["type"] == "title_sw":
+            tk = a + 0.3
+            while tk < min(bb, a + 3.2):
+                sfx.append((round(tk, 3), "tick"))
+                tk += 0.5
     calls.append(f'tl.call(clearWords, [], {total - 0.05});')
+    calls.append(f'tl.call(trackerDot, [-1], {total - 0.05});')
+    sfx.sort()
+    json.dump([{"t": t, "sfx": n} for t, n in sfx],
+              open(os.path.join(V2, f"sfx_{prefix}.json"), "w"))
 
     beat_durs = [round(bb - a, 2) for a, bb in bounds]
     cam = {"title": "zin", "flow": "panr", "stage": "zin", "stamp": "zin",
            "checklist": "zout", "closing": "zout"}
     beat_cams = [b.get("cam") or cam[b["scene"]["type"]] for b in beats]
+    _CAMDTL = {"title_sw": {"s0": 1.0, "s1": 1.25},
+               "timeline": {"s0": 1.3, "s1": 1.0},
+               "steps": {"x0": 0, "x1": -120, "s0": 1.05, "s1": 1.15},
+               "dashboard": {"s0": 1.0, "s1": 1.35},
+               "alarm": {"x0": 0, "x1": 80, "s0": 1.1, "s1": 1.2},
+               "closing_stamp": {"s0": 1.25, "s1": 1.0}}
+    cam_detail = [_CAMDTL.get(b["scene"]["type"], {}) for b in beats]
     js = JS.replace("__BEATDURS__", json.dumps(beat_durs)).replace(
         "__BEATCAM__", json.dumps(beat_cams)).replace(
+        "__CAMDETAIL__", json.dumps(cam_detail)).replace(
+        "__TOTAL__", str(total)).replace(
         "__CALLS__", "\n".join(calls))
 
     html = (f'<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">'
             f'<style>{CSS}</style></head><body>'
             f'<div id="root" data-composition-id="whiteboard" data-start="0" '
-            f'data-duration="{total}" data-width="1080" data-height="1920">'
+            f'data-duration="{total}" data-width="1080" data-height="1920" data-fps="30">'
             f'<div id="brand">FAST<b>LIS</b></div>{WOBBLE}'
+            f'<div id="tracker"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div>'
+            f'<div id="fx"><svg id="fxsvg" width="1080" height="1920"></svg></div>'
             f'{"".join(scene_divs)}'
             f'<div id="karaoke">{"".join(karaoke_divs)}</div></div>'
             f'<script src="../assets/gsap.min.js"></script><script>{js}</script>'
@@ -771,6 +1423,10 @@ def main():
     args = sys.argv[1:]
     if "--tulis-naskah" in args:
         date = today_wib().strftime("%Y-%m-%d")
+        _np = daily_naskah_path(date)
+        if os.path.exists(_np) and "--force" not in args:
+            print(f"naskah sudah ada: {_np} (tidak ditimpa; pakai --force untuk timpa)")
+            return
         topik = json.load(open(os.path.join(BASE, "content", "hari-ini.json")))["topik"]
         beats = compose_daily_beats()
         p = daily_naskah_path(date)

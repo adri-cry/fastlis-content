@@ -1,6 +1,6 @@
-Hasil lab kamu pernah telat keluar? 3 tips jaga TAT.
-TAT itu timer dari sampel diterima. Sampai hasil dirilis.
-1. Catat tiap titik waktu. Terima, analisis, rilis. Kalau nggak dicatat, TAT cuma tebakan.
-2. Pantau dashboard real-time. Lihat antrean live. Sampel numpuk kelihatan sebelum timer jebol.
-3. Pasang alarm TAT. Peringatan otomatis. Sampel mau lewat batas? Langsung dapat notif.
-Bukan soal ngebut, tapi tepat waktu. TAT lab kamu minggu ini aman atau jebol? Komen.
+Hasil lab telat keluar lagi? 3 cara jaga TAT biar nggak jebol.
+TAT itu timer. Mulai dari sampel diterima, sampai hasil dirilis.
+Satu. Catat tiap titik waktu. Terima, analisis, rilis. Nggak dicatat, TAT cuma tebakan.
+Dua. Pantau dashboard real-time. Tumpukan tabung kelihatan sebelum timer jebol.
+Tiga. Pasang pengingat TAT. Peringatan otomatis. Sampel mau lewat batas? Langsung dapat notif.
+Bukan soal ngebut, tapi tepat waktu. TAT lab kamu minggu ini, aman atau jebol? Komen!
