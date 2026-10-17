@@ -1,5 +1,13 @@
 # Wiring gaya diagram ke cron reels harian — rencana eksekusi
 
+> SUPERSEDED 2026-10-17: Adri memilih gaya WHITEBOARD sebagai template reels
+> (bukan diagram, bukan sinematik v2). Builder sinematik (`build_reels_v2.py`,
+> `build_reels_v2_long.py`) sudah dihapus; semua fungsi dipakai-ulang (TTS,
+> whisper, mux, write_status, jingle) sudah pindah ke
+> `scripts/build_reels_whiteboard.py`. Cron `fastlis-daily-reels` sekarang
+> menjalankan `build_reels_whiteboard.py --daily`. Dokumen ini disimpan
+> sebagai arsip rencana saja.
+
 Status: MENUNGGU verdict Adri (diminta 2026-10-15 19:30 WIB, cron reels jalan 06:45 WIB).
 Tanpa verdict: besok otomatis sinematik v2 seperti biasa. Jangan mulai wiring tanpa persetujuan.
 
