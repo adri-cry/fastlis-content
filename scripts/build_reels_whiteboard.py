@@ -388,6 +388,116 @@ def compose_daily_beats(path=None):
         last = c
     return beats
 
+# ------------------------------------------------- naskah .md (acuan pembuatan reels)
+# Alur: --tulis-naskah (dari hari-ini.json) -> content/naskah-reels-YYYY-MM-DD.md
+#       --daily baca .md itu (bisa diedit manual dulu); kalau tidak ada/rusak,
+#       generate ulang dari hari-ini.json.
+
+def daily_naskah_path(date=None):
+    d = date or today_wib().strftime("%Y-%m-%d")
+    return os.path.join(BASE, "content", f"naskah-reels-{d}.md")
+
+
+def beats_to_md(beats, topik, date):
+    """Beats -> markdown naskah yang enak dibaca dan bisa diedit manual."""
+    L = [f"# Naskah Reels \u2014 {date}", f"Topik: {topik}", ""]
+    for i, b in enumerate(beats, 1):
+        s = b["scene"]
+        t = s["type"]
+        L.append(f"## Beat {i} \u2014 {t}")
+        if t == "title":
+            L += [f"Judul: {s['title']}", f"Sub: {s.get('sub', '')}",
+                  f"Narasi: {b['narr']}"]
+        elif t == "stage":
+            warna = "biru" if s.get("color") == "#1B5FD9" else "hitam"
+            L += [f"Kotak: {s['word']} | {warna}",
+                  f"Baris: {' | '.join(d[0] for d in s['descs'])}",
+                  f"Narasi: {b['narr']}"]
+        elif t == "checklist":
+            L += [f"Judul: {s['title']}"] \
+                + [f"Item: {it[0]}" for it in s["items"]] \
+                + [f"Narasi: {b['narr']}"]
+        elif t == "flow":
+            L += [f"Judul: {s['title']}",
+                  f"Langkah: {' | '.join(s['steps'])}",
+                  f"Narasi: {b['narr']}"]
+        elif t == "stamp":
+            L += [f"Atas: {s['top']}", f"Cap: {s['stamp']}",
+                  f"Sub: {s.get('sub', '')}", f"Narasi: {b['narr']}"]
+        elif t == "closing":
+            if s.get("title"):
+                L += [f"Judul: {s['title']}"]
+            if s.get("sub"):
+                L += [f"Sub: {s['sub']}"]
+            L += [f"Narasi: {b['narr']}"]
+        else:
+            L += [f"Narasi: {b['narr']}"]
+        L.append("")
+    return "\n".join(L).rstrip() + "\n"
+
+
+def md_to_beats(path):
+    """Parse .md naskah -> (date, beats). Raise ValueError kalau format rusak."""
+    txt = open(path).read()
+    m = re.search(r"^# Naskah Reels \u2014 (\d{4}-\d{2}-\d{2})", txt, re.M)
+    if not m:
+        raise ValueError("header '# Naskah Reels \u2014 YYYY-MM-DD' tidak ketemu")
+    date = m.group(1)
+    parts = re.split(r"^## Beat \d+ \u2014 (\w+)\s*$", txt, flags=re.M)
+    beats = []
+    for j in range(1, len(parts), 2):
+        t, body = parts[j], parts[j + 1]
+        F, items = {}, []
+        for line in body.strip().split("\n"):
+            line = line.strip()
+            if not line or ":" not in line:
+                continue
+            k, v = line.split(":", 1)
+            k, v = k.strip(), v.strip()
+            if k == "Item":
+                items.append(v)
+            else:
+                F[k] = v
+        narr = F.get("Narasi", "")
+        if not narr:
+            raise ValueError(f"beat bertipe '{t}': field 'Narasi:' wajib ada")
+        if t == "title":
+            beats.append({"narr": narr, "scene": {
+                "type": "title", "title": F.get("Judul", ""),
+                "sub": F.get("Sub", ""), "ul_trigger": _pick_trigger(narr)}})
+        elif t == "stage":
+            kot, _, warna = F.get("Kotak", " | hitam").partition("|")
+            baris = [x.strip() for x in F.get("Baris", "").split("|") if x.strip()]
+            beats.append({"narr": narr, "scene": {
+                "type": "stage", "word": kot.strip(),
+                "color": "#1B5FD9" if warna.strip() == "biru" else "#1a1a1a",
+                "box_trigger": _pick_trigger(narr, kot.strip().lower()),
+                "descs": [[x, _pick_trigger(x)] for x in baris]}})
+        elif t == "checklist":
+            beats.append({"narr": narr, "scene": {
+                "type": "checklist", "title": F.get("Judul", ""),
+                "items": [[x, _pick_trigger(x)] for x in items]}})
+        elif t == "flow":
+            beats.append({"narr": narr, "scene": {
+                "type": "flow", "title": F.get("Judul", ""),
+                "steps": [x.strip() for x in F.get("Langkah", "").split("|")
+                          if x.strip()]}})
+        elif t == "stamp":
+            beats.append({"narr": narr, "scene": {
+                "type": "stamp", "top": F.get("Atas", ""), "stamp": F.get("Cap", ""),
+                "sub": F.get("Sub", ""), "circ_trigger": _pick_trigger(narr),
+                "stamp_trigger": _pick_trigger(narr)}})
+        elif t == "closing":
+            beats.append({"narr": narr, "scene": {
+                "type": "closing", "title": F.get("Judul", ""),
+                "sub": F.get("Sub", "")}})
+        else:
+            raise ValueError(f"tipe scene '{t}' tidak dikenal")
+    if not beats:
+        raise ValueError("tidak ada beat yang bisa diparse")
+    return date, beats
+
+
 CSS = """
 @font-face { font-family:'Caveat'; src:url('../assets/fonts/caveat-700.woff2') format('woff2'); font-weight:700; }
 @font-face { font-family:'Poppins'; src:url('../assets/fonts/poppins-6.woff2') format('woff2'); font-weight:600; }
@@ -594,11 +704,33 @@ def build_from_beats(beats, prefix="whiteboard"):
 def main():
     beats, prefix = BEATS, "whiteboard"
     args = sys.argv[1:]
+    if "--tulis-naskah" in args:
+        date = today_wib().strftime("%Y-%m-%d")
+        topik = json.load(open(os.path.join(BASE, "content", "hari-ini.json")))["topik"]
+        beats = compose_daily_beats()
+        p = daily_naskah_path(date)
+        open(p, "w").write(beats_to_md(beats, topik, date))
+        print(f"naskah ditulis: {p} ({len(beats)} beats)")
+        return
     daily = "--daily" in args
     if daily:
-        beats = compose_daily_beats()
         prefix = "daily"
-        print(f"mode daily: {len(beats)} beats dari content/hari-ini.json")
+        p = daily_naskah_path()
+        if os.path.exists(p):
+            try:
+                d, beats = md_to_beats(p)
+                if d != today_wib().strftime("%Y-%m-%d"):
+                    raise ValueError(f"tanggal naskah {d} bukan hari ini")
+                print(f"mode daily: {len(beats)} beats dari {p} (acuan .md)")
+            except ValueError as e:
+                print(f"naskah rusak ({e}), generate ulang dari hari-ini.json")
+                p = None
+        if not os.path.exists(p or ""):
+            beats = compose_daily_beats()
+            topik = json.load(open(os.path.join(BASE, "content", "hari-ini.json")))["topik"]
+            p = daily_naskah_path()
+            open(p, "w").write(beats_to_md(beats, topik, today_wib().strftime("%Y-%m-%d")))
+            print(f"mode daily: {len(beats)} beats dari content/hari-ini.json (+ naskah ditulis)")
     elif "--beats" in args:
         i = args.index("--beats")
         beats = json.load(open(args[i + 1]))
