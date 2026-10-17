@@ -322,12 +322,13 @@ def compose_daily_beats(path=None):
     # s1: hook -> title (underline digambar pas kata kunci disebut)
     d1 = r.get("s1", {})
     n1 = join_spoken(strip_html(d1.get("h1", "")), strip_html(d1.get("sub", "")))
+    _hl = re.search(r'class="blue"[^>]*>(.*?)</span>', d1.get("h1", ""), re.S)
     beats.append({
         "narr": n1,
         "scene": {"type": "title",
                   "title": d1.get("h1", ""),
                   "sub": strip_html(d1.get("sub", "")),
-                  "ul_trigger": _pick_trigger(n1)}})
+                  "ul_trigger": _pick_trigger(_hl.group(1) if _hl else n1)}})
 
     # s2: konteks/kasus -> stage (kotak besar + 2 baris penjelasan)
     d2 = r.get("s2", {})
@@ -374,57 +375,119 @@ def compose_daily_beats(path=None):
                       "sub": strip_html(d6.get("sub", "")),
                       "ul_trigger": _pick_trigger(n6)}})
 
-    # variasi kamera: jangan dua beat berurutan pakai gerakan yang sama
-    # (beat "cam" opsional; kalau tidak diisi, build_from_beats pakai default per tipe)
-    _flip = {"zin": "zout", "zout": "zin", "panr": "panl", "panl": "panr"}
-    _defcam = {"title": "zin", "flow": "panr", "stage": "zin",
-               "stamp": "zin", "checklist": "zout", "closing": "zout"}
-    last = None
-    for b in beats:
-        c = _defcam[b["scene"]["type"]]
-        if c == last:
-            c = _flip.get(c, c)
-        b["cam"] = c
-        last = c
-    return beats
+    return assign_cams(beats)
 
 # ------------------------------------------------- naskah .md (acuan pembuatan reels)
 # Alur: --tulis-naskah (dari hari-ini.json) -> content/naskah-reels-YYYY-MM-DD.md
 #       --daily baca .md itu (bisa diedit manual dulu); kalau tidak ada/rusak,
 #       generate ulang dari hari-ini.json.
 
+_CAM_DEF = {"title": "zin", "flow": "panr", "stage": "zin",
+            "stamp": "zin", "checklist": "zout", "closing": "zout"}
+_CAM_FLIP = {"zin": "zout", "zout": "zin", "panr": "panl", "panl": "panr"}
+CAM_KE_MD = {"zin": "zoom-in", "zout": "zoom-out",
+             "panr": "geser-kanan", "panl": "geser-kiri"}
+CAM_DARI_MD = {v: k for k, v in CAM_KE_MD.items()}
+
+
+def assign_cams(beats):
+    """Isi b['cam'] yang kosong: default per tipe + jangan dua beat
+    berurutan pakai gerakan yang sama. Cam eksplisit tidak diubah."""
+    last = None
+    for b in beats:
+        c = b.get("cam")
+        if not c:
+            c = _CAM_DEF[b["scene"]["type"]]
+            if c == last:
+                c = _CAM_FLIP.get(c, c)
+        b["cam"] = c
+        last = c
+    return beats
+
+
 def daily_naskah_path(date=None):
     d = date or today_wib().strftime("%Y-%m-%d")
     return os.path.join(BASE, "content", f"naskah-reels-{d}.md")
 
 
-def beats_to_md(beats, topik, date):
-    """Beats -> markdown naskah yang enak dibaca dan bisa diedit manual."""
-    L = [f"# Naskah Reels \u2014 {date}", f"Topik: {topik}", ""]
+def beats_to_md(beats, topik, date, variant=None, est_dur=None):
+    """Beats -> markdown SPEC PRODUKSI: naskah + cara video dibuat.
+    Bisa dibaca/diedit manual; field mesin: Judul/Sub/Narasi/Kotak/Baris/
+    Item/Langkah/Atas/Cap/Kamera. Visual/Animasi/spec = dokumentasi."""
+    assign_cams(beats)
+    if variant is None:
+        variant = JINGLE_VARIANTS[today_wib().timetuple().tm_yday % 4]
+    L = [f"# Naskah Reels \u2014 {date}", f"Topik: {topik}", "",
+         "## Spesifikasi produksi",
+         "Gaya: whiteboard hand-drawn \u2014 kertas putih #FBF9F4 + pola titik, "
+         "font Caveat (tulisan tangan), garis bergelombang, aksen biru FastLIS #1B5FD9",
+         "Kanvas: 1080 x 1920 vertikal (9:16)",
+         "Karaoke: kata yang sedang diucapkan disorot stabilo kuning #FFE45E, "
+         "timing tiap kata asli dari whisper (bukan tebakan)",
+         "Voice over: AI voice avocado_v2:MAI_01, Bahasa Indonesia",
+         f"Musik latar: jingle FastLIS varian {variant} (volume 12%, "
+         "fade in 1.5 dtk, fade out 2.5 dtk)",
+         f"Durasi: \u00b1{est_dur or '?'} detik, {len(beats)} beat",
+         "Aturan animasi: setiap elemen digambar/dimunculkan sinkron dengan kata "
+         "yang diucapkan (bukan teks statis); kamera bergerak di tiap scene "
+         "(lihat \"Kamera\" per beat); highlight simetris penuh",
+         "Kamera boleh diisi: zoom-in / zoom-out / geser-kanan / geser-kiri",
+         ""]
     for i, b in enumerate(beats, 1):
         s = b["scene"]
         t = s["type"]
         L.append(f"## Beat {i} \u2014 {t}")
         if t == "title":
-            L += [f"Judul: {s['title']}", f"Sub: {s.get('sub', '')}",
+            L += [f"Visual: judul besar tulisan tangan: "
+                  f"\u201c{strip_html(s['title'])}\u201d"
+                  + (f", sub kecil: \u201c{s.get('sub', '')}\u201d" if s.get("sub") else ""),
+                  f"Animasi: judul pop-in; garis bawah digambar saat kata "
+                  f"\u201c{s.get('ul_trigger') or '-'}\u201d diucapkan.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}",
+                  f"Judul: {s['title']}", f"Sub: {s.get('sub', '')}",
                   f"Narasi: {b['narr']}"]
         elif t == "stage":
             warna = "biru" if s.get("color") == "#1B5FD9" else "hitam"
-            L += [f"Kotak: {s['word']} | {warna}",
+            baris_txt = " / ".join(f"\u201c{d[0]}\u201d" for d in s["descs"])
+            L += [f"Visual: kotak label \u201c{s['word']}\u201d ({warna}) + "
+                  f"{len(s['descs'])} baris teks: {baris_txt}",
+                  f"Animasi: kotak digambar saat kata "
+                  f"\u201c{s.get('box_trigger') or '-'}\u201d diucapkan; "
+                  f"tiap baris pop-in mengikuti narasi.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}",
+                  f"Kotak: {s['word']} | {warna}",
                   f"Baris: {' | '.join(d[0] for d in s['descs'])}",
                   f"Narasi: {b['narr']}"]
         elif t == "checklist":
-            L += [f"Judul: {s['title']}"] \
-                + [f"Item: {it[0]}" for it in s["items"]] \
-                + [f"Narasi: {b['narr']}"]
+            items_txt = ", ".join(f"\u201c{it[0]}\u201d" for it in s["items"])
+            L += [f"Visual: judul \u201c{strip_html(s['title'])}\u201d + daftar "
+                  f"centang ({len(s['items'])} item): {items_txt}",
+                  "Animasi: tiap item pop-in dengan centang biru, sinkron narasi.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}",
+                  f"Judul: {s['title']}"]
+            L += [f"Item: {it[0]}" for it in s["items"]]
+            L += [f"Narasi: {b['narr']}"]
         elif t == "flow":
-            L += [f"Judul: {s['title']}",
+            L += [f"Visual: alur {len(s['steps'])} langkah: "
+                  + " \u2192 ".join(s["steps"]),
+                  "Animasi: tiap langkah + panah digambar berurutan mengikuti narasi.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}",
+                  f"Judul: {s['title']}",
                   f"Langkah: {' | '.join(s['steps'])}",
                   f"Narasi: {b['narr']}"]
         elif t == "stamp":
-            L += [f"Atas: {s['top']}", f"Cap: {s['stamp']}",
+            L += [f"Visual: lingkaran peringatan + cap \u201c{s['stamp']}\u201d "
+                  f"(atas: \u201c{s['top']}\u201d)",
+                  f"Animasi: lingkaran digambar saat kata "
+                  f"\u201c{s.get('circ_trigger') or '-'}\u201d; "
+                  f"cap muncul dengan punch-zoom.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}",
+                  f"Atas: {s['top']}", f"Cap: {s['stamp']}",
                   f"Sub: {s.get('sub', '')}", f"Narasi: {b['narr']}"]
         elif t == "closing":
+            L += ["Visual: kartu penutup: logo FastLIS + ajakan follow",
+                  "Animasi: logo digambar; kamera zoom-out.",
+                  f"Kamera: {CAM_KE_MD.get(b.get('cam'), b.get('cam'))}"]
             if s.get("title"):
                 L += [f"Judul: {s['title']}"]
             if s.get("sub"):
@@ -461,38 +524,39 @@ def md_to_beats(path):
         narr = F.get("Narasi", "")
         if not narr:
             raise ValueError(f"beat bertipe '{t}': field 'Narasi:' wajib ada")
+        cam = CAM_DARI_MD.get(F.get("Kamera", "").strip().lower())
+        beat = {"narr": narr, "scene": {}}
+        if cam:
+            beat["cam"] = cam
         if t == "title":
-            beats.append({"narr": narr, "scene": {
-                "type": "title", "title": F.get("Judul", ""),
-                "sub": F.get("Sub", ""), "ul_trigger": _pick_trigger(narr)}})
+            beat["scene"] = {"type": "title", "title": F.get("Judul", ""),
+                             "sub": F.get("Sub", ""),
+                             "ul_trigger": _pick_trigger(narr)}
         elif t == "stage":
             kot, _, warna = F.get("Kotak", " | hitam").partition("|")
             baris = [x.strip() for x in F.get("Baris", "").split("|") if x.strip()]
-            beats.append({"narr": narr, "scene": {
-                "type": "stage", "word": kot.strip(),
-                "color": "#1B5FD9" if warna.strip() == "biru" else "#1a1a1a",
-                "box_trigger": _pick_trigger(narr, kot.strip().lower()),
-                "descs": [[x, _pick_trigger(x)] for x in baris]}})
+            beat["scene"] = {"type": "stage", "word": kot.strip(),
+                             "color": "#1B5FD9" if warna.strip() == "biru" else "#1a1a1a",
+                             "box_trigger": _pick_trigger(narr, kot.strip().lower()),
+                             "descs": [[x, _pick_trigger(x)] for x in baris]}
         elif t == "checklist":
-            beats.append({"narr": narr, "scene": {
-                "type": "checklist", "title": F.get("Judul", ""),
-                "items": [[x, _pick_trigger(x)] for x in items]}})
+            beat["scene"] = {"type": "checklist", "title": F.get("Judul", ""),
+                             "items": [[x, _pick_trigger(x)] for x in items]}
         elif t == "flow":
-            beats.append({"narr": narr, "scene": {
-                "type": "flow", "title": F.get("Judul", ""),
-                "steps": [x.strip() for x in F.get("Langkah", "").split("|")
-                          if x.strip()]}})
+            beat["scene"] = {"type": "flow", "title": F.get("Judul", ""),
+                             "steps": [x.strip() for x in F.get("Langkah", "").split("|")
+                                       if x.strip()]}
         elif t == "stamp":
-            beats.append({"narr": narr, "scene": {
-                "type": "stamp", "top": F.get("Atas", ""), "stamp": F.get("Cap", ""),
-                "sub": F.get("Sub", ""), "circ_trigger": _pick_trigger(narr),
-                "stamp_trigger": _pick_trigger(narr)}})
+            beat["scene"] = {"type": "stamp", "top": F.get("Atas", ""),
+                             "stamp": F.get("Cap", ""), "sub": F.get("Sub", ""),
+                             "circ_trigger": _pick_trigger(narr),
+                             "stamp_trigger": _pick_trigger(narr)}
         elif t == "closing":
-            beats.append({"narr": narr, "scene": {
-                "type": "closing", "title": F.get("Judul", ""),
-                "sub": F.get("Sub", "")}})
+            beat["scene"] = {"type": "closing", "title": F.get("Judul", ""),
+                             "sub": F.get("Sub", "")}
         else:
             raise ValueError(f"tipe scene '{t}' tidak dikenal")
+        beats.append(beat)
     if not beats:
         raise ValueError("tidak ada beat yang bisa diparse")
     return date, beats
@@ -592,6 +656,7 @@ def build_from_beats(beats, prefix="whiteboard"):
     beats: list of {"narr": str, "scene": {"type": ..., ...}}
     Output: reels/v2/<prefix>.html, vo_<prefix>.mp3, timings_<prefix>.json
     """
+    assign_cams(beats)
     # ---- TTS ----
     narr_text = "\n".join(b["narr"] for b in beats)
     vo_path = os.path.join(V2, f"vo_{prefix}.mp3")
@@ -709,7 +774,12 @@ def main():
         topik = json.load(open(os.path.join(BASE, "content", "hari-ini.json")))["topik"]
         beats = compose_daily_beats()
         p = daily_naskah_path(date)
-        open(p, "w").write(beats_to_md(beats, topik, date))
+        doy = today_wib().timetuple().tm_yday
+        narr_chars = len(" ".join(b["narr"] for b in beats))
+        est = round(max(1, narr_chars) / 850 * 60)
+        open(p, "w").write(beats_to_md(beats, topik, date,
+                                       variant=JINGLE_VARIANTS[doy % 4],
+                                       est_dur=est))
         print(f"naskah ditulis: {p} ({len(beats)} beats)")
         return
     daily = "--daily" in args

@@ -52,7 +52,7 @@ function clearWords() {
   document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
 }
 var BEAT_DURS = [3.85, 4.21, 7.67, 7.23, 7.13, 6.27];
-var BEAT_CAM = ["zin", "zin", "zin", "zin", "zin", "zout"];
+var BEAT_CAM = ["zin", "zout", "zin", "zout", "zin", "zout"];
 function drawEl(id) {
   var el = document.getElementById(id); if(!el) return;
   gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, ease:'power1.inOut'});
