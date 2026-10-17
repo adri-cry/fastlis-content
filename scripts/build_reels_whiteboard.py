@@ -602,7 +602,7 @@ def scene_closing_stamp(s, si, narr=None):
             f'<h1 class="hand" style="font-size:96px">{thtml}</h1>'
             f'<div style="margin-top:24px">{"".join(rows)}</div>'
             f'<svg viewBox="0 0 700 300" style="width:640px;margin:10px auto 0;display:block" filter="url(#wobble)">'
-            f'<g id="{P}-cs-stamp" class="drop0"><rect class="ink-blue" x="150" y="60" width="400" height="150" rx="30" fill="#1B5FD9" opacity="0.92" transform="rotate(-4 350 135)"/>'
+            f'<g id="{P}-cs-stamp" class="drop0"><rect x="150" y="60" width="400" height="150" rx="30" style="fill:#1B5FD9;stroke:#1B5FD9;stroke-width:7;opacity:0.92" transform="rotate(-4 350 135)"/>'
             f'<text x="350" y="170" text-anchor="middle" font-size="88" font-family="Poppins" font-weight="800" fill="#fff" transform="rotate(-4 350 135)">FASTLIS</text></g>'
             f'<ellipse class="ink-blue draw" id="{P}-cs-rip" pathLength="1" cx="350" cy="135" rx="230" ry="105"/>'
             f'{MARKER}</svg>'
