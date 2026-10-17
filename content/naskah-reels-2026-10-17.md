@@ -8,10 +8,10 @@ Safe zone: teks & ilustrasi di x 80–900, y 220–1450
 Font minimum: judul 110px, baris utama 72px, baris kedua 60px, karaoke 64px bold (y ≈ 1350)
 Karaoke: timing tiap kata asli dari whisper (bukan tebakan), highlight stabilo kuning #FFE45E
 Progress tracker: 3 titik kiri atas (y ≈ 250) mulai beat 3, titik aktif biru
-Voice over: AI voice avocado_v2:MAI_01, Bahasa Indonesia, tempo cepat-santai, jeda 0.2 dtk antar kalimat
+Voice over: AI voice avocado_v2:MAI_01, Bahasa Indonesia, tempo santai, jeda 0.2 dtk antar beat
 Musik latar: jingle FastLIS energetic (volume 12%, fade in 1.5 dtk, fade out 2.5 dtk)
 SFX (volume ±25%): scribble saat garis digambar, pop saat elemen muncul, tick-tick jam, ding saat centang, swoosh saat transisi
-Durasi: ±33 detik, 6 beat
+Durasi: ±95 detik, 6 beat
 Tipe scene: title_sw / timeline / steps / dashboard / alarm / closing_stamp (spesifik, ada ilustrasi) atau title / stage / checklist / flow / stamp / closing (generik)
 
 ## ATURAN WAJIB GERAK
@@ -38,52 +38,52 @@ T3 (B3→B4) SCRIBBLE-WIPE: spidol menggambar coretan zig-zag besar menutupi lay
 T4 (B4→B5) BURST: tabung merah "meledak" jadi percikan coretan, flash putih 0.1 dtk, lonceng jatuh dari atas dengan bounce masuk ke beat 5.
 T5 (B5→B6) PAGE-FLIP: kertas diangkat dan di-scroll ke atas, kertas baru naik dari bawah, ada bayangan lipatan.
 
-## Beat 1 — title_sw (0–4 dtk)
+## Beat 1 — title_sw (0–13 dtk)
 Visual: frame pertama langsung ada stopwatch gambar tangan, jarum berputar cepat, arc merah memenuhi. Judul besar di atasnya, sub di bawah.
 Animasi: 0–0.3 dtk stopwatch M1 + tick-tick; judul M3 kata per kata (kata "telat" M5 + garis bawah merah bergelombang M1); sub M2 saat kata "3"; stopwatch M4 (jarum terus berputar, bergetar makin kencang menjelang akhir beat).
 Kamera: zoom-in (scale 1.0→1.25, fokus ke stopwatch lalu naik ke judul, sepanjang beat)
 Transisi keluar: T1
 Judul: Hasil lab<br><span class="blue">telat keluar... lagi?</span>
 Sub: 3 cara jaga TAT
-Narasi: Hasil lab telat keluar lagi? 3 cara jaga TAT biar nggak jebol.
+Narasi: Hasil lab telat keluar lagi? Kalau iya, kamu nggak sendirian. Banyak lab ngalamin hal yang sama. Hari ini aku kasih 3 cara mudah jaga TAT biar nggak jebol. Simak sampai habis.
 
-## Beat 2 — timeline (4–8.5 dtk)
+## Beat 2 — timeline (13–28 dtk)
 Visual: kotak label "DEFINISI" (biru). Garis waktu horizontal: tabung sampel (kiri) → kertas hasil (kanan), stopwatch kecil di tengah garis. Label "SAMPEL DITERIMA" kiri, "HASIL DIRILIS" kanan.
 Animasi: kotak M1 saat kata "timer"; tabung M1+M2 saat "sampel"; garis menjalar ke kanan M1 sambil stopwatch kecil meluncur mengikuti ujung garis; kertas hasil M2 + M5 saat "dirilis"; baris teks M3; semua M4.
 Kamera: zoom-out (scale 1.3→1.0, lalu geser pelan ke kanan 40px mengikuti garis)
 Transisi keluar: T2
 Kotak: DEFINISI | biru
 Baris: TAT = timer dari sampel masuk | sampai hasil keluar
-Narasi: TAT itu timer. Mulai dari sampel diterima, sampai hasil dirilis.
+Narasi: Pertama, pahami dulu. TAT itu timer. Timer-nya jalan mulai dari sampel diterima di lab, sampai hasil dirilis ke dokter. Selama timer jalan, semua mata nungguin. Jadi TAT bukan sekadar angka, tapi janji ke pasien.
 
-## Beat 3 — steps (8.5–14 dtk)
+## Beat 3 — steps (28–44 dtk)
 Visual: angka "1" dilingkari + headline. 3 titik di garis waktu: Terima → Analisis → Rilis, jam di bawah tiap titik (08:02 / 08:20 / 08:41). Di bawah: kata "TAT" dicoret, muncul "tebakan?" merah.
 Animasi: lingkaran angka M1 saat "Satu" (titik progress pertama menyala); headline M3 per kata, "catat" M5; titik 1-2-3 M2 berurutan sesuai "terima, analisis, rilis", tiap titik diikuti jam yang berganti angka cepat (efek odometer) lalu berhenti; saat "tebakan" coretan merah M1 di "TAT" + guncangan; semua M4.
-Kamera: geser-kanan (translate 0→-120px sambil scale 1.05→1.15, mengikuti urutan titik)
+Kamera: geser-kanan (translate 0→-80px sambil scale 1.05→1.12, mengikuti urutan titik)
 Transisi keluar: T3
 Kotak: 1 | hitam
 Baris: Catat tiap titik waktu | Nggak dicatat, TAT cuma tebakan
-Narasi: Satu. Catat tiap titik waktu. Terima, analisis, rilis. Nggak dicatat, TAT cuma tebakan.
+Narasi: Satu. Catat tiap titik waktu. Kapan sampel diterima, kapan mulai dianalisis, kapan hasil dirilis. Tiga titik ini wajib dicatat. Soalnya kalau nggak dicatat, TAT cuma tebakan. Dan tebakan nggak bisa dipertanggungjawabkan.
 
-## Beat 4 — dashboard (14–20 dtk)
+## Beat 4 — dashboard (44–59 dtk)
 Visual: angka "2" dilingkari + headline. Sketsa layar dashboard; di dalamnya antrean tabung menumpuk, warna bergeser hijau → oranye → merah. Panah melingkar "numpuk!" menunjuk bagian merah.
 Animasi: lingkaran M1 saat "Dua" (titik progress kedua menyala); dashboard dibingkai M1 saat "pantau"; tabung jatuh satu-satu dari atas (bounce kecil) saat "antrean live", ritme makin cepat; batang warna berubah halus hijau→merah saat "numpuk"; "jebol" M5 + lingkaran merah M1; angka kecil di dashboard (jumlah antrean) terus bertambah (odometer).
 Kamera: zoom-in (scale 1.0→1.35 pelan, fokus akhir ke tumpukan merah)
 Transisi keluar: T4
 Kotak: 2 | hitam
 Baris: Pantau dashboard real-time | Antrean numpuk? Kelihatan duluan
-Narasi: Dua. Pantau dashboard real-time. Tumpukan tabung kelihatan sebelum timer jebol.
+Narasi: Dua. Pantau dashboard real-time. Di dashboard, tumpukan tabung kelihatan duluan, sebelum timer-nya jebol. Jadi kamu bisa gerak cepat, alihin prioritas, sebelum semuanya telat.
 
-## Beat 5 — alarm (20–26 dtk)
+## Beat 5 — alarm (59–74 dtk)
 Visual: angka "3" dilingkari + headline. Lonceng (masuk dari T4), stopwatch dengan arc hampir penuh, lalu HP gambar tangan dengan notifikasi "⚠ Sampel hampir lewat batas TAT" (ID sampel dummy).
 Animasi: lingkaran M1 saat "Tiga" (titik progress ketiga menyala); lonceng berayun keras M4+M5 saat "pengingat"; arc stopwatch terisi merah saat "lewat batas" (HP ikut bergetar); notifikasi slide-in dari atas HP + SFX ding + HP berputar kecil saat "notif"; headline M3.
 Kamera: geser-kiri (translate 0→+120px sambil scale 1.1→1.2, berakhir di HP)
 Transisi keluar: T5
 Kotak: 3 | hitam
 Baris: Pasang pengingat TAT | Mau lewat batas? Langsung notif
-Narasi: Tiga. Pasang pengingat TAT. Peringatan otomatis. Sampel mau lewat batas? Langsung dapat notif.
+Narasi: Tiga. Pasang pengingat TAT. Jangan andalin ingatan. Bikin peringatan otomatis. Begitu ada sampel yang mau lewat batas, langsung dapat notif di HP. Tinggal tindak lanjuti, beres.
 
-## Beat 6 — closing_stamp (26–33 dtk)
+## Beat 6 — closing_stamp (74–95 dtk)
 Visual: judul besar + 3 centang merangkum 3 tip. Di bawah, stempel logo FASTLIS biru, lalu teks "Komen: AMAN / JEBOL" dengan panah ke bawah.
 Animasi: judul M3 per kata; tiap item M2 dengan centang biru M1 + SFX ding, sinkron narasi; stempel FASTLIS jatuh dari atas dengan skala 1.6→1.0 + guncangan kamera 6px saat menghantam + riak lingkaran di kertas; panah "Komen" M1 lalu berdenyut terus (M4); confetti coretan biru 1 dtk setelah stempel.
 Kamera: zoom-out (scale 1.25→1.0, lalu push-in kecil 1.0→1.04 saat stempel jatuh)
@@ -92,4 +92,4 @@ Item: Catat tiap titik waktu
 Item: Pantau antrean live
 Item: Pasang alarm TAT
 Stempel: FASTLIS
-Narasi: Bukan soal ngebut, tapi tepat waktu. TAT lab kamu minggu ini, aman atau jebol? Komen!
+Narasi: Ingat, ini bukan soal ngebut, tapi soal tepat waktu. TAT yang terjaga bikin dokter percaya, pasien tenang. Nah, TAT lab kamu minggu ini, aman atau jebol? Tulis di komen!

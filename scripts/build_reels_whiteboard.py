@@ -239,6 +239,16 @@ def _reg(id, trigger=None, kind="draw", offset=0, **kw):
     _draw_ids[-1].append(d)
 
 
+
+def _arc(cx, cy, r, frac=0.985):
+    """Path busur hampir penuh, dijamin konsentris di (cx,cy) radius r."""
+    import math as _m
+    a0 = -_m.pi / 2
+    a1 = a0 + frac * 2 * _m.pi
+    return (f"M{cx + r * _m.cos(a0):.1f} {cy + r * _m.sin(a0):.1f} "
+            f"A{r:.0f} {r:.0f} 0 1 1 {cx + r * _m.cos(a1):.1f} {cy + r * _m.sin(a1):.1f}")
+
+
 def _key(w):
     return w.lower().strip(".,!?;:\"'()…")
 
@@ -408,7 +418,7 @@ def scene_title_sw(s, si, narr=None):
             f'<rect class="ink pop0" id="{P}-sw-btn" x="182" y="14" width="36" height="30" rx="9"/>'
             f'<line class="ink" x1="200" y1="44" x2="200" y2="58" stroke-width="8"/>'
             f'<circle class="ink draw" id="{P}-sw-circ" pathLength="1" cx="200" cy="180" r="130"/>'
-            f'<path class="ink-red draw" id="{P}-sw-arc" pathLength="1" d="M200 50 A130 130 0 1 1 196 52"/>'
+            f'<path class="ink-red draw" id="{P}-sw-arc" pathLength="1" d="{_arc(200, 180, 140)}"/>'
             f'<g id="{P}-sw-ticks" class="pop0">{ticks}</g>'
             f'<g id="{P}-sw-hands"><line class="ink" x1="200" y1="180" x2="200" y2="92" stroke-width="9"/>'
             f'<line class="ink" x1="200" y1="180" x2="262" y2="180" stroke-width="9"/>'
@@ -428,7 +438,7 @@ def scene_timeline(s, si, narr=None):
     _reg(f"{P}-tl-tube", "sampel", "draw")
     _reg(f"{P}-tl-tubein", "sampel", "pop", offset=0.35)
     _reg(f"{P}-tl-line", "sampel", "draw", offset=0.4, dur=1.2)
-    _reg(f"{P}-tl-msw", "sampel", "slidex", offset=0.4, x=740, dur=1.2)
+    _reg(f"{P}-tl-msw", "sampel", "slidex", offset=0.4, x=500, dur=1.2)
     _reg(f"{P}-tl-paper", "dirilis", "pop")
     _reg(f"{P}-tl-paper", "dirilis", "emphasis", offset=0.2)
     _reg(f"{P}-tl-lab1", "sampel", "pop", offset=0.5)
@@ -441,19 +451,19 @@ def scene_timeline(s, si, narr=None):
             f'<rect class="ink draw" id="{P}-tl-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/>'
             f'<text x="380" y="140" text-anchor="middle" font-size="104" font-family="Caveat" fill="{s["color"]}">DEFINISI</text>'
             f'{MARKER}</svg>'
-            f'<svg viewBox="0 0 920 400" style="width:880px;margin:26px auto 0;display:block" filter="url(#wobble)">'
-            f'<g><rect class="ink draw" id="{P}-tl-tube" pathLength="1" x="60" y="110" width="96" height="170" rx="22"/>'
-            f'<rect id="{P}-tl-tubein" class="pop0" x="76" y="180" width="64" height="84" rx="12" fill="#1B5FD9" opacity="0.75"/></g>'
-            f'<path class="ink draw" id="{P}-tl-line" pathLength="1" d="M170 195 L750 195"/>'
-            f'<g id="{P}-tl-msw" transform="translate(170,195)"><circle class="ink" cx="0" cy="0" r="36" fill="#FBF9F4"/>'
+            f'<svg viewBox="0 0 920 400" style="width:800px;margin:26px auto 0;display:block" filter="url(#wobble)">'
+            f'<g><rect class="ink draw" id="{P}-tl-tube" pathLength="1" x="100" y="110" width="96" height="170" rx="22"/>'
+            f'<rect id="{P}-tl-tubein" class="pop0" x="116" y="180" width="64" height="84" rx="12" fill="#1B5FD9" opacity="0.75"/></g>'
+            f'<path class="ink draw" id="{P}-tl-line" pathLength="1" d="M210 195 L710 195"/>'
+            f'<g id="{P}-tl-msw" transform="translate(210,195)"><circle class="ink" cx="0" cy="0" r="36" fill="#FBF9F4"/>'
             f'<line class="ink" x1="0" y1="0" x2="0" y2="-20" stroke-width="7"/>'
             f'<line class="ink" x1="0" y1="0" x2="14" y2="0" stroke-width="7"/></g>'
-            f'<g id="{P}-tl-paper" class="pop0"><rect class="ink" x="740" y="105" width="130" height="180" rx="12" fill="#fff"/>'
-            f'<line class="ink" x1="760" y1="150" x2="850" y2="150" stroke-width="6"/>'
-            f'<line class="ink" x1="760" y1="185" x2="850" y2="185" stroke-width="6"/>'
-            f'<line class="ink-blue" x1="760" y1="220" x2="830" y2="220" stroke-width="8"/></g>'
-            f'<text id="{P}-tl-lab1" class="pop0" x="108" y="330" text-anchor="middle" font-size="44" font-family="Poppins" font-weight="600">SAMPEL DITERIMA</text>'
-            f'<text id="{P}-tl-lab2" class="pop0" x="805" y="330" text-anchor="middle" font-size="44" font-family="Poppins" font-weight="600">HASIL DIRILIS</text>'
+            f'<g id="{P}-tl-paper" class="pop0"><rect class="ink" x="690" y="105" width="130" height="180" rx="12" fill="#fff"/>'
+            f'<line class="ink" x1="710" y1="150" x2="800" y2="150" stroke-width="6"/>'
+            f'<line class="ink" x1="710" y1="185" x2="800" y2="185" stroke-width="6"/>'
+            f'<line class="ink-blue" x1="710" y1="220" x2="780" y2="220" stroke-width="8"/></g>'
+            f'<text id="{P}-tl-lab1" class="pop0" x="148" y="330" text-anchor="middle" font-size="30" font-family="Poppins" font-weight="600">SAMPEL DITERIMA</text>'
+            f'<text id="{P}-tl-lab2" class="pop0" x="755" y="330" text-anchor="middle" font-size="30" font-family="Poppins" font-weight="600">HASIL DIRILIS</text>'
             f'{MARKER}</svg>'
             f'<p class="bar1" style="margin-top:18px">{bhtml}</p></div>')
 
@@ -468,14 +478,14 @@ def scene_steps(s, si, narr=None):
         if _key(w) == "catat":
             _reg(wid, "catat", "emphasis", offset=0.1)
     _reg(f"{P}-st-line", "^", "draw", offset=1.0, dur=0.8)
-    pts = [("Terima", "terima", "08:02", 110), ("Analisis", "analisis", "08:20", 460), ("Rilis", "rilis", "08:41", 810)]
+    pts = [("Terima", "terima", "08:02", 160), ("Analisis", "analisis", "08:20", 460), ("Rilis", "rilis", "08:41", 760)]
     ptsvg = []
     for i, (lab, trig, tm, x) in enumerate(pts):
         _reg(f"{P}-st-pt{i}", trig, "pop")
         _reg(f"{P}-st-tm{i}", trig, "pop", offset=0.25)
         ptsvg.append(
-            f'<g id="{P}-st-pt{i}" class="pop0"><circle class="ink" cx="{x}" cy="110" r="46" fill="#FBF9F4"/>'
-            f'<text x="{x}" y="128" text-anchor="middle" font-size="40" font-family="Poppins" font-weight="700">{lab}</text></g>'
+            f'<g id="{P}-st-pt{i}" class="pop0"><circle class="ink" cx="{x}" cy="110" r="58" fill="#FBF9F4"/>'
+            f'<text x="{x}" y="126" text-anchor="middle" font-size="34" font-family="Poppins" font-weight="700">{lab}</text></g>'
             f'<text id="{P}-st-tm{i}" class="pop0" x="{x}" y="215" text-anchor="middle" font-size="52" font-family="Caveat">{tm}</text>')
     _reg(f"{P}-st-strike", "tebakan", "draw", offset=0, dur=0.4)
     _reg(f"{P}-st-teb", "tebakan", "pop", offset=0.15)
@@ -486,7 +496,7 @@ def scene_steps(s, si, narr=None):
             f'<text x="90" y="125" text-anchor="middle" font-size="100" font-family="Caveat">1</text>{MARKER}</svg>'
             f'<p class="bar1" style="flex:1;min-width:0;max-width:700px">{hhtml}</p></div>'
             f'<svg viewBox="0 0 920 260" style="width:880px;margin:30px auto 0;display:block" filter="url(#wobble)">'
-            f'<path class="ink draw" id="{P}-st-line" pathLength="1" d="M110 110 L810 110"/>'
+            f'<path class="ink draw" id="{P}-st-line" pathLength="1" d="M160 110 L760 110"/>'
             f'{"".join(ptsvg)}{MARKER}</svg>'
             f'<svg viewBox="0 0 640 130" style="width:560px;margin:16px auto 0;display:block" filter="url(#wobble)">'
             f'<text x="150" y="88" text-anchor="middle" font-size="76" font-family="Caveat">TAT</text>'
@@ -532,9 +542,9 @@ def scene_dashboard(s, si, narr=None):
             f'<text id="{P}-db-head" class="pop0" x="110" y="105" font-size="52" font-family="Poppins" font-weight="700">DASHBOARD LAB</text>'
             f'<text id="{P}-db-cnt" x="780" y="105" text-anchor="end" font-size="60" font-family="Caveat" fill="#E5484D">0</text>'
             f'{"".join(tubes)}'
-            f'<ellipse class="ink-red draw" id="{P}-db-rcirc" pathLength="1" cx="807" cy="265" rx="105" ry="180"/>'
+            f'<ellipse class="ink-red draw" id="{P}-db-rcirc" pathLength="1" cx="770" cy="300" rx="85" ry="140"/>'
             f'<path class="ink-blue draw" id="{P}-db-arrow" pathLength="1" d="M700 120 A150 150 0 0 1 830 220 M800 195 L832 222 L800 248"/>'
-            f'<text x="640" y="90" font-size="52" font-family="Caveat" fill="#1B5FD9" transform="rotate(-8 640 90)">numpuk!</text>'
+            f'<text x="595" y="82" font-size="52" font-family="Caveat" fill="#1B5FD9" transform="rotate(-8 595 82)">numpuk!</text>'
             f'{MARKER}</svg></div>')
 
 
@@ -563,13 +573,13 @@ def scene_alarm(s, si, narr=None):
             f'<line class="ink" x1="140" y1="300" x2="120" y2="280" stroke-width="7"/>'
             f'<line class="ink" x1="260" y1="300" x2="280" y2="280" stroke-width="7"/></g>'
             f'<circle class="ink draw" id="{P}-al-swc" pathLength="1" cx="470" cy="330" r="120"/>'
-            f'<path class="ink-red draw" id="{P}-al-arc" pathLength="1" d="M470 210 A120 120 0 1 1 462 212"/>'
+            f'<path class="ink-red draw" id="{P}-al-arc" pathLength="1" d="{_arc(470, 330, 130)}"/>'
             f'<g id="{P}-al-hp" class="pop0"><rect class="ink" x="600" y="140" width="190" height="340" rx="28" fill="#fff"/>'
             f'<rect class="ink" x="620" y="180" width="150" height="220" rx="10"/>'
             f'<circle class="ink" cx="695" cy="445" r="10"/></g>'
-            f'<g id="{P}-al-notif" class="drop0"><rect x="580" y="60" width="230" height="110" rx="18" fill="#FFE45E" stroke="#1a1a1a" stroke-width="6"/>'
-            f'<text x="695" y="112" text-anchor="middle" font-size="34" font-family="Poppins" font-weight="700">Sampel hampir</text>'
-            f'<text x="695" y="148" text-anchor="middle" font-size="34" font-family="Poppins" font-weight="700">lewat batas TAT</text></g>'
+            f'<g id="{P}-al-notif" class="drop0"><rect x="545" y="55" width="270" height="115" rx="18" fill="#FFE45E" stroke="#1a1a1a" stroke-width="6"/>'
+            f'<text x="680" y="100" text-anchor="middle" font-size="28" font-family="Poppins" font-weight="700">Sampel hampir</text>'
+            f'<text x="680" y="135" text-anchor="middle" font-size="28" font-family="Poppins" font-weight="700">lewat batas TAT</text></g>'
             f'{MARKER}</svg></div>')
 
 
@@ -1253,7 +1263,7 @@ def build_from_beats(beats, prefix="whiteboard"):
     if cp.returncode != 0:
         print("konversi mp3 GAGAL"); sys.exit(1)
     dur = audio_duration(vo_path)
-    total = round(dur + 0.6, 2)
+    total = round(dur + 2.5, 2)  # tail hold: CTA akhir butuh napas ±2 dtk
     print(f"VO jadi: {dur:.1f}s, total render {total}s")
     # ---- penjaga durasi: tangkap halusinasi TTS tanpa dengerin manual ----
     est = max(1, len(narr_text.replace("\n", " "))) / 850 * 60
@@ -1392,7 +1402,7 @@ def build_from_beats(beats, prefix="whiteboard"):
     beat_cams = [b.get("cam") or cam[b["scene"]["type"]] for b in beats]
     _CAMDTL = {"title_sw": {"s0": 1.0, "s1": 1.25},
                "timeline": {"s0": 1.3, "s1": 1.0},
-               "steps": {"x0": 0, "x1": -120, "s0": 1.05, "s1": 1.15},
+               "steps": {"x0": 0, "x1": -80, "s0": 1.05, "s1": 1.12},
                "dashboard": {"s0": 1.0, "s1": 1.35},
                "alarm": {"x0": 0, "x1": 80, "s0": 1.1, "s1": 1.2},
                "closing_stamp": {"s0": 1.25, "s1": 1.0}}
