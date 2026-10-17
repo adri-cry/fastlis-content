@@ -1,200 +1,192 @@
-<!doctype html>
-<html lang="id">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=1080, height=1920" />
-<link href="../assets/fonts-poppins.css" rel="stylesheet">
-<script src="../assets/gsap.min.js"></script>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:1080px;height:1920px;overflow:hidden;background:#071120}
-  body{font-family:'Poppins',sans-serif}
-  #root{width:1080px;height:1920px;position:relative;overflow:hidden;background:#071120}
-  #canvas{position:absolute;inset:-70px;background:radial-gradient(rgba(120,175,230,.13) 2px, transparent 2.6px);background-size:36px 36px;}
-  #vignette{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse 90% 70% at 50% 42%, transparent 40%, rgba(2,8,18,.80) 100%);}
-  .progress{position:absolute;top:0;left:0;height:8px;width:0;background:#0469DC;z-index:5}
-  #brandlogo{position:absolute;top:26px;right:72px;height:52px;z-index:6;opacity:.92}
-  .beat{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:40px 72px 360px}
-  .chlabel{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:27px;letter-spacing:5px;color:#3B9EFF;font-weight:700}
-  .bigt{font-size:84px;font-weight:800;color:#fff;line-height:1.04;letter-spacing:-2px;margin-top:24px;text-transform:uppercase}
-  .bigt .hl{color:#3B9EFF}
-  .polaroid{margin-top:34px;background:#fff;border-radius:10px;padding:18px 18px 0;transform:rotate(-2deg);box-shadow:0 24px 60px rgba(0,0,0,.45);position:relative}
-  .polaroid img{width:100%;height:600px;object-fit:cover;object-position:center 72%;display:block;border-radius:4px}
-  .polaroid .cap{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:25px;color:#334155;padding:18px 6px;letter-spacing:1px}
-  .polaroid .tape{position:absolute;top:-22px;left:50%;width:180px;height:44px;background:rgba(230,236,245,.85);transform:translateX(-50%) rotate(3deg);border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12)}
-  .keystrip{margin-top:26px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:18px;padding:24px 28px;font-size:33px;font-weight:600;color:#fff;line-height:1.4;display:flex;align-items:center;gap:18px}
-  .keystrip .kdot{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#3B9EFF;box-shadow:0 0 14px rgba(59,158,255,.8)}
-  .card{margin-top:40px;background:rgba(10,22,40,.74);border:1px solid rgba(90,160,240,.30);border-radius:24px;padding:36px 38px}
-  .card .big{font-size:54px;font-weight:800;color:#fff;line-height:1.2}
-  .card .asksub{font-size:34px;color:rgba(255,255,255,.85);margin-top:14px;font-weight:600}
-  .pillrow{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
-  .pill{font-size:26px;font-weight:700;color:#3B9EFF;background:rgba(59,158,255,.14);border:1px solid rgba(59,158,255,.35);border-radius:999px;padding:14px 26px}
-  #karaoke{position:absolute;left:56px;right:56px;bottom:110px;z-index:4;text-align:center}
-  .phrase{display:inline-block;background:rgba(3,10,22,.68);border-radius:20px;padding:24px 32px;font-size:38px;font-weight:600;color:rgba(255,255,255,.93);line-height:1.5}
-  .kw{transition:color .12s}
-  .kw.on{color:#3B9EFF;font-weight:800}
-</style>
-</head>
-<body>
-<div id="root" data-composition-id="daily" data-start="0" data-duration="50.44" data-width="1080" data-height="1920">
-  <div id="canvas"></div>
-  <div id="vignette"></div>
-  <div class="progress" id="prog"></div>
-  <img id="brandlogo" src="../assets/fastlis-logo-dark.png" alt="FastLIS">
-  <div class="beat" id="beat0"><div class="chlabel">PASCA-ANALITIK</div><div class="bigt">Hasil hari ini beda jauh<br><span class="hl">dari hasil kemarin?</span></div><div class="polaroid" id="b0-vis"><div class="tape"></div><img src="../assets/lab-25.jpg"><div class="cap">Hasil hari ini beda jauh dari hasil kemarin</div></div><div class="keystrip" id="b0-key"><span class="kdot"></span>Kuis: rilis atau tahan?</div></div><div class="beat" id="beat1" style="opacity:0"><div class="chlabel">KASUS HARI INI</div><div class="bigt">Kalium 4,1 jadi 6,5<br><span class="hl">dalam seminggu.</span></div><div class="polaroid" id="b1-vis"><div class="tape"></div><img src="../assets/lab-01.jpg"><div class="cap">Kalium 4,1 jadi 6,5 dalam seminggu.</div></div><div class="keystrip" id="b1-key"><span class="kdot"></span>QC lolos. Rilis atau tahan?</div></div><div class="beat" id="beat2" style="opacity:0"><div class="chlabel">HEMOLISIS? LABEL BENAR?</div><div class="bigt">1. Cek sampelnya</div><div class="polaroid" id="b2-vis"><div class="tape"></div><img src="../assets/lab-02.jpg"><div class="cap">1. Cek sampelnya</div></div><div class="keystrip" id="b2-key"><span class="kdot"></span>Pastikan sampel dan identitas pasien tidak tertukar.</div></div><div class="beat" id="beat3" style="opacity:0"><div class="chlabel">TERAPI ATAU PUASA BERUBAH?</div><div class="bigt">2. Cek kondisinya</div><div class="polaroid" id="b3-vis"><div class="tape"></div><img src="../assets/lab-20.jpg"><div class="cap">2. Cek kondisinya</div></div><div class="keystrip" id="b3-key"><span class="kdot"></span>Kondisi pasien bisa menggeser hasil secara wajar.</div></div><div class="beat" id="beat4" style="opacity:0"><div class="chlabel">BANDINGKAN HASIL LAMA</div><div class="bigt">3. Cek riwayatnya</div><div class="polaroid" id="b4-vis"><div class="tape"></div><img src="../assets/lab-16.jpg"><div class="cap">3. Cek riwayatnya</div></div><div class="keystrip" id="b4-key"><span class="kdot"></span>Lewat batas delta check? Tahan dan konfirmasi ulang.</div></div><div class="beat" id="beat5" style="opacity:0"><div class="chlabel">PENUTUP</div><div class="bigt">Delta check itu rem darurat<br>sebelum hasil dirilis.</div><div class="card ask" id="b5-vis"><div class="brandpill">FastLIS</div><div class="big">Kamu jawab A atau B? Tulis di komentar.</div><div class="pillrow"><span class="pill">Delta check</span><span class="pill">Validasi hasil</span><span class="pill">FASTLIS</span></div><div class="promo">Follow FastLIS untuk edukasi lab setiap hari.</div></div></div>
-  <div id="karaoke"><div class="phrase" id="p0" style="display:none"><span class="kw" id="w0">Hasil</span> <span class="kw" id="w1">hari</span> <span class="kw" id="w2">ini</span> <span class="kw" id="w3">beda</span> <span class="kw" id="w4">jauh</span> <span class="kw" id="w5">dari</span> <span class="kw" id="w6">hasil</span> <span class="kw" id="w7">kemarin?</span> <span class="kw" id="w8">Kuis:</span> <span class="kw" id="w9">rilis</span> <span class="kw" id="w10">atau</span> <span class="kw" id="w11">tahan?</span></div><div class="phrase" id="p1" style="display:none"><span class="kw" id="w12">Kalium</span> <span class="kw" id="w13">4,1</span> <span class="kw" id="w14">jadi</span> <span class="kw" id="w15">6,5</span> <span class="kw" id="w16">dalam</span> <span class="kw" id="w17">seminggu.</span> <span class="kw" id="w18">QC</span> <span class="kw" id="w19">lolos.</span> <span class="kw" id="w20">Rilis</span> <span class="kw" id="w21">atau</span> <span class="kw" id="w22">tahan?</span></div><div class="phrase" id="p2" style="display:none"><span class="kw" id="w23">1.</span> <span class="kw" id="w24">Cek</span> <span class="kw" id="w25">sampelnya.</span> <span class="kw" id="w26">Hemolisis?</span> <span class="kw" id="w27">Label</span> <span class="kw" id="w28">benar?</span> <span class="kw" id="w29">Pastikan</span> <span class="kw" id="w30">sampel</span> <span class="kw" id="w31">dan</span> <span class="kw" id="w32">identitas</span> <span class="kw" id="w33">pasien</span> <span class="kw" id="w34">tidak</span> <span class="kw" id="w35">tertukar.</span></div><div class="phrase" id="p3" style="display:none"><span class="kw" id="w36">2.</span> <span class="kw" id="w37">Cek</span> <span class="kw" id="w38">kondisinya.</span> <span class="kw" id="w39">Terapi</span> <span class="kw" id="w40">atau</span> <span class="kw" id="w41">puasa</span> <span class="kw" id="w42">berubah?</span> <span class="kw" id="w43">Kondisi</span> <span class="kw" id="w44">pasien</span> <span class="kw" id="w45">bisa</span> <span class="kw" id="w46">menggeser</span> <span class="kw" id="w47">hasil</span> <span class="kw" id="w48">secara</span> <span class="kw" id="w49">wajar.</span></div><div class="phrase" id="p4" style="display:none"><span class="kw" id="w50">3.</span> <span class="kw" id="w51">Cek</span> <span class="kw" id="w52">riwayatnya.</span> <span class="kw" id="w53">Bandingkan</span> <span class="kw" id="w54">hasil</span> <span class="kw" id="w55">lama.</span> <span class="kw" id="w56">Lewat</span> <span class="kw" id="w57">batas</span> <span class="kw" id="w58">delta</span> <span class="kw" id="w59">check?</span> <span class="kw" id="w60">Tahan</span> <span class="kw" id="w61">dan</span> <span class="kw" id="w62">konfirmasi</span> <span class="kw" id="w63">ulang.</span></div><div class="phrase" id="p5" style="display:none"><span class="kw" id="w64">Delta</span> <span class="kw" id="w65">check</span> <span class="kw" id="w66">itu</span> <span class="kw" id="w67">rem</span> <span class="kw" id="w68">darurat</span> <span class="kw" id="w69">sebelum</span> <span class="kw" id="w70">hasil</span> <span class="kw" id="w71">dirilis.</span> <span class="kw" id="w72">Kamu</span> <span class="kw" id="w73">jawab</span> <span class="kw" id="w74">A</span> <span class="kw" id="w75">atau</span> <span class="kw" id="w76">B?</span> <span class="kw" id="w77">Tulis</span> <span class="kw" id="w78">di</span> <span class="kw" id="w79">komentar.</span> <span class="kw" id="w80">Follow</span> <span class="kw" id="w81">FastLIS</span> <span class="kw" id="w82">untuk</span> <span class="kw" id="w83">edukasi</span> <span class="kw" id="w84">lab</span> <span class="kw" id="w85">setiap</span> <span class="kw" id="w86">hari.</span></div></div>
-</div>
-<script>
-  var cur = -1, curP = -1;
-  function setWord(i){
-    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
-    document.getElementById('w'+i).classList.add('on');
-    cur = i;
-  }
-  function clearWords(){
-    if(cur >= 0) document.getElementById('w'+cur).classList.remove('on');
-    cur = -1;
-  }
-  function showPhrase(p){
-    if(curP >= 0) document.getElementById('p'+curP).style.display = 'none';
-    clearWords();
-    document.getElementById('p'+p).style.display = 'inline-block';
-    curP = p;
-  }
-  var tl = gsap.timeline();
-  tl.fromTo('#canvas', {scale:1, x:0, y:0}, {scale:1.10, x:-30, y:-44, duration:50.44, ease:'none'}, 0);
-  tl.fromTo('#prog', {width:0}, {width:1080, duration:50.44, ease:'none'}, 0);
-  tl.from('#beat0 .chlabel', {opacity:0, y:16, duration:.5}, .15);
-  tl.from('#beat0 .bigt', {opacity:0, y:30, duration:.7}, .35);
-  tl.from('#b0-vis', {opacity:0, y:26, rotate:2, duration:.7}, .8);
-  tl.from('#b0-key', {opacity:0, x:-18, duration:.45}, 1.15);
-  
-  tl.to("#beat0", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 6.05);
-  tl.fromTo("#beat1", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 6.23);
-  tl.from("#beat1 .chlabel", {opacity:0, y:14, duration:.45}, 6.2);
-  tl.from("#beat1 .bigt", {opacity:0, y:26, duration:.6}, 6.35);
-  tl.from("#b1-vis", {opacity:0, y:22, scale:.97, duration:.55}, 6.6);
-  tl.from("#b1-key", {opacity:0, x:-18, duration:.45}, 6.85);
-  tl.to("#beat1", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 13.69);
-  tl.fromTo("#beat2", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 13.87);
-  tl.from("#beat2 .chlabel", {opacity:0, y:14, duration:.45}, 13.84);
-  tl.from("#beat2 .bigt", {opacity:0, y:26, duration:.6}, 13.99);
-  tl.from("#b2-vis", {opacity:0, y:22, scale:.97, duration:.55}, 14.24);
-  tl.from("#b2-key", {opacity:0, x:-18, duration:.45}, 14.49);
-  tl.to("#beat2", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 22.41);
-  tl.fromTo("#beat3", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 22.59);
-  tl.from("#beat3 .chlabel", {opacity:0, y:14, duration:.45}, 22.56);
-  tl.from("#beat3 .bigt", {opacity:0, y:26, duration:.6}, 22.71);
-  tl.from("#b3-vis", {opacity:0, y:22, scale:.97, duration:.55}, 22.96);
-  tl.from("#b3-key", {opacity:0, x:-18, duration:.45}, 23.21);
-  tl.to("#beat3", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 30.67);
-  tl.fromTo("#beat4", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 30.85);
-  tl.from("#beat4 .chlabel", {opacity:0, y:14, duration:.45}, 30.82);
-  tl.from("#beat4 .bigt", {opacity:0, y:26, duration:.6}, 30.97);
-  tl.from("#b4-vis", {opacity:0, y:22, scale:.97, duration:.55}, 31.22);
-  tl.from("#b4-key", {opacity:0, x:-18, duration:.45}, 31.47);
-  tl.to("#beat4", {opacity:0, y:-70, duration:.35, ease:"power2.in"}, 38.93);
-  tl.fromTo("#beat5", {opacity:0, y:70}, {opacity:1, y:0, duration:.5, ease:"power2.out"}, 39.11);
-  tl.from("#beat5 .chlabel", {opacity:0, y:14, duration:.45}, 39.08);
-  tl.from("#beat5 .bigt", {opacity:0, y:26, duration:.6}, 39.23);
-  tl.from("#b5-vis", {opacity:0, y:22, scale:.97, duration:.55}, 39.48);
-  tl.from("#b5-key", {opacity:0, x:-18, duration:.45}, 39.73);
-  
-  tl.call(setWord, [0], 0.08);
-  tl.call(setWord, [1], 0.76);
-  tl.call(setWord, [2], 0.96);
-  tl.call(setWord, [3], 1.28);
-  tl.call(setWord, [4], 1.62);
-  tl.call(setWord, [5], 1.92);
-  tl.call(setWord, [6], 2.1);
-  tl.call(setWord, [7], 2.4);
-  tl.call(setWord, [8], 3.5);
-  tl.call(setWord, [9], 4.28);
-  tl.call(setWord, [10], 4.82);
-  tl.call(setWord, [11], 5.22);
-  tl.call(setWord, [12], 6.5);
-  tl.call(setWord, [13], 6.92);
-  tl.call(setWord, [14], 7.92);
-  tl.call(setWord, [15], 8.34);
-  tl.call(setWord, [16], 9.3);
-  tl.call(setWord, [17], 9.72);
-  tl.call(setWord, [18], 11.06);
-  tl.call(setWord, [19], 11.58);
-  tl.call(setWord, [20], 12.36);
-  tl.call(setWord, [21], 12.88);
-  tl.call(setWord, [22], 13.14);
-  tl.call(setWord, [23], 14.14);
-  tl.call(setWord, [24], 15.06);
-  tl.call(setWord, [25], 15.2);
-  tl.call(setWord, [26], 16.24);
-  tl.call(setWord, [27], 17.36);
-  tl.call(setWord, [28], 17.78);
-  tl.call(setWord, [29], 18.92);
-  tl.call(setWord, [30], 19.38);
-  tl.call(setWord, [31], 19.98);
-  tl.call(setWord, [32], 20.18);
-  tl.call(setWord, [33], 20.74);
-  tl.call(setWord, [34], 21.2);
-  tl.call(setWord, [35], 21.56);
-  tl.call(setWord, [36], 22.86);
-  tl.call(setWord, [37], 23.9);
-  tl.call(setWord, [38], 24.06);
-  tl.call(setWord, [39], 25.26);
-  tl.call(setWord, [40], 25.72);
-  tl.call(setWord, [41], 25.92);
-  tl.call(setWord, [42], 26.26);
-  tl.call(setWord, [43], 26.72);
-  tl.call(setWord, [44], 27.8);
-  tl.call(setWord, [45], 28.3);
-  tl.call(setWord, [46], 28.56);
-  tl.call(setWord, [47], 29.04);
-  tl.call(setWord, [48], 29.46);
-  tl.call(setWord, [49], 29.86);
-  tl.call(setWord, [50], 31.12);
-  tl.call(setWord, [51], 31.9);
-  tl.call(setWord, [52], 32.16);
-  tl.call(setWord, [53], 33.32);
-  tl.call(setWord, [54], 33.94);
-  tl.call(setWord, [55], 34.34);
-  tl.call(setWord, [56], 35.28);
-  tl.call(setWord, [57], 35.56);
-  tl.call(setWord, [58], 35.92);
-  tl.call(setWord, [59], 36.14);
-  tl.call(setWord, [60], 37.1);
-  tl.call(setWord, [61], 37.54);
-  tl.call(setWord, [62], 37.74);
-  tl.call(setWord, [63], 38.44);
-  tl.call(setWord, [64], 39.38);
-  tl.call(setWord, [65], 39.8);
-  tl.call(setWord, [66], 40.14);
-  tl.call(setWord, [67], 40.38);
-  tl.call(setWord, [68], 40.66);
-  tl.call(setWord, [69], 41.12);
-  tl.call(setWord, [70], 41.74);
-  tl.call(setWord, [71], 42.16);
-  tl.call(setWord, [72], 43.28);
-  tl.call(setWord, [73], 43.72);
-  tl.call(setWord, [74], 44.08);
-  tl.call(setWord, [75], 44.26);
-  tl.call(setWord, [76], 44.44);
-  tl.call(setWord, [77], 45.32);
-  tl.call(setWord, [78], 45.7);
-  tl.call(setWord, [79], 45.84);
-  tl.call(setWord, [80], 46.82);
-  tl.call(setWord, [81], 47.12);
-  tl.call(setWord, [82], 47.66);
-  tl.call(setWord, [83], 48.0);
-  tl.call(setWord, [84], 48.56);
-  tl.call(setWord, [85], 48.84);
-  tl.call(setWord, [86], 49.32);
-  tl.call(showPhrase, [0], 0.08);
-  tl.call(showPhrase, [1], 6.5);
-  tl.call(showPhrase, [2], 14.14);
-  tl.call(showPhrase, [3], 22.86);
-  tl.call(showPhrase, [4], 31.12);
-  tl.call(showPhrase, [5], 39.38);
-  tl.call(clearWords, [], 50.39);
-  tl.to({}, {duration:50.44});
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><style>
+@font-face { font-family:'Caveat'; src:url('../assets/fonts/caveat-700.woff2') format('woff2'); font-weight:700; }
+@font-face { font-family:'Poppins'; src:url('../assets/fonts/poppins-6.woff2') format('woff2'); font-weight:600; }
+* { margin:0; padding:0; box-sizing:border-box; }
+#root { width:1080px; height:1920px; position:relative; overflow:hidden;
+  background:#FBF9F4; font-family:'Caveat',cursive; color:#1a1a1a; }
+#root::before { content:''; position:absolute; inset:0;
+  background-image:radial-gradient(#00000008 1px, transparent 1px);
+  background-size:28px 28px; }
+.scene { position:absolute; inset:0; display:none; padding:40px 70px 300px 70px; }
+.scene.on { display:flex; flex-direction:column; }
+.scene.on > *:first-child { margin-top:auto; }
+.scene.on > *:last-child { margin-bottom:auto; }
+.ink { stroke:#1a1a1a; stroke-width:7; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.ink-red { stroke:#E23B3B; stroke-width:9; fill:none; stroke-linecap:round; }
+.ink-blue { stroke:#1B5FD9; stroke-width:7; fill:none; stroke-linecap:round; }
+.draw { stroke-dasharray:1; stroke-dashoffset:1; }
+h1.hand { font-size:104px; line-height:1.08; text-align:center; }
+h1.hand .hl { background:linear-gradient(transparent 8%, #FFE45E 8%, #FFE45E 92%, transparent 92%); padding:0 14px; }
+h1.hand .blue, .blue { color:#1B5FD9; }
+.sub { font-family:'Poppins',sans-serif; font-size:34px; color:#555; text-align:center; margin-top:18px; }
+.wrap { width:100%; }
+.stagecard { display:flex; justify-content:center; }
+.desclist { margin-top:34px; }
+.checkline { display:flex; align-items:center; justify-content:center; gap:18px; margin:16px 0;
+  font-family:'Poppins',sans-serif; font-size:36px; }
+.checkline .dot { width:16px; height:16px; border-radius:50%; background:#1B5FD9; flex:none; }
+.check { display:flex; align-items:center; gap:26px; margin:26px 60px; font-size:60px; }
+.pill { display:inline-block; border:5px solid #1a1a1a; border-radius:999px;
+  padding:18px 54px; font-size:56px; background:#fff; box-shadow:5px 5px 0 #1a1a1a22; }
+#karaoke { position:absolute; left:60px; right:60px; bottom:90px; min-height:190px;
+  display:flex; align-items:center; justify-content:center; text-align:center; }
+.phrase { font-family:'Poppins',sans-serif; font-weight:600; font-size:42px; line-height:1.5; color:#1a1a1a; }
+.kw { padding:2px 8px; border-radius:8px; transition:background .12s; }
+.kw.on { background:#FFE45E; }
+.rv { opacity:0; }
+#brand { position:absolute; top:56px; left:70px; font-family:'Poppins',sans-serif;
+  font-weight:800; font-size:34px; letter-spacing:2px; }
+#brand b { color:#1B5FD9; }
+</style></head><body><div id="root" data-composition-id="whiteboard" data-start="0" data-duration="38.11" data-width="1080" data-height="1920"><div id="brand">FAST<b>LIS</b></div><svg width="0" height="0"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7"/></filter></defs></svg><div class="scene" id="s0"><div class="wrap"><h1 class="hand">Hasil lab kamu<br><span class="blue">pernah telat keluar?</span></h1><svg viewBox="0 0 600 40" style="width:600px;margin:6px auto 0;display:block" filter="url(#wobble)"><path class="ink-blue draw" id="s0-ul" pathLength="1" d="M20 22 C 200 12, 400 32, 580 20"/></svg><p class="sub">3 tips jaga TAT</p></div></div><div class="scene" id="s1"><div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)"><rect class="ink draw" id="s1-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/><text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="#1B5FD9">DEFINISI</text></svg></div><div class="desclist"><div class="checkline rv" id="s1-d0"><span class="dot"></span><span>TAT itu timer dari sampel diterima.</span></div><div class="checkline rv" id="s1-d1"><span class="dot"></span><span>Sampai hasil dirilis.</span></div></div></div></div><div class="scene" id="s2"><div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)"><rect class="ink draw" id="s2-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/><text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="#1a1a1a">1</text></svg></div><div class="desclist"><div class="checkline rv" id="s2-d0"><span class="dot"></span><span>Kalau nggak dicatat, TAT cuma tebakan.</span></div><div class="checkline rv" id="s2-d1"><span class="dot"></span><span>Terima, analisis, rilis</span></div></div></div></div><div class="scene" id="s3"><div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)"><rect class="ink draw" id="s3-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/><text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="#1a1a1a">2</text></svg></div><div class="desclist"><div class="checkline rv" id="s3-d0"><span class="dot"></span><span>Sampel numpuk kelihatan sebelum timer jebol.</span></div><div class="checkline rv" id="s3-d1"><span class="dot"></span><span>Lihat antrean live</span></div></div></div></div><div class="scene" id="s4"><div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)"><rect class="ink draw" id="s4-box" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/><text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="#1a1a1a">3</text></svg></div><div class="desclist"><div class="checkline rv" id="s4-d0"><span class="dot"></span><span>Sampel mau lewat batas? Langsung dapat notif.</span></div><div class="checkline rv" id="s4-d1"><span class="dot"></span><span>Peringatan otomatis</span></div></div></div></div><div class="scene" id="s5"><div class="wrap"><h1 class="hand">Bukan soal ngebut,<br>tapi tepat waktu.</h1><div style="margin-top:30px"><div class="check"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)"><rect class="ink-blue draw" id="s5-ck-b0" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/><path class="ink-red draw" id="s5-ck-c0" pathLength="1" d="M22 46 L40 64 L70 28"/></svg><span id="s5-ck-t0" class="rv">Turnaround time</span></div><div class="check"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)"><rect class="ink-blue draw" id="s5-ck-b1" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/><path class="ink-red draw" id="s5-ck-c1" pathLength="1" d="M22 46 L40 64 L70 28"/></svg><span id="s5-ck-t1" class="rv">Manajemen lab</span></div><div class="check"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)"><rect class="ink-blue draw" id="s5-ck-b2" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/><path class="ink-red draw" id="s5-ck-c2" pathLength="1" d="M22 46 L40 64 L70 28"/></svg><span id="s5-ck-t2" class="rv">FASTLIS</span></div></div></div></div><div id="karaoke"><div class="phrase" id="p0" style="display:none"><span class="kw" id="w0">Hasil</span> <span class="kw" id="w1">lab</span> <span class="kw" id="w2">kamu</span> <span class="kw" id="w3">pernah</span> <span class="kw" id="w4">telat</span> <span class="kw" id="w5">keluar?</span> <span class="kw" id="w6">3</span> <span class="kw" id="w7">tips</span> <span class="kw" id="w8">jaga</span> <span class="kw" id="w9">TAT.</span></div><div class="phrase" id="p1" style="display:none"><span class="kw" id="w10">TAT</span> <span class="kw" id="w11">itu</span> <span class="kw" id="w12">timer</span> <span class="kw" id="w13">dari</span> <span class="kw" id="w14">sampel</span> <span class="kw" id="w15">diterima.</span> <span class="kw" id="w16">Sampai</span> <span class="kw" id="w17">hasil</span> <span class="kw" id="w18">dirilis.</span></div><div class="phrase" id="p2" style="display:none"><span class="kw" id="w19">1.</span> <span class="kw" id="w20">Catat</span> <span class="kw" id="w21">tiap</span> <span class="kw" id="w22">titik</span> <span class="kw" id="w23">waktu.</span> <span class="kw" id="w24">Terima,</span> <span class="kw" id="w25">analisis,</span> <span class="kw" id="w26">rilis.</span> <span class="kw" id="w27">Kalau</span> <span class="kw" id="w28">nggak</span> <span class="kw" id="w29">dicatat,</span> <span class="kw" id="w30">TAT</span> <span class="kw" id="w31">cuma</span> <span class="kw" id="w32">tebakan.</span></div><div class="phrase" id="p3" style="display:none"><span class="kw" id="w33">2.</span> <span class="kw" id="w34">Pantau</span> <span class="kw" id="w35">dashboard</span> <span class="kw" id="w36">real-time.</span> <span class="kw" id="w37">Lihat</span> <span class="kw" id="w38">antrean</span> <span class="kw" id="w39">live.</span> <span class="kw" id="w40">Sampel</span> <span class="kw" id="w41">numpuk</span> <span class="kw" id="w42">kelihatan</span> <span class="kw" id="w43">sebelum</span> <span class="kw" id="w44">timer</span> <span class="kw" id="w45">jebol.</span></div><div class="phrase" id="p4" style="display:none"><span class="kw" id="w46">3.</span> <span class="kw" id="w47">Pasang</span> <span class="kw" id="w48">alarm</span> <span class="kw" id="w49">TAT.</span> <span class="kw" id="w50">Peringatan</span> <span class="kw" id="w51">otomatis.</span> <span class="kw" id="w52">Sampel</span> <span class="kw" id="w53">mau</span> <span class="kw" id="w54">lewat</span> <span class="kw" id="w55">batas?</span> <span class="kw" id="w56">Langsung</span> <span class="kw" id="w57">dapat</span> <span class="kw" id="w58">notif.</span></div><div class="phrase" id="p5" style="display:none"><span class="kw" id="w59">Bukan</span> <span class="kw" id="w60">soal</span> <span class="kw" id="w61">ngebut,</span> <span class="kw" id="w62">tapi</span> <span class="kw" id="w63">tepat</span> <span class="kw" id="w64">waktu.</span> <span class="kw" id="w65">TAT</span> <span class="kw" id="w66">lab</span> <span class="kw" id="w67">kamu</span> <span class="kw" id="w68">minggu</span> <span class="kw" id="w69">ini</span> <span class="kw" id="w70">aman</span> <span class="kw" id="w71">atau</span> <span class="kw" id="w72">jebol?</span> <span class="kw" id="w73">Komen.</span></div></div></div><script src="../assets/gsap.min.js"></script><script>
+var tl = gsap.timeline();
+function setWord(i) {
+  document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
+  var el = document.getElementById('w'+i); if(el) el.classList.add('on');
+}
+function showPhrase(bi) {
+  document.querySelectorAll('.phrase').forEach(e=>e.style.display='none');
+  var el = document.getElementById('p'+bi); if(el) el.style.display='block';
+}
+
+function clearWords() {
+  document.querySelectorAll('.kw.on').forEach(e=>e.classList.remove('on'));
+}
+var BEAT_DURS = [3.85, 4.21, 7.67, 7.23, 7.13, 6.27];
+var BEAT_CAM = ["zin", "zout", "zin", "zout", "zin", "zout"];
+function drawEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {strokeDashoffset:1}, {strokeDashoffset:0, duration:0.9, ease:'power1.inOut'});
+}
+function revealEl(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.fromTo(el, {opacity:0, y:26, scale:0.92}, {opacity:1, y:0, scale:1, duration:0.55, ease:'back.out(1.5)'});
+}
+function camera(si) {
+  var el = document.querySelector('#s'+si+' .wrap'); if(!el) return;
+  var dur = BEAT_DURS[si]||8, kind = BEAT_CAM[si]||'zin', o = {transformOrigin:'50% 50%', ease:'power1.inOut'};
+  if (kind==='zin') gsap.fromTo(el, {scale:1}, {scale:1.08, duration:dur, ...o});
+  else if (kind==='zout') gsap.fromTo(el, {scale:1.08}, {scale:1.0, duration:dur, ...o});
+  else if (kind==='panr') gsap.fromTo(el, {x:-55, scale:1.04}, {x:55, scale:1.04, duration:dur, ...o});
+  else if (kind==='panl') gsap.fromTo(el, {x:55, scale:1.04}, {x:-55, scale:1.04, duration:dur, ...o});
+}
+function punch(id) {
+  var el = document.getElementById(id); if(!el) return;
+  gsap.timeline()
+    .to(el, {scale:1.16, duration:0.22, ease:'power3.out', transformOrigin:'50% 50%'})
+    .to(el, {scale:1.0, duration:0.5, ease:'back.out(1.6)'});
+}
+function showScene(si) {
+  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('on'));
+  var el = document.getElementById('s'+si); if(el) el.classList.add('on');
+  camera(si);
+}
+tl.call(setWord, [0], 0.0);
+tl.call(setWord, [1], 0.48);
+tl.call(setWord, [2], 0.66);
+tl.call(setWord, [3], 1.06);
+tl.call(setWord, [4], 1.52);
+tl.call(setWord, [5], 1.8);
+tl.call(setWord, [6], 2.42);
+tl.call(setWord, [7], 2.7);
+tl.call(setWord, [8], 2.96);
+tl.call(setWord, [9], 3.4);
+tl.call(setWord, [10], 3.91);
+tl.call(setWord, [11], 4.42);
+tl.call(setWord, [12], 4.74);
+tl.call(setWord, [13], 5.18);
+tl.call(setWord, [14], 5.6);
+tl.call(setWord, [15], 6.02);
+tl.call(setWord, [16], 6.82);
+tl.call(setWord, [17], 7.34);
+tl.call(setWord, [18], 7.76);
+tl.call(setWord, [19], 8.64);
+tl.call(setWord, [20], 9.42);
+tl.call(setWord, [21], 9.74);
+tl.call(setWord, [22], 10.02);
+tl.call(setWord, [23], 10.32);
+tl.call(setWord, [24], 11.06);
+tl.call(setWord, [25], 11.88);
+tl.call(setWord, [26], 12.74);
+tl.call(setWord, [27], 13.58);
+tl.call(setWord, [28], 13.78);
+tl.call(setWord, [29], 13.96);
+tl.call(setWord, [30], 14.88);
+tl.call(setWord, [31], 15.24);
+tl.call(setWord, [32], 15.58);
+tl.call(setWord, [33], 16.27);
+tl.call(setWord, [34], 17.38);
+tl.call(setWord, [35], 17.8);
+tl.call(setWord, [36], 18.22);
+tl.call(setWord, [37], 19.26);
+tl.call(setWord, [38], 19.64);
+tl.call(setWord, [39], 20.16);
+tl.call(setWord, [40], 21.04);
+tl.call(setWord, [41], 21.34);
+tl.call(setWord, [42], 21.7);
+tl.call(setWord, [43], 22.3);
+tl.call(setWord, [44], 22.7);
+tl.call(setWord, [45], 22.96);
+tl.call(setWord, [46], 23.9);
+tl.call(setWord, [47], 24.74);
+tl.call(setWord, [48], 25.08);
+tl.call(setWord, [49], 25.5);
+tl.call(setWord, [50], 26.36);
+tl.call(setWord, [51], 26.78);
+tl.call(setWord, [52], 27.86);
+tl.call(setWord, [53], 28.3);
+tl.call(setWord, [54], 28.44);
+tl.call(setWord, [55], 28.7);
+tl.call(setWord, [56], 29.18);
+tl.call(setWord, [57], 29.98);
+tl.call(setWord, [58], 30.24);
+tl.call(setWord, [59], 31.1);
+tl.call(setWord, [60], 31.46);
+tl.call(setWord, [61], 31.78);
+tl.call(setWord, [62], 32.36);
+tl.call(setWord, [63], 32.66);
+tl.call(setWord, [64], 32.98);
+tl.call(setWord, [65], 33.68);
+tl.call(setWord, [66], 34.14);
+tl.call(setWord, [67], 34.34);
+tl.call(setWord, [68], 34.72);
+tl.call(setWord, [69], 35.2);
+tl.call(setWord, [70], 35.4);
+tl.call(setWord, [71], 35.68);
+tl.call(setWord, [72], 35.92);
+tl.call(setWord, [73], 36.66);
+tl.call(showPhrase, [0], 0.0);
+tl.call(showScene, [0], 0.0);
+tl.call(drawEl, ['s0-ul'], 0.0);
+tl.call(showPhrase, [1], 4.0);
+tl.call(showScene, [1], 4.0);
+tl.call(drawEl, ['s1-box'], 4.74);
+tl.call(revealEl, ['s1-d0'], 4.74);
+tl.call(revealEl, ['s1-d1'], 6.82);
+tl.call(showPhrase, [2], 8.36);
+tl.call(showScene, [2], 8.36);
+tl.call(drawEl, ['s2-box'], 9.42);
+tl.call(revealEl, ['s2-d0'], 13.96);
+tl.call(revealEl, ['s2-d1'], 11.06);
+tl.call(showPhrase, [3], 16.18);
+tl.call(showScene, [3], 16.18);
+tl.call(drawEl, ['s3-box'], 17.38);
+tl.call(revealEl, ['s3-d0'], 21.04);
+tl.call(revealEl, ['s3-d1'], 19.26);
+tl.call(showPhrase, [4], 23.56);
+tl.call(showScene, [4], 23.56);
+tl.call(drawEl, ['s4-box'], 24.74);
+tl.call(revealEl, ['s4-d0'], 27.86);
+tl.call(revealEl, ['s4-d1'], 26.36);
+tl.call(showPhrase, [5], 30.84);
+tl.call(showScene, [5], 30.84);
+tl.call(drawEl, ['s5-ck-b0'], 32.069);
+tl.call(revealEl, ['s5-ck-t0'], 32.695);
+tl.call(drawEl, ['s5-ck-c0'], 33.472);
+tl.call(drawEl, ['s5-ck-b1'], 33.498);
+tl.call(revealEl, ['s5-ck-t1'], 34.125);
+tl.call(drawEl, ['s5-ck-c1'], 34.902);
+tl.call(drawEl, ['s5-ck-b2'], 34.928);
+tl.call(revealEl, ['s5-ck-t2'], 35.555);
+tl.call(drawEl, ['s5-ck-c2'], 36.331);
+tl.call(clearWords, [], 38.06);
+</script></body></html>

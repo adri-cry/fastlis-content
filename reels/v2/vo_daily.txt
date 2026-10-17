@@ -1,6 +1,6 @@
-Hasil hari ini beda jauh dari hasil kemarin? Kuis: rilis atau tahan?
-Kalium 4,1 jadi 6,5 dalam seminggu. QC lolos. Rilis atau tahan?
-1. Cek sampelnya. Hemolisis? Label benar? Pastikan sampel dan identitas pasien tidak tertukar.
-2. Cek kondisinya. Terapi atau puasa berubah? Kondisi pasien bisa menggeser hasil secara wajar.
-3. Cek riwayatnya. Bandingkan hasil lama. Lewat batas delta check? Tahan dan konfirmasi ulang.
-Delta check itu rem darurat sebelum hasil dirilis. Kamu jawab A atau B? Tulis di komentar. Follow FastLIS untuk edukasi lab setiap hari.
+Hasil lab kamu pernah telat keluar? 3 tips jaga TAT.
+TAT itu timer dari sampel diterima. Sampai hasil dirilis.
+1. Catat tiap titik waktu. Terima, analisis, rilis. Kalau nggak dicatat, TAT cuma tebakan.
+2. Pantau dashboard real-time. Lihat antrean live. Sampel numpuk kelihatan sebelum timer jebol.
+3. Pasang alarm TAT. Peringatan otomatis. Sampel mau lewat batas? Langsung dapat notif.
+Bukan soal ngebut, tapi tepat waktu. TAT lab kamu minggu ini aman atau jebol? Komen.
