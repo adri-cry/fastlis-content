@@ -1,6 +1,6 @@
-Hasil lab telat keluar lagi? Kalau iya, kamu nggak sendirian. Banyak lab ngalamin hal yang sama. Hari ini aku kasih 3 cara mudah jaga TAT biar nggak jebol. Simak sampai habis.
-Pertama, pahami dulu. TAT itu timer. Timer-nya jalan mulai dari sampel diterima di lab, sampai hasil dirilis ke dokter. Selama timer jalan, semua mata nungguin. Jadi TAT bukan sekadar angka, tapi janji ke pasien.
-Satu. Catat tiap titik waktu. Kapan sampel diterima, kapan mulai dianalisis, kapan hasil dirilis. Tiga titik ini wajib dicatat. Soalnya kalau nggak dicatat, TAT cuma tebakan. Dan tebakan nggak bisa dipertanggungjawabkan.
-Dua. Pantau dashboard real-time. Di dashboard, tumpukan tabung kelihatan duluan, sebelum timer-nya jebol. Jadi kamu bisa gerak cepat, alihin prioritas, sebelum semuanya telat.
-Tiga. Pasang pengingat TAT. Jangan andalin ingatan. Bikin peringatan otomatis. Begitu ada sampel yang mau lewat batas, langsung dapat notif di HP. Tinggal tindak lanjuti, beres.
-Ingat, ini bukan soal ngebut, tapi soal tepat waktu. TAT yang terjaga bikin dokter percaya, pasien tenang. Nah, TAT lab kamu minggu ini, aman atau jebol? Tulis di komen!
+Shift ganti, info penting ikut hilang juga? Dulu vs sekarang.
+Handover verbal itu gampang lupa. Info penting nyangkut di kepala, bukan di catatan.
+1. Catat yang pending. Sampel stat & antrean. Siapa yang nunggu hasil, kelihatan jelas di worklist.
+2. Lapor status alat. Maintenance & QC. Alat ngadat jangan cuma dibisikin ke shift berikutnya.
+3. Teruskan nilai kritis. Belum terkonfirmasi. Kritis yang belum dilapor jangan sampai tenggelam.
+Handover rapi, shift tenang. Shift kamu serah terimanya gimana? Komen.
