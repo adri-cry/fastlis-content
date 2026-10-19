@@ -1,84 +1,93 @@
-# FastLIS Content
+# FastLIS Content Pipeline
 
-Pipeline konten Instagram harian FastLIS (sistem informasi laboratorium).
-Jalan otomatis tiap pagi via cron: gambar (carousel + single post) jam 06:14 WIB,
-video reels jam 06:45 WIB. Hasil dikirim ke WhatsApp untuk review.
+Otomasi pembuatan konten Instagram harian untuk **FastLIS** (sistem informasi
+laboratorium / LIS untuk analis kesehatan di Indonesia).
+
+Setiap pagi pipeline ini membuat dua paket konten dari satu topik edukasi
+seputar dunia laboratorium:
+
+- **Carousel + single post** (gambar, 1080×1920)
+- **Video reels** (gaya whiteboard hand-drawn, dengan voice over + musik)
+
+## Cara Kerja
+
+```
+Topik baru tiap hari
+        │
+        ▼
+┌─────────────────┐     ┌──────────────────┐
+│ Konten gambar   │     │ Video reels      │
+│ 5 slide +       │     │ whiteboard       │
+│ 1 single post   │     │ + voice over     │
+└─────────────────┘     └──────────────────┘
+        │                        │
+        ▼                        ▼
+   Review → arsip → publikasi
+```
+
+1. **Pilih topik.** Topik harus baru (dicek terhadap riwayat 30 hari) dan
+   formatnya digilir: kuis, before-vs-after, mitos-vs-fakta, tips praktis,
+   checklist.
+2. **Render gambar.** Carousel 5 slide + 1 single post, lengkap dengan foto
+   yang relevan tiap slide dan caption siap posting.
+3. **Quality check otomatis.** Memastikan foto sesuai isi slide, tidak ada
+   foto ganda, caption tidak kepanjangan, dan slide terakhir berupa kartu
+   penutup.
+4. **Render video.** Naskah 6 bagian diubah menjadi animasi whiteboard dengan
+   voice over, teks karaoke yang mengikuti suara, dan musik latar.
+5. **Review.** Semua hasil dikirim untuk direview sebelum dipublikasikan.
 
 ## Struktur Folder
 
 ```
 fastlis-content/
-├── assets/            # Logo & brand assets
-├── carousel/          # Template carousel (template.html, 5 slide)
-├── single/            # Template single post (template.html)
-├── content/           # hari-ini.json (konten hari ini) + naskah-reels-*.md
-├── data/              # Tracking: last_topics.json, used_images.json, photo_tags.json
-├── docs/              # Dokumentasi & referensi (demo bank, panduan TTS, dll)
-├── html/              # Bank foto lab + fonts + screenshot demo (LIVE, dipakai template)
-├── reels/
-│   ├── assets/        # Jingle (4 varian), SFX, fonts, logo buat video
-│   ├── v2/            # Output build harian (gitignored, jangan commit)
-│   ├── hyperframes.json
-│   └── package.json   # hyperframes 0.8.31 (lokal, jangan install ulang)
-├── scripts/
-│   ├── render_all.py               # Pipeline gambar: carousel + single + QA
-│   ├── rebuild_today.py            # Render carousel dari hari-ini.json
-│   ├── build_single.py             # Render single post
-│   ├── qa_check.py                 # QA: foto, duplikat, caption, relevansi
-│   ├── cdp_shot.py                 # Screenshot via Chrome DevTools Protocol
-│   ├── archive_today.py            # Arsip hasil ke folder tanggal
-│   ├── build_reels_whiteboard.py   # Builder reels whiteboard (VO+animasi+karaoke)
-│   ├── render_reels.py             # Wrapper render hyperframes + progress
-│   ├── whisper_times.py            # Timing kata buat karaoke (dipakai builder)
-│   ├── export_dashboard.py         # Export data.json buat dashboard publik
-│   ├── sync_dashboard.sh           # Sync media ke sabaraya-server
-│   ├── _common.py                  # BASE path, WIB today, PipelineLock
-│   └── tools/                      # Generator sekali pakai
-│       ├── make_jingle_variants.py # Bikin 4 varian jingle
-│       └── make_sfx.py             # Bikin sound effect
-└── backups/           # Backup template versi lama
+├── assets/        # Logo dan aset brand
+├── carousel/      # Template desain carousel
+├── single/        # Template desain single post
+├── content/       # Konten hari ini (teks, judul, naskah video)
+├── data/          # Data pelacakan: riwayat topik, foto terpakai
+├── docs/          # Dokumentasi dan materi referensi
+├── html/          # Bank foto laboratorium + font
+├── reels/         # Aset dan template video (musik, efek suara, font)
+├── scripts/       # Script otomasi pipeline
+│   └── tools/     # Script bantu sekali pakai (pembuat musik/efek suara)
+└── backups/       # Arsip template versi lama
 ```
 
-## Alur Harian
+## Menjalankan Manual
 
-**1. Konten gambar (06:14 WIB)** — `scripts/render_all.py`
-- Baca `data/last_topics.json` (topik harus fresh, format beda dari 3 hari terakhir)
-- Tulis `content/hari-ini.json` baru (5 slide + single + key `reels` buat video)
-- Render + QA (foto relevan per slide, caption ≤2200, slide 5 = endcard)
-- Commit lokal, sync dashboard, kirim 6 PNG + caption ke WhatsApp
+Butuh Python 3 dan Google Chrome terinstal.
 
-**2. Video reels (06:45 WIB)** — `scripts/build_reels_whiteboard.py`
-- `--tulis-naskah`: tulis `content/naskah-reels-YYYY-MM-DD.md` dari key `reels`
-- `--daily`: build `reels/v2/daily.html` dari naskah (whiteboard hand-drawn, 6 scene)
-- VO via TTS, timing karaoke via whisper, kamera zoom/pan per scene
-- Render hyperframes (`TMPDIR=reels/.tmp`, /tmp cuma 512MB)
-- Mux: VO + jingle + SFX, flag `+faststart` wajib (syarat WhatsApp)
-- Kirim mp4 ke WhatsApp
+```bash
+# 1. Siapkan file konten hari ini di content/hari-ini.json
+#    (lihat contoh struktur di file yang sudah ada)
 
-## Aturan Konten
+# 2. Render gambar (carousel + single post + QA)
+python3 scripts/render_all.py
 
-- Istilah: selalu **"kritis"**, jangan "panik" (nilai kritis, batas kritis)
-- Slide 1: judul harus pertanyaan hook yang bikin penasaran
-- Judul: baris 1 polos + baris 2 highlight kuning (jangan kepotong)
-- Foto: relevan dengan ISI tiap slide, tolak tag "bukan foto lab"
-- Minimal 1 slide berisi data konkret yang layak di-screenshot
-- CTA spesifik (save/tag/komen), bukan "geser" generik
-- Naskah reels: tempel teks langsung di chat kalau diminta (bukan file)
+# 3. Render video reels
+python3 scripts/build_reels_whiteboard.py --tulis-naskah  # tulis naskah dulu
+python3 scripts/build_reels_whiteboard.py --daily         # bangun animasi
+python3 scripts/render_reels.py --html v2/daily.html --out v2/daily_raw.mp4 --duration <detik>
+python3 scripts/build_reels_whiteboard.py --mux reels/v2/daily_raw.mp4 reels/v2/vo_daily.mp3 hasil.mp4
+```
 
-## Aturan Git
+Hasil render harian **tidak** disimpan di repo ini (lihat `.gitignore`).
+Distribusinya lewat dashboard web dan arsip lokal.
 
-- Hasil render (mp4, png harian, archive) **JANGAN** di-commit — lihat `.gitignore`
-- Distribusi hasil via dashboard publik + folder `fastlis-renders/`
-- Yang di-commit: script, template, naskah, bank foto, data tracking
+## Standar Konten
+
+- Bahasa Indonesia, santai tapi profesional, untuk analis lab
+- Istilah baku: **"kritis"** (nilai kritis, batas kritis) — bukan "panik"
+- Cover carousel berupa pertanyaan yang memancing rasa penasaran
+- Setiap slide memakai foto yang sesuai dengan isi slide tersebut
+- Minimal satu slide berisi data konkret (angka/rentang) yang layak disimpan
+- Ajakan di akhir spesifik (simpan, tandai teman, komentar)
 
 ## Catatan Teknis
 
-- Repo harus di `~/workspace/fastlis-content` (hanya `~/` yang survive VM replace)
-- `BASE` dari env `FASTLIS_BASE`, default `~/workspace/fastlis-content`
-- Semua penanggalan pakai WIB (Asia/Jakarta), bukan UTC
-- `PipelineLock` cegah 2 run jalan bareng
-- Screenshot via CDP (`cdp_shot.py`), bukan flag `--screenshot` Chrome
-- Render browser tanpa internet: GSAP + font di-vendor lokal di `reels/assets/`
-- Root div hyperframes wajib `data-composition-id`, `data-duration`, `data-width/height`
-- Jangan pakai GSAP `repeat:-1` di template render (bikin hang)
-- TTS voice `avocado_v2:MAI_01` punya quirk pengucapan — verifikasi via TTS→whisper round-trip
+- Semua tanggal memakai zona waktu WIB (Asia/Jakarta)
+- Render video memakai [Hyperframes](https://github.com/) 0.8.31 (sudah termasuk di `reels/`)
+- Screenshot memakai Chrome DevTools Protocol (`scripts/cdp_shot.py`)
+- Font dan library animasi disertakan lokal di `reels/assets/` (tidak butuh internet saat render)
+- Video output memakai flag `faststart` agar bisa diputar di WhatsApp/Instagram
