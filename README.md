@@ -1,102 +1,84 @@
 # FastLIS Content
 
-Kumpulan template, foto, dan script untuk generate konten harian FastLIS
-(carousel, single post, reels).
+Pipeline konten Instagram harian FastLIS (sistem informasi laboratorium).
+Jalan otomatis tiap pagi via cron: gambar (carousel + single post) jam 06:14 WIB,
+video reels jam 06:45 WIB. Hasil dikirim ke WhatsApp untuk review.
 
 ## Struktur Folder
 
 ```
 fastlis-content/
-├── carousel/          # Template carousel (5 slide) + hasil render slide*.png
-├── single/            # Template single post + hasil render
-├── reels/             # Project hyperframes untuk video reels
-│   ├── index.html     # Definisi animasi
+├── assets/            # Logo & brand assets
+├── carousel/          # Template carousel (template.html, 5 slide)
+├── single/            # Template single post (template.html)
+├── content/           # hari-ini.json (konten hari ini) + naskah-reels-*.md
+├── data/              # Tracking: last_topics.json, used_images.json, photo_tags.json
+├── docs/              # Dokumentasi & referensi (demo bank, panduan TTS, dll)
+├── html/              # Bank foto lab + fonts + screenshot demo (LIVE, dipakai template)
+├── reels/
+│   ├── assets/        # Jingle (4 varian), SFX, fonts, logo buat video
+│   ├── v2/            # Output build harian (gitignored, jangan commit)
 │   ├── hyperframes.json
-│   ├── package.json   # npm scripts (preview/render/publish)
-│   └── assets/        # Aset gambar buat reels
-├── html/              # Aset HTML: base template, font, demo screenshot
-├── photos/            # Pool foto (lab, dashboard, dll) buat carousel/single
-├── content/           # Data konten harian (hari-ini.json)
-├── archive/           # Arsip hasil per tanggal (YYYY-MM-DD)
-│   └── <tanggal>/
-│       ├── slide1-5.png
-│       ├── single-post.png
-│       └── fastlis-reels.mp4
-├── scripts/           # Script Python generator
-├── data/              # Tracking JSON (used_images, last_topics)
-├── assets/            # Logo & aset global
-└── backups/           # Backup template & script versi lama
+│   └── package.json   # hyperframes 0.8.31 (lokal, jangan install ulang)
+├── scripts/
+│   ├── render_all.py               # Pipeline gambar: carousel + single + QA
+│   ├── rebuild_today.py            # Render carousel dari hari-ini.json
+│   ├── build_single.py             # Render single post
+│   ├── qa_check.py                 # QA: foto, duplikat, caption, relevansi
+│   ├── cdp_shot.py                 # Screenshot via Chrome DevTools Protocol
+│   ├── archive_today.py            # Arsip hasil ke folder tanggal
+│   ├── build_reels_whiteboard.py   # Builder reels whiteboard (VO+animasi+karaoke)
+│   ├── render_reels.py             # Wrapper render hyperframes + progress
+│   ├── whisper_times.py            # Timing kata buat karaoke (dipakai builder)
+│   ├── export_dashboard.py         # Export data.json buat dashboard publik
+│   ├── sync_dashboard.sh           # Sync media ke sabaraya-server
+│   ├── _common.py                  # BASE path, WIB today, PipelineLock
+│   └── tools/                      # Generator sekali pakai
+│       ├── make_jingle_variants.py # Bikin 4 varian jingle
+│       └── make_sfx.py             # Bikin sound effect
+└── backups/           # Backup template versi lama
 ```
 
-## Script
+## Alur Harian
 
-Semua script pakai `BASE = "/root/.fastlis-content"` (absolute path).
+**1. Konten gambar (06:14 WIB)** — `scripts/render_all.py`
+- Baca `data/last_topics.json` (topik harus fresh, format beda dari 3 hari terakhir)
+- Tulis `content/hari-ini.json` baru (5 slide + single + key `reels` buat video)
+- Render + QA (foto relevan per slide, caption ≤2200, slide 5 = endcard)
+- Commit lokal, sync dashboard, kirim 6 PNG + caption ke WhatsApp
 
-| Script | Fungsi |
-|--------|--------|
-| `scripts/rebuild_today.py` | Render carousel dari `content/hari-ini.json` |
-| `scripts/build_single.py` | Render single post |
-| `scripts/render_all.py` | Pipeline lengkap: carousel + single + reels + QA + tracking |
-| `scripts/qa_check.py` | QA cek konten |
-| `scripts/archive_today.py` | Arsipkan hasil hari ini ke `archive/<tanggal>/` |
-| `scripts/update_used.py` | Update tracking foto terpakai |
-| `scripts/killchrome.py` | Bersihin proses chrome nyangkut |
+**2. Video reels (06:45 WIB)** — `scripts/build_reels_whiteboard.py`
+- `--tulis-naskah`: tulis `content/naskah-reels-YYYY-MM-DD.md` dari key `reels`
+- `--daily`: build `reels/v2/daily.html` dari naskah (whiteboard hand-drawn, 6 scene)
+- VO via TTS, timing karaoke via whisper, kamera zoom/pan per scene
+- Render hyperframes (`TMPDIR=reels/.tmp`, /tmp cuma 512MB)
+- Mux: VO + jingle + SFX, flag `+faststart` wajib (syarat WhatsApp)
+- Kirim mp4 ke WhatsApp
 
-## Cara Pakai
+## Aturan Konten
 
-1. Edit `content/hari-ini.json` — isi topik, slide, foto.
-2. Render carousel:
-   ```bash
-   python3 scripts/rebuild_today.py
-   ```
-3. Render single:
-   ```bash
-   python3 scripts/build_single.py
-   ```
-4. Atau sekali jalan semua:
-   ```bash
-   python3 scripts/render_all.py
-   ```
-5. Arsipkan hasil:
-   ```bash
-   python3 scripts/archive_today.py
-   ```
+- Istilah: selalu **"kritis"**, jangan "panik" (nilai kritis, batas kritis)
+- Slide 1: judul harus pertanyaan hook yang bikin penasaran
+- Judul: baris 1 polos + baris 2 highlight kuning (jangan kepotong)
+- Foto: relevan dengan ISI tiap slide, tolak tag "bukan foto lab"
+- Minimal 1 slide berisi data konkret yang layak di-screenshot
+- CTA spesifik (save/tag/komen), bukan "geser" generik
+- Naskah reels: tempel teks langsung di chat kalau diminta (bukan file)
 
-## Reels (hyperframes)
+## Aturan Git
 
-```bash
-cd reels
-npm run preview    # preview animasi
-npm run render     # render ke mp4
-npm run publish    # publish
-```
+- Hasil render (mp4, png harian, archive) **JANGAN** di-commit — lihat `.gitignore`
+- Distribusi hasil via dashboard publik + folder `fastlis-renders/`
+- Yang di-commit: script, template, naskah, bank foto, data tracking
 
-## Catatan
+## Catatan Teknis
 
-- **Jangan** hapus `content/hari-ini.json` tanpa backup — dipakai semua script.
-- Backup template ada di `backups/` (v1, v2, neobrutalism).
-- Foto yang sudah terpakai dicatat di `data/used_images.json`.
-- Riwayat topik di `data/last_topics.json` (30 hari terakhir).
-
-## v2 (2026-10-09, restore pasca VM replace)
-
-- PENTING: repo tinggal di `~/workspace/fastlis-content` (hanya `~/` yang survive VM replace; `/root` ikut ke-wipe).
-- `scripts/_common.py`: `BASE` dari env `FASTLIS_BASE` (default `~/workspace/fastlis-content`), deteksi Chrome otomatis.
-- `scripts/cdp_shot.py`: screenshot via Chrome DevTools Protocol (stdlib only, port unik per proses). Pengganti flag `--screenshot` yang pernah gagal diam-diam (false positive).
-- `scripts/generate_content.py`: generate `hari-ini.json` via LLM + guard anti topik kembar (alat bantu manual; jadwal resmi pakai agen langsung).
-- `scripts/daily.py`: orkestrator manual (generate -> render_all -> reels -> git).
-- `reels/`: hyperframes 0.8.31 terinstall lokal; gsap + font Plus Jakarta Sans di-vendor lokal (CDN diblokir di sandbox). Render: `TMPDIR=reels/.tmp npm run render` (/tmp cuma 512MB).
-- Jadwal: cron `fastlis-daily-content` (~06:14 WIB, gambar) + `fastlis-daily-reels` (06:45 WIB, video). Push GitHub off (kirim ke chat dulu).
-
-## Audit fixes (2026-10-09)
-- Waktu: semua penanggalan pakai WIB (Asia/Jakarta), bukan UTC sistem.
-- `PipelineLock`: cegah 2 run jalan bareng (jadwal vs manual).
-- `cdp_shot.py`: profile Chrome di /tmp dibersihkan tiap run.
-- `update_used.py`: DEPRECATED (berbahaya, hardcode 2026-09-15) jadi stub.
-- `archive_today.py`: satu-satunya implementasi arsip, prune 30 hari.
-- `killchrome.py`: hanya bunuh chrome headless nyangkut.
-- `qa_check.py`: + cek foto duplikat antar slide, + batas caption 2200.
-- `build_reels.py`: catat bg video ke today_video.
-- `render_all.py`: prune backup hari-ini.json.bak-* >30 hari.
-- `preview.py`: render 1 slide saja buat cek cepat.
-- Cron: rotasi format dipaksakan (beda dari 3 hari terakhir).
+- Repo harus di `~/workspace/fastlis-content` (hanya `~/` yang survive VM replace)
+- `BASE` dari env `FASTLIS_BASE`, default `~/workspace/fastlis-content`
+- Semua penanggalan pakai WIB (Asia/Jakarta), bukan UTC
+- `PipelineLock` cegah 2 run jalan bareng
+- Screenshot via CDP (`cdp_shot.py`), bukan flag `--screenshot` Chrome
+- Render browser tanpa internet: GSAP + font di-vendor lokal di `reels/assets/`
+- Root div hyperframes wajib `data-composition-id`, `data-duration`, `data-width/height`
+- Jangan pakai GSAP `repeat:-1` di template render (bikin hang)
+- TTS voice `avocado_v2:MAI_01` punya quirk pengucapan — verifikasi via TTS→whisper round-trip
