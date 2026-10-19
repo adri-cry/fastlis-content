@@ -292,10 +292,17 @@ def scene_title(s, si, narr=None):
     _new_scene()
     uid = f"s{si}-ul"
     _reg(uid, s.get("ul_trigger"), "draw")
-    return (f'<div class="wrap"><h1 class="hand">{s["title"]}</h1>'
+    tid = f"s{si}-title"
+    thtml, wids = _w3(s["title"], si, "t")
+    for wid, w in wids:
+        _reg(wid, _key(w), "wordin")
+    _reg(tid, "^", "idle", offset=0.8)  # gerak halus sustain
+    sid = f"s{si}-sub"
+    _reg(sid, s.get("ul_trigger"), "pop", offset=0.3)
+    return (f'<div class="wrap"><h1 class="hand" id="{tid}">{thtml}</h1>'
             f'<svg viewBox="0 0 600 40" style="width:600px;margin:6px auto 0;display:block" filter="url(#wobble)">'
-            f'<path class="ink-blue draw" id="{uid}" pathLength="1" d="M20 22 C 200 12, 400 32, 580 20"/></svg>'
-            f'<p class="sub">{esc(s["sub"])}</p></div>')
+            f'<path class="ink-blue draw" id="{uid}" pathLength="1" d="M20 22 C 200 12, 400 32, 580 20"/>{MARKER}</svg>'
+            f'<p class="sub pop0" id="{sid}">{esc(s["sub"])}</p></div>')
 
 
 def scene_flow(s, si, narr=None):
@@ -325,16 +332,21 @@ def scene_stage(s, si, narr=None):
     _new_scene()
     bid = f"s{si}-box"
     _reg(bid, s["box_trigger"], "draw")
+    _reg(bid, s["box_trigger"], "emphasis", offset=0.65)  # punch saat kata kunci
+    _reg(bid, s["box_trigger"], "idle", offset=1.1)       # gerak halus sustain
+    fid = f"s{si}-flourish"
+    _reg(fid, s["box_trigger"], "draw", offset=1.4, dur=0.7)  # ornamen digambar
     descs = ""
     for j, (d, trig) in enumerate(s["descs"]):
         did = f"s{si}-d{j}"
         _reg(did, trig, "reveal")
         descs += (f'<div class="checkline rv" id="{did}"><span class="dot"></span>'
                   f'<span>{esc(d)}</span></div>')
-    return (f'<div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 210" style="width:760px;display:block" filter="url(#wobble)">'
+    return (f'<div class="wrap"><div class="stagecard"><svg viewBox="0 0 760 260" style="width:760px;display:block" filter="url(#wobble)">'
             f'<rect class="ink draw" id="{bid}" pathLength="1" x="10" y="10" width="740" height="190" rx="24"/>'
             f'<text x="380" y="140" text-anchor="middle" font-size="110" font-family="Caveat" fill="{s["color"]}">{s["word"]}</text>'
-            f'</svg></div><div class="desclist">{descs}</div></div>')
+            f'<path class="ink-blue draw" id="{fid}" pathLength="1" d="M120 232 C 300 218, 480 244, 640 228"/>'
+            f'{MARKER}</svg></div><div class="desclist">{descs}</div></div>')
 
 
 def scene_stamp(s, si, narr=None):
@@ -354,18 +366,22 @@ def scene_stamp(s, si, narr=None):
 
 def scene_checklist(s, si, narr=None):
     _new_scene()
+    tid = f"s{si}-ck-title"
     rows = []
     for i, (it, trig) in enumerate(s["items"]):
         b, c, t = f"s{si}-ck-b{i}", f"s{si}-ck-c{i}", f"s{si}-ck-t{i}"
         _reg(b, trig, "draw")
         _reg(t, trig, "reveal", offset=0.15)
         _reg(c, trig, "draw", offset=0.45)
+        _reg(c, trig, "emphasis", offset=0.75)  # punch saat centang jadi
+        if i == 0:
+            _reg(tid, trig, "punch", offset=0)  # judul punch bareng item pertama
         rows.append(
             f'<div class="check"><svg width="90" height="90" viewBox="0 0 90 90" filter="url(#wobble)">'
             f'<rect class="ink-blue draw" id="{b}" pathLength="1" x="8" y="8" width="74" height="74" rx="14"/>'
             f'<path class="ink-red draw" id="{c}" pathLength="1" d="M22 46 L40 64 L70 28"/></svg>'
             f'<span id="{t}" class="rv">{esc(it)}</span></div>')
-    return (f'<div class="wrap"><h1 class="hand">{s["title"]}</h1>'
+    return (f'<div class="wrap"><h1 class="hand" id="{tid}">{s["title"]}</h1>'
             f'<div style="margin-top:30px">{"".join(rows)}</div></div>')
 
 
@@ -1307,26 +1323,11 @@ def build_from_beats(beats, prefix="whiteboard"):
         fn = BUILDERS[b["scene"]["type"]]
         scene_divs.append(f'<div class="scene" id="s{si}"><div class="dots"></div>{fn(b["scene"], si, b["narr"])}</div>')
 
-    # ---- karaoke chunk: narasi dipecah jadi chunk 2-3 kata, swap sinkron ----
-    chunks = []  # (teks, t0)
-    widx = 0
-    for b in beats:
-        ws = b["narr"].split(" ")
-        j = 0
-        while j < len(ws):
-            n = 3 if len(ws) - j > 4 else len(ws) - j  # hindari sisa 1 kata
-            if n == 4:
-                n = 2
-            cwords = ws[j:j+n]
-            t0 = words[widx + j]["t0"] if widx + j < len(words) else 0
-            chunks.append((" ".join(cwords), round(t0, 3)))
-            j += n
-        widx += len(ws)
-    chunk_divs = [f'<div class="chunk" id="c{i}" style="display:none">{esc(t)}</div>'
-                  for i, (t, _) in enumerate(chunks)]
-    print(f"karaoke chunk: {len(chunks)} chunk dari {len(words)} kata")
+    # ---- karaoke: DINONAKTIFKAN per 2026-10-19 (permintaan Adri) ----
+    # (chunk_divs + showChunk dihapus; timing kata tetap dipakai untuk trigger animasi)
+    print(f"karaoke: nonaktif ({len(words)} kata)")
 
-    calls = [f'tl.call(showChunk, [{i}], {t0});' for i, (_, t0) in enumerate(chunks)]
+    calls = []
     sfx = []  # (t, nama)
     _SFX_KIND = {"draw": "scribble", "pop": "pop", "emphasis": "pop",
                  "drop": "pop", "slideup": "pop"}
@@ -1425,7 +1426,7 @@ def build_from_beats(beats, prefix="whiteboard"):
             f'<div id="tracker"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div>'
             f'<div id="fx"><svg id="fxsvg" width="1080" height="1920"></svg></div>'
             f'{"".join(scene_divs)}'
-            f'<div id="karaoke">{"".join(chunk_divs)}</div></div>'
+            f'</div>'
             f'<script src="../assets/gsap.min.js"></script><script>{js}</script>'
             f'</body></html>')
     open(os.path.join(V2, f"{prefix}.html"), "w").write(html)
