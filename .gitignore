@@ -1,7 +1,26 @@
 __pycache__/
 *.pyc
 .DS_Store
+Thumbs.db
 node_modules/
+reels/node_modules/
 reels/.tmp/
 reels/renders/
 logs/
+
+# Hasil render harian - JANGAN commit, distribusi via dashboard + fastlis-renders/
+archive/
+carousel/slide*.png
+single/*.png
+reels/*.mp4
+reels/v2/*.mp4
+reels/v2/*.wav
+reels/v2/*.mp3
+reels/v2/daily.html
+reels/v2/timings_*.json
+reels/v2/render_status.json
+reels/v2/sfx_*.json
+
+# Backup lokal
+content/*.bak-*
+*.bak
