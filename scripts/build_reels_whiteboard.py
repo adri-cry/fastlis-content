@@ -950,11 +950,10 @@ h1.hand .red, .red { color:#E5484D; }
 .check { display:flex; align-items:center; gap:26px; margin:26px 60px; font-size:60px; }
 .pill { display:inline-block; border:5px solid #1a1a1a; border-radius:999px;
   padding:18px 54px; font-size:56px; background:#fff; box-shadow:5px 5px 0 #1a1a1a22; }
-#karaoke { position:absolute; left:80px; right:80px; top:1350px; min-height:200px;
+#karaoke { position:absolute; left:80px; right:80px; top:1350px; min-height:220px;
   display:flex; align-items:center; justify-content:center; text-align:center; z-index:5; }
-.phrase { font-family:'Poppins',sans-serif; font-weight:700; font-size:64px; line-height:1.45; color:#1a1a1a; }
-.kw { padding:2px 10px; border-radius:10px; }
-.kw.on { background:#FFE45E; }
+.chunk { font-family:'Poppins',sans-serif; font-weight:800; font-size:72px; line-height:1.35; color:#1a1a1a;
+  background:#FFE45E; padding:8px 28px; border-radius:16px; display:inline-block; }
 .rv { opacity:0; }
 .pop0 { opacity:0; }
 .drop0 { opacity:0; }
@@ -978,18 +977,15 @@ var BEAT_DURS = __BEATDURS__;
 var BEAT_CAM = __BEATCAM__;
 var CAM_DETAIL = __CAMDETAIL__;
 var svgNS = 'http://www.w3.org/2000/svg';
-/* ---------- karaoke M6 ---------- */
-function setWord(i) {
-  document.querySelectorAll('.kw.on').forEach(function(e){ e.classList.remove('on'); e.style.transform='scale(1)'; });
-  var el = document.getElementById('w'+i);
-  if(el){ el.classList.add('on'); el.style.transform='scale(1.08)'; }
+/* ---------- karaoke chunk M6: 2-3 kata per chunk, swap sinkron narasi ---------- */
+function showChunk(i) {
+  document.querySelectorAll('.chunk').forEach(function(e){ e.style.display='none'; });
+  var el = document.getElementById('c'+i);
+  if(el){ el.style.display='inline-block';
+    gsap.fromTo(el, {scale:0.7, opacity:0, y:24}, {scale:1, opacity:1, y:0, duration:0.28, ease:'back.out(2)'}); }
 }
-function showPhrase(bi) {
-  document.querySelectorAll('.phrase').forEach(function(e){ e.style.display='none'; });
-  var el = document.getElementById('p'+bi); if(el) el.style.display='block';
-}
-function clearWords() {
-  document.querySelectorAll('.kw.on').forEach(function(e){ e.classList.remove('on'); e.style.transform='scale(1)'; });
+function clearChunks() {
+  document.querySelectorAll('.chunk').forEach(function(e){ e.style.display='none'; });
 }
 /* ---------- M1 DRAW + spidol ---------- */
 function drawEl(id, dur) {
@@ -1311,17 +1307,26 @@ def build_from_beats(beats, prefix="whiteboard"):
         fn = BUILDERS[b["scene"]["type"]]
         scene_divs.append(f'<div class="scene" id="s{si}"><div class="dots"></div>{fn(b["scene"], si, b["narr"])}</div>')
 
-    # ---- karaoke ----
-    wi = 0
-    karaoke_divs = []
-    for bi, b in enumerate(beats):
-        spans = [f'<span class="kw" id="w{wi + j}">{esc(w)}</span>'
-                 for j, w in enumerate(b["narr"].split(" "))]
-        wi += len(spans)
-        karaoke_divs.append(
-            f'<div class="phrase" id="p{bi}" style="display:none">{" ".join(spans)}</div>')
+    # ---- karaoke chunk: narasi dipecah jadi chunk 2-3 kata, swap sinkron ----
+    chunks = []  # (teks, t0)
+    widx = 0
+    for b in beats:
+        ws = b["narr"].split(" ")
+        j = 0
+        while j < len(ws):
+            n = 3 if len(ws) - j > 4 else len(ws) - j  # hindari sisa 1 kata
+            if n == 4:
+                n = 2
+            cwords = ws[j:j+n]
+            t0 = words[widx + j]["t0"] if widx + j < len(words) else 0
+            chunks.append((" ".join(cwords), round(t0, 3)))
+            j += n
+        widx += len(ws)
+    chunk_divs = [f'<div class="chunk" id="c{i}" style="display:none">{esc(t)}</div>'
+                  for i, (t, _) in enumerate(chunks)]
+    print(f"karaoke chunk: {len(chunks)} chunk dari {len(words)} kata")
 
-    calls = [f'tl.call(setWord, [{i}], {wd["t0"]});' for i, wd in enumerate(words)]
+    calls = [f'tl.call(showChunk, [{i}], {t0});' for i, (_, t0) in enumerate(chunks)]
     sfx = []  # (t, nama)
     _SFX_KIND = {"draw": "scribble", "pop": "pop", "emphasis": "pop",
                  "drop": "pop", "slideup": "pop"}
@@ -1336,7 +1341,6 @@ def build_from_beats(beats, prefix="whiteboard"):
         if b.get("trans") and bi + 1 < len(beats):
             skip_show.add(bi + 1)
     for bi, (a, bb) in enumerate(bounds):
-        calls.append(f'tl.call(showPhrase, [{bi}], {a});')
         if bi not in skip_show:
             calls.append(f'tl.call(showScene, [{bi}], {a});')
         if bi in (2, 3, 4):
@@ -1390,7 +1394,7 @@ def build_from_beats(beats, prefix="whiteboard"):
             while tk < min(bb, a + 3.2):
                 sfx.append((round(tk, 3), "tick"))
                 tk += 0.5
-    calls.append(f'tl.call(clearWords, [], {total - 0.05});')
+    calls.append(f'tl.call(clearChunks, [], {total - 0.05});')
     calls.append(f'tl.call(trackerDot, [-1], {total - 0.05});')
     sfx.sort()
     json.dump([{"t": t, "sfx": n} for t, n in sfx],
@@ -1421,7 +1425,7 @@ def build_from_beats(beats, prefix="whiteboard"):
             f'<div id="tracker"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div>'
             f'<div id="fx"><svg id="fxsvg" width="1080" height="1920"></svg></div>'
             f'{"".join(scene_divs)}'
-            f'<div id="karaoke">{"".join(karaoke_divs)}</div></div>'
+            f'<div id="karaoke">{"".join(chunk_divs)}</div></div>'
             f'<script src="../assets/gsap.min.js"></script><script>{js}</script>'
             f'</body></html>')
     open(os.path.join(V2, f"{prefix}.html"), "w").write(html)
